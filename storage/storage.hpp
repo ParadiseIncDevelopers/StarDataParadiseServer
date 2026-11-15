@@ -6,6 +6,7 @@
 #include <functional>
 #include <list>
 #include <map>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -130,6 +131,7 @@ struct Integrity
 
 using PageReader = std::function<Page(PageId)>;
 using RowVisitor = std::function<void(RowId, const Row&)>;
+using ScanRow = std::function<bool(RowId, const Row&)>;
 Integrity inspect_pages(const Header& header, const PageReader& read, const RowVisitor& visit = {},
     std::span<const RowId> index_candidates = {});
 
@@ -168,18 +170,24 @@ public:
     explicit Editor(Store& store, size_t writable_pages = 256)
         : store_(store), dirty_{store.header().pages, {}}, limit_(writable_pages) {}
     Row get(RowId id);
+    void visit(const RowVisitor& visitor, std::optional<uint32_t> schema = {});
+    // False indicates that the visitor stopped before scanning all rows.
+    bool scan(RowId after, const ScanRow& visitor, std::optional<uint32_t> schema = {},
+        const std::function<void()>& check = {});
     RowId insert(const Row& row);
     void update(RowId id, const Row& row);
     void erase(RowId id);
+    void restore_row(RowId id, const Row& row);
     Snapshot snapshot() const { return dirty_; }
     void restore(Snapshot snapshot) { dirty_ = std::move(snapshot); }
     Batch prepare(uint64_t lsn) const;
 
 private:
+    enum class RowEdit { append, replace, restore };
     Page read(PageId id);
     void write(PageId id, Page image);
     PageId allocate(Kind kind);
-    void replace(PageId id, uint16_t slot, std::span<const Byte> bytes, bool append);
+    void replace(PageId id, uint16_t slot, std::span<const Byte> bytes, RowEdit edit);
     Bytes record(PageId id, uint16_t slot, std::vector<PageId>* references = nullptr);
 
     Store& store_;

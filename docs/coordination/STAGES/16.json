@@ -1,0 +1,203 @@
+{
+  "stage_id": 16,
+  "status": "PASSED",
+  "started_at": "2026-11-15T12:49:18.3567142+03:00",
+  "finished_at": "2026-11-15T13:07:37.9835004+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 15,
+      "file": "STAGES/15.json",
+      "sha256": "d016a39354a3beb853c03019ca0ff42df2c471994743b6a4a59555e24aa08a76"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "plsql_ir": 1,
+    "wire_version": 1,
+    "storage_format": 1,
+    "wal_format": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "0771acc3055ea3684e4dd48a6ee1b948300bf35f",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "IR_SPEC.md",
+        "PLSQL_LANGUAGE.md",
+        "sql/access.cpp",
+        "sql/binder.cpp",
+        "sql/binder.hpp",
+        "sql/definition.cpp",
+        "sql/executor.cpp",
+        "sql/pl_ir.cpp",
+        "sql/pl_ir.hpp",
+        "sql/pl_runtime.cpp",
+        "sql/pl_runtime.hpp",
+        "sql/pl_syntax.hpp",
+        "sql/routines.cpp",
+        "sql/routines.hpp",
+        "sql/session.cpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "StarDataParadiseServer/storage_admin.cpp",
+        "tests/plsql_rpc.py"
+      ],
+      "source_manifest": "out/sdp-m4/stage16/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "460c8ca529001c93e33ec9d6212ca0aed5bd88b153148a00502a55f337d03390"
+    }
+  ],
+  "checkpoint": {
+    "repo": "StarDataParadiseServer",
+    "archive_path": "out/sdp-m4/stage16/workspace-before.zip",
+    "archive_sha256": "2299f98aacc350da4f49591ebad29cf2f10103ab0fb203e79a36dcac609f365f",
+    "manifest": "out/sdp-m4/stage16/workspace-before.json"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m4/stage16/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/checkpoint.log",
+      "log_sha256": "0643fdf084f9ebfdd1381d29384c2a10691e36fcc17507f15070bd13ea9364a5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m3/stage15/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/baseline.log",
+      "log_sha256": "113bfde1f8ec2a01b64200c7bbc18f4430ca64aa8c544a329c0fb63011d7ffe9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --preset windows-x64 -B out/sdp-m4/stage16/build <locked dependencies and legacy fixtures>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/configure.log",
+      "log_sha256": "5120b95634c7fbee0f65f21968b51aeb3a374972cb3519498b53a147b144363d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m4/stage16/build --config Release --parallel 4",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/build-final.log",
+      "log_sha256": "e6709f9889f87015f21a2033f1932c44ab8d49a3a3d380c698f043faea6bf892",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m4/stage16/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/ctest.log",
+      "log_sha256": "c22e83900fa960e298604a8359f931ef91811ea293b31a360e5d5e8a67466a00",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild.exe StarDataParadiseServer.slnx /t:Build /p:Configuration=Release /p:Platform=x64 <isolated output>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/msbuild.log",
+      "log_sha256": "f35213c00c23aa81ae6e5c3b62da455964b0147a331bcbaf70c279cd64f79081",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run independent MSVC x64 typed IR and serialization fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/pl-ir-check/test.log",
+      "log_sha256": "dc00aa565309083a211e9656d7c56cc6d682fe6de03abe23b24c271ff18b31e3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run independent MSVC x64 PL/SQL runtime limits fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/runtime-agent/test-final.log",
+      "log_sha256": "0c23427ab45bf37b5f848987a541dbb785fce5daf2db4174fdc6bd3e8e0977a6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python -B tests/plsql_rpc.py --server <Stage16 Server> --openssl <tool> --scratch <isolated fixture>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/plsql-rpc-agent.log",
+      "log_sha256": "2cd5e3307cf60490c174e5ee5760cad4f71f129d99a1d387d0fb923f5ec0e658",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m4/stage16/workspace-before.json --check --allow StarDataParadiseServer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "python tests/package_integration.py --package <Stage15 ZIP> --server <Stage16 Server> --openssl <pinned tool> --cmake <tool> --scratch out/sdp-m4/stage16/it --sql --security",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage16/compatibility.log",
+      "log_sha256": "f19dff1465b550ca1a95a2064155d242c3dd5878b85edf9c3b2be945d0a2dbe0",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S16-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek TLS istemcisi, lexical :param ile SQL tablosundan okuyan fonksiyonu ve tipli OUT/IN OUT prosedürünü çalıştırdı. Rutin caller transaction içindeki özel satırı gördü, caller sonra rollback yaptı."
+    },
+    {
+      "id": "S16-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "NULL, BIGINT overflow handler, uzun LOOP ve recursive call depth sınırları çalıştı. İptal/zaman/bellek sınırları bağımsız runtime fixture ile sınandı; Server canlı kaldı."
+    },
+    {
+      "id": "S16-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "IR v1 serialize/recompile, typed slot, kaynak offset/line/column, restart sonrası rutin revision ve schema dependency invalidation ile CREATE OR REPLACE doğrulandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage16/build/Release/StarDataParadiseServer.exe",
+      "sha256": "1d3d3248785f363c7b9161c9ae318d7f59ec114b0cdd8e3e49881b9bbff6d0dc"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage16/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    }
+  ],
+  "remaining_issues": [
+    "Etap 16 scalar PL/SQL, standalone SELECT function çağrısı ve CALL ekler. Cursor, trigger, record ve collection Etap 17 kapsamındadır.",
+    "Gömülü SQL caller transaction içinde read-only SELECT veya EXISTS çalıştırır. INVOKER yetkileri korunur."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 17
+}

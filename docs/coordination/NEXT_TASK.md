@@ -1,7 +1,7 @@
 # Sıradaki etap
 
-**11 — Katalog, SQL parser ve tip denetimi**
+**21 Decision kural modeli**
 
-M2 kabul kayıtları tamamlandı. Sıradaki kapsam Server kataloğu, SQL parser ve binder. Etap 11’e henüz başlanmadı.
+M4 kapanış kanıtı ve yedi proje sonuçları M4_REPORT.md dosyasında. Etap 21 başlamadan önce ilgili prompt, kapsam, mevcut capability ve test kayıtlarını doğrula.
 
-[M2 raporu](M2_REPORT.md) · [Etap 10 kabul kanıtı](STAGES/10.json)
+[Etap 20 kabul kanıtı](STAGES/20.json)

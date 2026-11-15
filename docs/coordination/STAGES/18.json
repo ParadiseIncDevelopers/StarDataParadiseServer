@@ -1,0 +1,233 @@
+{
+  "stage_id": 18,
+  "status": "PASSED",
+  "started_at": "2026-11-15T13:24:00.5458958+03:00",
+  "finished_at": "2026-11-15T13:42:59.3747839+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 17,
+      "file": "STAGES/17.json",
+      "sha256": "59cb5f272ccd6737061fd062007f3fa0f40f3a3abb171150ac0752b39859a74e"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "plsql_ir": 1,
+    "native_product_candidate": "0.2.0",
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "0771acc3055ea3684e4dd48a6ee1b948300bf35f",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "PLSQL_DEBUG.md",
+        "sql/debugger.cpp",
+        "sql/debugger.hpp",
+        "sql/pl_runtime.cpp",
+        "sql/pl_runtime.hpp",
+        "sql/routines.cpp",
+        "sql/routines.hpp",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "StarDataParadiseServer/config.cpp",
+        "StarDataParadiseServer/server.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/debugger_rpc.py"
+      ],
+      "source_manifest": "out/sdp-m4/stage18/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "f5715b20f973e363ff73bd9bc2b04706dfab8f25d016417e1aeaf2b94cbecd9c"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "c36a3f4a860509dd04b44dc884e25493874cb6a6",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "include/StarDataParadiseDLLler.h",
+        "StarDataParadiseDLLler/api.cpp",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py"
+      ],
+      "source_manifest": "out/sdp-m4/stage18/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "d599ac8f234302b1e70933f79242dcc50b022784bb3b3d5bc7cde9fd82fcd5e8"
+    }
+  ],
+  "checkpoint": {
+    "archive_sha256": "546b5f5c07d9f76f1ee97902be9d31f804e809b27a8bd4968207eb8d965a4f17",
+    "archive_path": "out/sdp-m4/stage18/workspace-before.zip",
+    "manifest": "out/sdp-m4/stage18/workspace-before.json",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m4/stage18/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/checkpoint.log",
+      "log_sha256": "42dde043d3e13e2fa2564779af165065dcb33861dd2363f089c3cb78f4a0dd73",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Stage17 Release CTest baseline and verified installed DLL before changes",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/baseline.log",
+      "log_sha256": "f1261625550c196d274f29aaffcd952377fc044d2f65b3a533a8ef2e39e6ed64",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m4/stage18/build --config Release --parallel 4",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/build-final.log",
+      "log_sha256": "12aeae61c4bb47de71c965a0d0c98f580773097f528dea26dee2d0e814f05f5f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m4/stage18/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/ctest-final.log",
+      "log_sha256": "3c6aad3ab44052eff0dcbbfaf55bf9c32ec2ee8e0f5d6f929ce8242d0b5e236d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild StarDataParadiseServer.slnx /m:1 /p:Configuration=Release /p:Platform=x64; --version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/msbuild.log",
+      "log_sha256": "5419fc240dec280db02ab766875dbfd8ae073e48b22087dfe8b3d8b538221790",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cmake --build out/sdp-m4/stage18/build --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/build-final.log",
+      "log_sha256": "87be9df78f7d8a07ce044e6ca48e7ccfbc7553835c9adb6c75b6caf8bc8d76ef",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "ctest --test-dir out/sdp-m4/stage18/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/ctest-final.log",
+      "log_sha256": "c59585545d01a7a42ae815d9d241c992e514adc2b53540bd418b089c276632b6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cpack -G ZIP -C Release, package-final",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/cpack-final.log",
+      "log_sha256": "2df9b0bb597fa78a351ac12436fc1a664b4bcc3b5f8449cd0294d33465420358",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "MSBuild StarDataParadiseDLLler.slnx, Release x64",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/msbuild.log",
+      "log_sha256": "e7fae9787d948e3c5e018d99e4a9214c44399e0da289e45a260953568d2b7dc7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "dumpbin /exports, baseline 28 symbols retained",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/exports.log",
+      "log_sha256": "c3bc883567dd787c52aa4787866cc48ed3bd78e14d7a13868b717f9b47f5919b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "python tests/package_integration.py --package <Stage18 ZIP> --server <Stage18 Server> --sql --security --plsql --debugger <test inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/integration-final.log",
+      "log_sha256": "bf0c37985a990d1eff258c24d3330fab831e5e5c5604e45db6d1e1a82cea6802",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python tests/debugger_rpc.py <Stage18 Server> <fixture root>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/debugger-rpc-agent.log",
+      "log_sha256": "e4949ccf3215b46d8a3dec9ec2a5da6da4d1351f1705ea680de306e50b1e68f4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m4/stage18/workspace-before.json --check --allow StarDataParadiseServer --allow StarDataParadiseDLLler",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage18/isolation.log",
+      "log_sha256": "82ae118696621845d3915687a8e964b25852621b9a28bad3833d2cea71abb38a",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S18-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek TLS breakpoint ve step-over satır 4 → 5, local 5 → 7; continue, SQL host ve tipli OUT fetch. Nested süreler ve SQL süresi ölçüldü; izole routine test her durumda rollback etti."
+    },
+    {
+      "id": "S18-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Salt okunur typed watch ve local görünümü, stale routine revision ve izinsiz debug reddi doğrulandı. Test için explicit instance açılmalı."
+    },
+    {
+      "id": "S18-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Hem controller hem duraklatılan target kapanışı 2 saniye içinde transaction kilidini bıraktı. Correlated CANCELLED ve data/WAL byte eşitliği doğrulandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage18/build/Release/StarDataParadiseServer.exe",
+      "sha256": "2f75eb22e0a37d30995641f10c42069219e04b47e0bdbe026c49700a08e30792"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage18/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m4/stage18/package-final/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "1ae5cb5b80d85ef378ce9cf4217edbd27438628fc82e3c3cbc62474e8519e9c8"
+    }
+  ],
+  "remaining_issues": [
+    "Debugger oturum denetimi ve routine test sınırları PLSQL_DEBUG.md altında. Routine test opt-in instance üzerinde çalışır."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 19
+}

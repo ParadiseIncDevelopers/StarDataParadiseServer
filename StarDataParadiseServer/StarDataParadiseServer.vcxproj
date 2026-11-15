@@ -148,6 +148,27 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="service.cpp" />
     <ClCompile Include="storage_admin.cpp" />
+    <ClCompile Include="..\sql\syntax.cpp" />
+    <ClCompile Include="..\sql\types.cpp" />
+    <ClCompile Include="..\sql\catalog.cpp" />
+    <ClCompile Include="..\sql\binder.cpp" />
+    <ClCompile Include="..\sql\executor.cpp" />
+    <ClCompile Include="..\sql\session.cpp" />
+    <ClCompile Include="..\sql\wire_values.cpp" />
+    <ClCompile Include="..\sql\btree.cpp" />
+    <ClCompile Include="..\sql\definition.cpp" />
+    <ClCompile Include="..\sql\relational.cpp" />
+    <ClCompile Include="..\sql\advanced.cpp" />
+    <ClCompile Include="..\sql\collation.cpp" />
+    <ClCompile Include="..\sql\security.cpp" />
+    <ClCompile Include="..\sql\access.cpp" />
+    <ClCompile Include="..\sql\pl_ir.cpp" />
+    <ClCompile Include="..\sql\pl_runtime.cpp" />
+    <ClCompile Include="..\sql\routines.cpp" />
+    <ClCompile Include="..\sql\debugger.cpp" />
+    <ClCompile Include="..\sql\history_journal.cpp" />
+    <ClCompile Include="..\sql\history_query.cpp" />
+    <ClCompile Include="..\sql\history_restore.cpp" />
     <ClCompile Include="..\storage\disk.cpp" />
     <ClCompile Include="..\storage\heap.cpp" />
     <ClCompile Include="..\storage\wal.cpp" />
@@ -156,9 +177,34 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="server.hpp" />
+    <ClInclude Include="..\sql\diagnostic.hpp" />
+    <ClInclude Include="..\sql\syntax.hpp" />
+    <ClInclude Include="..\sql\types.hpp" />
+    <ClInclude Include="..\sql\catalog.hpp" />
+    <ClInclude Include="..\sql\binder.hpp" />
+    <ClInclude Include="..\sql\executor.hpp" />
+    <ClInclude Include="..\sql\session.hpp" />
+    <ClInclude Include="..\sql\wire_values.hpp" />
+    <ClInclude Include="..\sql\btree.hpp" />
+    <ClInclude Include="..\sql\definition.hpp" />
+    <ClInclude Include="..\sql\relational.hpp" />
+    <ClInclude Include="..\sql\advanced.hpp" />
+    <ClInclude Include="..\sql\collation.hpp" />
+    <ClInclude Include="..\sql\security.hpp" />
+    <ClInclude Include="..\sql\access.hpp" />
+    <ClInclude Include="..\sql\pl_syntax.hpp" />
+    <ClInclude Include="..\sql\pl_ir.hpp" />
+    <ClInclude Include="..\sql\pl_runtime.hpp" />
+    <ClInclude Include="..\sql\routines.hpp" />
+    <ClInclude Include="..\sql\debugger.hpp" />
+    <ClInclude Include="..\sql\history_journal.hpp" />
+    <ClInclude Include="..\sql\history_query.hpp" />
+    <ClInclude Include="..\sql\history_restore.hpp" />
+    <None Include="..\sql\SQL.ebnf" />
   </ItemGroup>
   <ItemDefinitionGroup>
     <ClCompile>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir)..\contracts\v1\cpp;$(SDP_JSON_ROOT)\include;$(SDP_ASIO_ROOT)\include;$(OPENSSL_ROOT_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ASIO_STANDALONE;_WIN32_WINNT=0x0A00;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>

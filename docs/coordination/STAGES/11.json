@@ -1,0 +1,182 @@
+{
+  "stage_id": 11,
+  "status": "PASSED",
+  "started_at": "2026-11-15T11:29:35.9916360+03:00",
+  "finished_at": "2026-11-15T11:42:45.0315007+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 10,
+      "file": "STAGES/10.json",
+      "sha256": "cc2454e64e828a8bb1cbb3b3c7031a3bf8d77c2437082f78d8dd2010d01aa029"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51 (v145)",
+    "storage_format": 1,
+    "wal_format": 1,
+    "wire_version": 1
+  },
+  "repositories": [
+    {
+      "dirty_before": false,
+      "name": "StarDataParadiseServer",
+      "changed_files": [
+        "CMakeLists.txt",
+        "SQL_COMPATIBILITY.md",
+        "sql/binder.cpp",
+        "sql/binder.hpp",
+        "sql/catalog.cpp",
+        "sql/catalog.hpp",
+        "sql/diagnostic.hpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "sql/types.cpp",
+        "sql/types.hpp",
+        "StarDataParadiseServer/StarDataParadiseServer.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "StarDataParadiseServer/storage_admin.cpp",
+        "StarDataParadiseServer/storage_admin.hpp",
+        "storage/heap.cpp",
+        "storage/storage.hpp",
+        "storage/transactions.cpp",
+        "storage/transactions.hpp",
+        "tests/sql_checker.py",
+        "tests/sql_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m3/stage11/changed.sha256",
+      "branch": "master",
+      "source_manifest_sha256": "55d21a3f4136ff187b0346fac0be840ee77031c1680a5713f5a3ca5d5e10548b",
+      "head": "0771acc3055ea3684e4dd48a6ee1b948300bf35f"
+    }
+  ],
+  "checkpoint": {
+    "repo": "StarDataParadiseServer",
+    "manifest": "out/sdp-m3/stage11/workspace-before.json",
+    "archive_sha256": "17b80665d5c21491a49727e0539aa2dff7258ab136c540ef4c6f6e292d233335",
+    "archive_path": "out/sdp-m3/stage11/workspace-before.zip"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. out/sdp-m3/stage11/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage11/checkpoint.log",
+      "log_sha256": "9d4191584eeba58bdbf91a3f460b668ab67604c1d435f8103efa8b261bf09bbf",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m2/stage10/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage11/baseline.log",
+      "log_sha256": "ad6bd8cad03ca083a1effa13fb2535b5f59b0d34cd7d06769dc85d48f1f33d9b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --preset windows-x64 -B out/sdp-m3/stage11/build <pinned dependencies and stage08/09 fixtures>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage11/configure.log",
+      "log_sha256": "7e5b7d3fc6dfa4d40c2386bdd1194a14fb2f27db217cac0f040bc88af4130d24",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m3/stage11/build --config Release --parallel 4",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage11/build-final.log",
+      "log_sha256": "6538e3c8bc8f3258a035f7b2bda778d177f80f86e31949e27a8c6ed60dd4ac9c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m3/stage11/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage11/ctest.log",
+      "log_sha256": "8a9767366ef5fcaae75df114261fdbb5b5e0c263325f446d5a0d9e9334a3ae82",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild.exe StarDataParadiseServer.slnx /t:Build /m:3 /p:Configuration=Release /p:Platform=x64 <isolated output>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage11/msbuild.log",
+      "log_sha256": "fed97c0ff21619fcbd631b5a706f5a688f64c418eb614c05f70704779befe697",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. out/sdp-m3/stage11/workspace-before.json --check --allow StarDataParadiseServer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage11/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m3/stage11/client-regression/workbench -C Release -V --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage11/client-regression/workbench/ctest.log",
+      "log_sha256": "fc6d8a7438a26b6fcf312a8285f6eebc93e23ea939a7a73f8941e686a0d5bafd",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m3/stage11/client-regression/cli -C Release -V --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage11/client-regression/cli/ctest.log",
+      "log_sha256": "df867bf9149f421f836eb876df4575598bc6b121dc96870d307216c564691c89",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S11-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "sql_catalog: Kalıcı CREATE/DROP/ALTER, transaction/savepoint rollback, DDL redo, sabit nesne kimliği ve şema sürümü, yarım katalog kaydı yok."
+    },
+    {
+      "id": "S11-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "sql_types ve sql_parser: NULL truth table, int64 ve decimal taşması, zaman dilimi, Türkçe quoted identifier, tip uyuşmazlığı ve named parameter."
+    },
+    {
+      "id": "S11-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "sql_parser ve sql_checker: JOIN/trigger açık unsupported, satır/sütun tanılaması, 2500 sabit tohumlu bozuk girdi, disk içeriğine yazmayan CLI denetleyicisi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m3/stage11/build/Release/StarDataParadiseServer.exe",
+      "sha256": "6d97469e25e36cdb99a6ef493626fbe97f51e41f1ffd29378631602e6a3b0bf5"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m3/stage11/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    }
+  ],
+  "remaining_issues": [
+    "SQL yürütme ve ağ metadata uçları Etap 12 kapsamındadır. Etap 11 SQL katalog ve typed plan sunar."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 12
+}

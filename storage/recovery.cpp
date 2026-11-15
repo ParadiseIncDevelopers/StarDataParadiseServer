@@ -62,7 +62,8 @@ struct Redo
         for (auto& change : frame.changes)
         {
             const auto found = ledger.find(change.id);
-            if (change.before.empty() ? found != ledger.end() :
+            // An insert opens a new identity; a restore can open a previously verified tombstone.
+            if (change.before.empty() ? found != ledger.end() && !found->second.empty() :
                 found == ledger.end() || found->second != change.before)
                 throw Error(Fault::corrupt, "Transaction journal chain is inconsistent");
             ledger.insert_or_assign(change.id, std::move(change.after));

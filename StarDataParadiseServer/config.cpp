@@ -211,7 +211,7 @@ Config read_config(const std::filesystem::path& path)
         auto root = std::filesystem::absolute(path).parent_path();
         const auto json = wire::parse_payload(read_text(path, max_config, "Cannot read configuration"));
         constexpr std::array keys{"data_dir", "log_dir", "temp_dir", "tls_certificate", "tls_private_key",
-            "bind", "allow_remote", "port", "max_connections", "timeout_ms"};
+            "bind", "allow_remote", "port", "max_connections", "timeout_ms", "routine_test_instance"};
         for (const auto& field : json.items())
             if (std::find(keys.begin(), keys.end(), field.key()) == keys.end())
                 throw StartupError("Unrecognized configuration key");
@@ -227,6 +227,7 @@ Config read_config(const std::filesystem::path& path)
             std::filesystem::equivalent(result.logs, result.temp))
             throw StartupError("Data, log and temp directories must differ");
 
+        result.routine_test_instance = json.value("routine_test_instance", false);
         if (json.contains("bind")) result.bind = wire::string_field(json, "bind");
         const bool allow_remote = json.value("allow_remote", false);
         asio::error_code ec;
@@ -301,6 +302,19 @@ bool Admin::verify(std::string_view user, std::string_view password) const
     return matches && user == username;
 }
 
+void Admin::set_password(std::string_view password)
+{
+    if (password.size() < 16 || password.size() > max_password || password.find('\0') != password.npos ||
+        !MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, password.data(), static_cast<int>(password.size()), nullptr, 0))
+        throw StartupError("Password must be UTF-8 and between 16 and the configured byte limit");
+    Admin candidate;
+    if (RAND_bytes(candidate.salt.data(), static_cast<int>(candidate.salt.size())) != 1)
+        throw StartupError("System random source failed");
+    derive(password, candidate, candidate.verifier);
+    salt = candidate.salt;
+    verifier = candidate.verifier;
+}
+
 void bootstrap_admin(const Config& config, std::string_view username)
 {
     if (!username_valid(username)) throw StartupError("Invalid administrator username");
@@ -320,8 +334,7 @@ void bootstrap_admin(const Config& config, std::string_view username)
         throw StartupError("Password must be valid UTF-8");
     Admin admin;
     admin.username = username;
-    if (RAND_bytes(admin.salt.data(), static_cast<int>(admin.salt.size())) != 1) throw StartupError("System random source failed");
-    derive(password.view(), admin, admin.verifier);
+    admin.set_password(password.view());
     write_admin(config, admin);
     log_event(config, true, "administrator_created");
 }

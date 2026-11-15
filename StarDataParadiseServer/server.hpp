@@ -10,6 +10,7 @@
 
 namespace sdp::server
 {
+inline constexpr auto product_version = "0.2.0";
 struct Config
 {
     std::filesystem::path data;
@@ -20,6 +21,7 @@ struct Config
     std::string bind = "127.0.0.1";
     uint16_t port = 7443;
     unsigned max_connections = 16;
+    bool routine_test_instance{};
     std::chrono::milliseconds timeout{10000};
 };
 
@@ -35,6 +37,7 @@ struct Admin
     std::array<unsigned char, 32> verifier{};
 
     bool verify(std::string_view user, std::string_view password) const;
+    void set_password(std::string_view password);
 };
 
 class DataLock

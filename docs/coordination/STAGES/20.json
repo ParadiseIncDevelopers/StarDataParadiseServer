@@ -1,0 +1,411 @@
+{
+  "stage_id": 20,
+  "status": "PASSED",
+  "started_at": "2026-11-15T14:02:09.1439105+03:00",
+  "finished_at": "2026-11-15T14:24:41.3375965+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 19,
+      "file": "STAGES/19.json",
+      "sha256": "a649d8f9e050a83ba2341a3098c1b7866ea163d534890b561dbb128eac49bd1e"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "history_seal_version": 1,
+    "plsql_ir": 1,
+    "server_product": "0.2.0",
+    "native_product": "0.2.0",
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "0771acc3055ea3684e4dd48a6ee1b948300bf35f",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "HISTORY.md",
+        "sql/catalog.cpp",
+        "sql/catalog.hpp",
+        "sql/executor.cpp",
+        "sql/executor.hpp",
+        "sql/history_journal.cpp",
+        "sql/history_journal.hpp",
+        "sql/history_restore.cpp",
+        "sql/history_restore.hpp",
+        "sql/relational.cpp",
+        "sql/relational.hpp",
+        "sql/routines.cpp",
+        "sql/routines.hpp",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "StarDataParadiseServer/server.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "storage/heap.cpp",
+        "storage/recovery.cpp",
+        "storage/storage.hpp",
+        "storage/transactions.cpp",
+        "storage/transactions.hpp",
+        "tests/history_journal_smoke.cpp",
+        "tests/history_journal_storage.py",
+        "tests/history_restore_rpc.py"
+      ],
+      "source_manifest": "out/sdp-m4/stage20/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "723f04d8fa43138a47919487e3400aa42468e78248cf077c3246550a99b5f58e"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "c36a3f4a860509dd04b44dc884e25493874cb6a6",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "include/StarDataParadiseDLLler.h",
+        "StarDataParadiseDLLler/api.cpp",
+        "StarDataParadiseDLLler/transport.cpp",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py"
+      ],
+      "source_manifest": "out/sdp-m4/stage20/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "39e18bb520d76ca1ec585113d6b162e925178377a929e2d2f72bab510361e0bb"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m4/stage20/workspace-before.zip",
+    "repo": "StarDataParadiseServer",
+    "archive_sha256": "70103082a27954ea7f8b7aeac91d4c29e81f629b7799bb8c3da45368f3164dc3",
+    "manifest": "out/sdp-m4/stage20/workspace-before.json"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m4/stage20/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/checkpoint.log",
+      "log_sha256": "b28911758ab9a4d35254fcf7f537636a6070599bf2e286643f1debcba5b5c7e4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake -S . -B out/sdp-m4/stage20/build -G 'Visual Studio 18 2026' -A x64 -T v145 <pinned dependencies and legacy fixtures>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/configure.log",
+      "log_sha256": "12f542d128ffc221333546aecf648d0ceb07a24fcacaa5250ef3c9e571557d60",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m4/stage20/build --config Release --parallel 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/build-final.log",
+      "log_sha256": "54c4b4b4177d7c88fbd229ce3360f9d52bf65abbc00ab318d59f82eb954a1133",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m4/stage20/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/ctest-final.log",
+      "log_sha256": "dd6272046cd4447b1782abe52a476d828a6460e79c0a28a0a4f1e79ece5d13a9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild StarDataParadiseServer.slnx /m:1 /p:Configuration=Release /p:Platform=x64; --version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/msbuild.log",
+      "log_sha256": "1114167d4ef420ddc5339578eb330d633b703f3f6795b089154e280315c69041",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSVC /W4 /WX History restore/revert SQL grammar, regressions and corpus",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/parser-agent/test.log",
+      "log_sha256": "b8d735f66e3b21bfc1f634811ecef74f06d2eda53b915be76a5c7c3828f148bf",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python -B tests/history_restore_rpc.py --server <Stage20 Release> --openssl <locked tool> --scratch <isolated instances>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/history-restore-rpc-agent.log",
+      "log_sha256": "29365e7cf9542281cf0840ab94b80e67e0ad500e486bbaed0dd51eb20988e797",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run complete History restore TLS fixture against official .slnx Release binary",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/msbuild-history-restore.log",
+      "log_sha256": "acff25171f186ddb0f3e62ad0e99cdf39c2ddec16b5e3403ef722d03aa1a0921",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Actual TLS indexed PK and collation conflict fixture, then read-only integrity check",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/msbuild-reused-key.log",
+      "log_sha256": "fbea2b4479a08fd4e502b6ec0667aee20014c7345d50a11bd7aa28a02046b06f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Actual TLS secondary-index identity, equality/range, restart and integrity fixture on the final CMake Server",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/secondary-index-restore-agent.log",
+      "log_sha256": "d169e03217c385bb3e66469a3a64c7a5d619265ebdbe58d55885287c14f8a13e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "History storage kill matrix: before WAL marker and after WAL durable; verify stable tombstone restore",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/history-agent/test.log",
+      "log_sha256": "7a3539353aeff919ef446846fa0a356427dfa738628f96e300323beeece05147",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial parallel CLI regression preserved for diagnosis",
+      "exit_code": 8,
+      "expected_exit_code": 8,
+      "log_path": "out/sdp-m4/stage20/client-regression/cli/ctest-parallel.log",
+      "log_sha256": "9878f699d2dadd9d87ce32cff5421c4bc71eb6a76cb165f3809c18da7f70344c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir <Stage20 CLI fixtures> -C Release -V --output-on-failure --no-tests=error, serialized",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/client-regression/cli/ctest.log",
+      "log_sha256": "9ea45c0b37897038327e356628c12b7da4f271bf85f71c6e542c910cfcfe5cd3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir <Stage20 Workbench fixtures> -C Release -V --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/client-regression/workbench/ctest.log",
+      "log_sha256": "48cbaac79f65eeb94869522c3d27b27141af4b758607fb3acbab32f604eae9b6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cmake --build <Stage20 Native x64 release> --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/build.log",
+      "log_sha256": "4f79ae9d4616c92b9d2d79dfa80bd32810106efb912bb02d4a7ddb0e37c9628b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "ctest --test-dir <Stage20 Native x64 release> -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/ctest.log",
+      "log_sha256": "c6b99dc0e54ec6d07d55a20bcea6795e19782e138d55e414ef687140491ce31c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cpack -G ZIP -C Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/cpack.log",
+      "log_sha256": "a28f1cc7eaa03f5997106bf99cebe6e0ee37927f3200d577ed93b61cdb68c8f2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "MSBuild StarDataParadiseDLLler.slnx, Release x64",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/msbuild.log",
+      "log_sha256": "ba4aff9a59a44ef9acfe8fa84e523624b0b06b33645190514d0832b13d284cd8",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Compare dumpbin /exports with Stage19 Native ABI 1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/exports.log",
+      "log_sha256": "d0be91f53a1c5a0adcb518c371d9ea010ee3b62c9c9334c7650501c222de644c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run Stage20 installed Native SDK against Stage19 Server using previous RPC suites",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/integration-prev.log",
+      "log_sha256": "f4b4cb3d996853ca29995655923cc2285dfbbbd533b58ecfa16073c85c47f9af",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "python tests/package_integration.py --package <Stage20 ZIP> --server <Stage20 Server> --sql --security --plsql --debugger --history --restore <test inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/integration-final.log",
+      "log_sha256": "2e806555733e3b0eec20cbeae1a343e70a2f7657a6b20f14f4d36442159179f3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "ctest --test-dir <Stage20 Native ASan> -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/asan/ctest.log",
+      "log_sha256": "b42e8037c2eaa6d05ecfa05642b25da0dfcc38567d8c6a30f03b32605f4b2059",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "python tests/package_integration.py --package <Stage20 ASan ZIP> --server <Stage20 Server> --sql --security --plsql --debugger --history --restore --asan <test inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/asan/integration-final.log",
+      "log_sha256": "2e806555733e3b0eec20cbeae1a343e70a2f7657a6b20f14f4d36442159179f3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "pwsh -NoProfile -File ci.ps1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/milestone/test.log",
+      "log_sha256": "c6c4eb97096a589b7b8dbe3f7cd80b330640b5b32c21b7efe55c768320828918",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.Java",
+      "command": "pwsh -NoProfile -File ci.ps1 -Gradle <local Gradle 9.3.1>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/milestone/test.log",
+      "log_sha256": "69c2be3241b35fb416369eb138b659ee418943051a0cb8b4851d70fde5486137",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.Python",
+      "command": "pwsh -NoProfile -File ci.ps1 -Wheelhouse <local prerequisite wheelhouse>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/milestone/test.log",
+      "log_sha256": "bb94efba4ff6023ece24440543b4504addda8434efca6a11eeb6e2d5cbefc7c2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m4/stage20/workspace-before.json --check --allow StarDataParadiseServer --allow StarDataParadiseDLLler",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/isolation.log",
+      "log_sha256": "82ae118696621845d3915687a8e964b25852621b9a28bad3833d2cea71abb38a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Create and unzip Server portable ZIP, hash both products and run extracted --version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage20/release/package.log",
+      "log_sha256": "4094c3ef786223fafb30444ed47042dafaa5dba0711971dcdb4f08738e3b42dc",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S20-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek TLS ve .slnx paketinde silinen satır aynı stable ID ve tam tipli değerlerle döndü. DROP/TRUNCATE, tarihsel indeks kimlikleri ve routine source doğrulandı; yeni revision üretildi ve önceki imaj sabit kaldı."
+    },
+    {
+      "id": "S20-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Satır ve bütün tablo kapsamındaki PK reuse, eski fiziksel ID ve Türkçe kollasyonlu unique reuse, FK ve şema çakışmaları yazmadı. Preview sonrası güncel revision değişimi reddedildi. Field revert sonraki bağımsız alanı korudu. Güncel trigger aynı commit içinde çalıştı."
+    },
+    {
+      "id": "S20-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "WAL işareti öncesi ve durable WAL sonrası gerçek süreç kesintileri yeni satır ve history yayınını atomik tuttu. İstemci cevabı almadan kapandı, sunucu yeniden başlatıldı ve aynı actor/plan/token aynı LSN döndürdü. Başka mod aynı token’ı kullanamadı."
+    },
+    {
+      "id": "S20-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Server 26/26 ve resmi .slnx; Native Release ve ASan 20 paket senaryosu; Workbench 2/2, CLI seri 4/4, .NET NuGet, Java JAR ve Python wheel smoke geçti. Final native ABI 1 sembol karşılaştırması 39/39."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage20/build/Release/StarDataParadiseServer.exe",
+      "sha256": "f9f6dd6f41dbff879835d585272307fb68278c5a19458a28908eb9754ac9cc41"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage20/vs/bin/StarDataParadiseServer.exe",
+      "sha256": "9a66c4a7e42ed93f8e077496675fef816f2ffb00cbcbe39745d02f2a2db8116c"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage20/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage20/release/StarDataParadiseServer-0.2.0-win-x64.zip",
+      "sha256": "8914fe60f4ca2f4e969b5bd6dc93734c9215f530344c4a63015b4198d121ffb6"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m4/stage20/package/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "5957cd3b289464c597dad6d75d270149911464976c2124bdd90a2bfe4936ae1a"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m4/stage20/asan/package/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "f32982a6654dd85950e3f9eb326f322f98a9f9fcc8407d7d6171a880f54e671c"
+    }
+  ],
+  "remaining_issues": [
+    "Mantıksal History floor ilerlerken fiziksel WAL v1 zinciri recovery için tutulur.",
+    "Restore tabloları, tablo indekslerini ve PL/SQL kaynaklarını kapsar. Bir planın mutasyon adedi ve journal boyutu sınırlandırılır.",
+    "Aynı stable tombstone kimliğini canlandıran yeni WAL işleminin eski Server sürümleriyle yeniden oynatımı desteklenmez.",
+    "CLI paralel TLS denemesi hata verdi. Seri tekrar kaynak değişikliği olmadan 4/4 geçti ve ilk log korundu."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 21
+}

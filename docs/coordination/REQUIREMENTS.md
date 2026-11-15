@@ -81,3 +81,9 @@ History branch/merge, hazır veritabanına dayalı motor, LLM/MCP ve iptal edilm
 SSH tunnel, üretim imzası, ilave işletim sistemleri ve GPU donanım doğrulaması koşulları belgede ayrıdır. Bunların olmaması gizlenmez. Temel TLS bağlantısı, Windows/CPU testleri ve doğrulanmış backup/restore isteğe bağlı değildir.
 Satranç talebi algoritmayı uygulamaya taşıma kullanımını doğrular; tam satranç oyunu veya tüm PL/SQL/ML kodunun sınırsız Java dönüşümü vaat edilmez.
 Bir gereksinimin Server ve Workbench etaplarında birlikte bulunması tekrar geliştirme değil backend/istemci/test ayrımıdır. Paket kontrolü yalnız eşleşme ve dosya bütünlüğünü sınar; yazılım doğruluğunu kanıtlamaz.
+
+Etap 11 katalog, SQL grameri ve tip denetimi kabul kanıtı [Etap 11 kaydında](STAGES/11.json).
+
+Etap 12–15 SQL ve güvenlik kabul kanıtları [M3 raporunda](M3_REPORT.md).
+
+Etap 16–20 PL/SQL ve History kabul kanıtları [M4 raporunda](M4_REPORT.md).

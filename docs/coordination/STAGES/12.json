@@ -1,0 +1,259 @@
+{
+  "stage_id": 12,
+  "status": "PASSED",
+  "started_at": "2026-11-15T11:42:45.3582776+03:00",
+  "finished_at": "2026-11-15T11:58:45.3965719+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 11,
+      "file": "STAGES/11.json",
+      "sha256": "4eab6189bbe3e2c63869adb839d68e411b19b1ec275bbeee1c94497e69867a44"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "wire_capability": "sql_crud_v1",
+    "storage_format": 1,
+    "wal_format": 1,
+    "native_product": "0.2.0",
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "0771acc3055ea3684e4dd48a6ee1b948300bf35f",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "contracts/sql/SQL_RPC_V1.md",
+        "SQL_COMPATIBILITY.md",
+        "sql/binder.cpp",
+        "sql/binder.hpp",
+        "sql/catalog.cpp",
+        "sql/catalog.hpp",
+        "sql/executor.cpp",
+        "sql/executor.hpp",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "sql/wire_values.cpp",
+        "sql/wire_values.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "StarDataParadiseServer/storage_admin.cpp",
+        "StarDataParadiseServer/storage_admin.hpp",
+        "storage/heap.cpp",
+        "storage/storage.hpp",
+        "storage/transactions.cpp",
+        "storage/transactions.hpp",
+        "tests/ledger_smoke.cpp",
+        "tests/sql_rpc.py"
+      ],
+      "source_manifest": "out/sdp-m3/stage12/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "4657a739351bbec0e5feef935940db9bff7c83ba4ca1ce0c844168d16a95a717"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "c36a3f4a860509dd04b44dc884e25493874cb6a6",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "CMakeLists.txt",
+        "include/StarDataParadiseDLLler.h",
+        "StarDataParadiseDLLler/api.cpp",
+        "StarDataParadiseDLLler/transport.cpp",
+        "StarDataParadiseDLLler/transport.hpp",
+        "StarDataParadiseDLLler/version.cpp",
+        "tests/consumer/CMakeLists.txt",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py",
+        "tests/version_smoke.c"
+      ],
+      "source_manifest": "out/sdp-m3/stage12/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "3d7ae527452c5b4569c95955f9305fd4a24cc17d8ae4d8ee0eafe04c2d609008"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m3/stage12/workspace-before.json",
+    "archive_path": "out/sdp-m3/stage12/workspace-before.zip",
+    "repo": "StarDataParadiseServer",
+    "archive_sha256": "5a4ce7743bcbb98e1516ce08405d29f223824e16b303032eeb4eaa1dfa7ee403"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m3/workspace.py .. out/sdp-m3/stage12/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/checkpoint.log",
+      "log_sha256": "6cb4ea6d0a49608a3c6195866ed8c2dfdf3998cc5eb77e69e603d79606309062",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m3/stage11/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/baseline.log",
+      "log_sha256": "8a9767366ef5fcaae75df114261fdbb5b5e0c263325f446d5a0d9e9334a3ae82",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --preset windows-x64 -B out/sdp-m3/stage12/build <pinned dependencies and stage08/09 fixtures>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/configure.log",
+      "log_sha256": "bd268175f8641b04e0f8de55226c9d6733b569298acc0c325a47925f7fb7b140",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m3/stage12/build --config Release --parallel 4",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/build-final.log",
+      "log_sha256": "d9b57a19b8c9365b0756c56b2b6407980317a67acad26528eeea8b264d696b53",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m3/stage12/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/ctest.log",
+      "log_sha256": "fdcfc28a19b3a6b2a7f34225d1950e903d9a26a5d78c5599f7933b085154103a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild.exe StarDataParadiseServer.slnx /t:Build /p:Configuration=Release /p:Platform=x64 <isolated output>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/msbuild.log",
+      "log_sha256": "23c399328e67623a82f9e9ade37b01af14e92ac771380d394a64dd08bd3e4f30",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m3/workspace.py .. out/sdp-m3/stage12/workspace-before.json --check --allow StarDataParadiseServer --allow StarDataParadiseDLLler",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/isolation.log",
+      "log_sha256": "82ae118696621845d3915687a8e964b25852621b9a28bad3833d2cea71abb38a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cmake --preset windows-x64 -B out/sdp-m3/stage12/build-final <pinned dependencies>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/configure-final.log",
+      "log_sha256": "8ba39a483c880c071ea912a2c656dea1a2ce43b708132193f43ebf4627a02c92",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cmake --build out/sdp-m3/stage12/build-final --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/build-final.log",
+      "log_sha256": "2908dab7ebd396e05ea77a321cffdd957dee756bc673f0d621a9c03fdc06ab01",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "ctest --test-dir out/sdp-m3/stage12/build-final -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/ctest-final.log",
+      "log_sha256": "9528d9a60b44aa98765f10e91855812f12af11324ed1f5f0331f07b4f24f7e67",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cpack --config out/sdp-m3/stage12/build-final/CPackConfig.cmake -C Release -B out/sdp-m3/stage12/package-final",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/cpack-final.log",
+      "log_sha256": "1db369f86d3ee604650cafb11602e4dbcc16b212b4dbc6e2c065a410e6421293",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "python tests/package_integration.py --package <0.2.0 zip> --server <Stage 12 Server> --openssl <test tool> --cmake <CMake 4.2.2> --scratch <isolated fixture> --sql",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/sql-integration.log",
+      "log_sha256": "83303c197f4cd89f45fc78c78e02edaa1373855c374357b9677ab8648a7c46f2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "MSBuild.exe StarDataParadiseDLLler.slnx /t:Build /m:1 /v:minimal /p:Configuration=Release /p:Platform=x64 <isolated output>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage12/msbuild.log",
+      "log_sha256": "587b7460a7adcd39752ffae1c552199d201a2f69ab0c209ffaffb9a1ee29313b",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S12-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Kurulu 0.2.0 native ZIP’ini tüketen TLS istemcisi DDL ve parametreli CRUD yaptı. Restart sonrası satırlar korundu ve WAL doğrulaması geçti."
+    },
+    {
+      "id": "S12-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Apostrof ve noktalama taşıyan metin bağlanan değer olarak saklandı. BIGINT, exact decimal, BLOB ve NULL sonuçlarda korundu. Yanlış tip yazma yapmadı."
+    },
+    {
+      "id": "S12-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek TLS yanıt kaybı sonrasında native işlem sonucunu belirsiz raporladı. Yeni oturum committed LSN okudu. Savepoint ve rollback verileri geri aldı. Doğrudan C++ fixture süresi dolan ve farklı actor’a ait ledger sonucunu unknown doğruladı."
+    },
+    {
+      "id": "S12-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Native paket tüketicisi 320 satır limitli batch’leri okudu ve result_cancel ile açık imleci bıraktı. İkinci TLS bağlantısı cancel sonrasında yazabildi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m3/stage12/build/Release/StarDataParadiseServer.exe",
+      "sha256": "b6c905dcda27af5b76942d028c415edf36eeb59f158cccfc85af7ddfa2d304bb"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m3/stage12/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m3/stage12/package-final/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "9dab15216a5ddecfcb86f03bfd1b68a433f8ba7882b43d8fd48f468f1a2d4e98"
+    }
+  ],
+  "remaining_issues": [
+    "SQL eklentisi sql_crud_v1 capability ile açılır. Ağ dışı yönetim bağlantısından çalışan sorguyu kesme Etap 15 kapsamındadır; Etap 12 result_cancel batch aralarında kaynakları bırakır.",
+    "Tek seri transaction lease ve 64 MiB WAL kotası sürer. Ledger sorgu görünürlüğü 24 saattir."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 13
+}

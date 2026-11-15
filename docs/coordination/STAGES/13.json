@@ -1,0 +1,173 @@
+{
+  "stage_id": 13,
+  "status": "PASSED",
+  "started_at": "2026-11-15T11:58:45.6375039+03:00",
+  "finished_at": "2026-11-15T12:13:58.3404840+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 12,
+      "file": "STAGES/12.json",
+      "sha256": "40cb7d63e8a693bffa71ac9660b2e3220321553c62898d7743d082c685b2cfa0"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "storage_format": 1,
+    "wal_format": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "0771acc3055ea3684e4dd48a6ee1b948300bf35f",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "SQL_COMPATIBILITY.md",
+        "sql/binder.cpp",
+        "sql/binder.hpp",
+        "sql/btree.cpp",
+        "sql/btree.hpp",
+        "sql/catalog.cpp",
+        "sql/catalog.hpp",
+        "sql/definition.cpp",
+        "sql/definition.hpp",
+        "sql/executor.cpp",
+        "sql/executor.hpp",
+        "sql/relational.cpp",
+        "sql/relational.hpp",
+        "sql/session.cpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "StarDataParadiseServer/storage_admin.cpp",
+        "tests/relations_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m3/stage13/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "1bbd98bed35b905a4c36926710fb21782dfccc492d8458386d4c6c4b2267fad4"
+    }
+  ],
+  "checkpoint": {
+    "archive_sha256": "99de7874938334145ad18c58af3eba14978667f09f55a1c501163fb981350bdc",
+    "manifest": "out/sdp-m3/stage13/workspace-before.json",
+    "archive_path": "out/sdp-m3/stage13/workspace-before.zip",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m3/workspace.py .. out/sdp-m3/stage13/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage13/checkpoint.log",
+      "log_sha256": "bf90edf269b4fe0737181d01791a6261a1d2516fe07a5cca6ce4b3ceeb7526a7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m3/stage12/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage13/baseline.log",
+      "log_sha256": "fdcfc28a19b3a6b2a7f34225d1950e903d9a26a5d78c5599f7933b085154103a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --preset windows-x64 -B out/sdp-m3/stage13/build <pinned dependencies and stage08/09 fixtures>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage13/configure.log",
+      "log_sha256": "8f0f7c9555c59ed8b6f51eea9f0dcd81783eec353d4854e20f793cda8dbddc9d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m3/stage13/build --config Release --parallel 4",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage13/build-final.log",
+      "log_sha256": "081983ca47db0c423aa2e6392ac408f7438dc5db8a60d079b6790fdca130a2d4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m3/stage13/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage13/ctest.log",
+      "log_sha256": "af42e88f9988c3ff3e00e302e3f23f93edefccbdc0d9ca93d4a9b8b216a2ca69",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild.exe StarDataParadiseServer.slnx /t:Build /m:1 /v:minimal /p:Configuration=Release /p:Platform=x64 <isolated output>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage13/msbuild.log",
+      "log_sha256": "de8e1018dcf26541ffd04d6fc2a089e250338ca0e7f62621f4ecbf29bd18674f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run isolated Windows x64 B+Tree test with 460 inserted rows and split/merge/restart fixtures",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage13/tree-check/test.log",
+      "log_sha256": "f4c030866761dae71236fa5acfb2e9092dcfd92c44c08ca62b0a92abf872277a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m3/workspace.py .. out/sdp-m3/stage13/workspace-before.json --check --allow StarDataParadiseServer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m3/stage13/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S13-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "sql_relational: Aynı equality sorgusu tablo taraması ve B+Tree erişimiyle aynı satırı döndürdü. Restart sonrası gerçek aralık yolu ve bütünlük doğrulandı. 460 satırlık ayrı test split, merge, composite NULL ve devamlı erişimi kapsadı."
+    },
+    {
+      "id": "S13-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İki eşzamanlı UNIQUE yazmasından biri commit etti. FK, CHECK ve deferred reddi doğrulandı. İkinci satırdaki CHECK hatası ilk satırı da geri aldı. Salt okunur bütünlük taraması güncel indeksi ve FK’yi doğruladı."
+    },
+    {
+      "id": "S13-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "DDL rollback indeks ve tabloyu geri aldı. PK değişince eski indeks anahtarı kayboldu ve yeni anahtar bulundu. DROP/TRUNCATE WAL önceki satır imajlarını korudu. Sequence, identity ve salt okunur view çalıştı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m3/stage13/build/Release/StarDataParadiseServer.exe",
+      "sha256": "122c5935c7b20679587d502880c643e0606a7fbf7f33b31f052ec9e46774fbe6"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m3/stage13/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    }
+  ],
+  "remaining_issues": [
+    "İndeks kolasyonu bu etapta binary. Etap 14 locale-aware collation, reindex ve ileri sorguları ekler.",
+    "FK kısıtları anında uygulanır. Deferred ve cascaded eylemler ile ileri/self-FK tanımları kapsam dışıdır."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 14
+}

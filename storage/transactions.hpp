@@ -28,6 +28,7 @@ struct Revision
     uint64_t lsn;
     std::vector<Change> changes;
 };
+using RevisionVisitor = std::function<void(Revision&&)>;
 
 class Transaction;
 class Engine
@@ -40,6 +41,8 @@ public:
     void disconnect(Owner owner);
     Header current();
     std::vector<Revision> history();
+    // Runs while the WAL read lock is held; callbacks must not reenter the engine.
+    void visit_history(const RevisionVisitor& visitor, const std::function<void()>& check = {});
     Checkpoint checkpoint(const RetentionPins& pins = {});
 
 private:
@@ -76,11 +79,19 @@ public:
     Transaction(const Transaction&) = delete;
     Transaction& operator=(const Transaction&) = delete;
 
+    void ensure_active(Owner caller);
+    void visit_changes(Owner caller, const std::function<void(std::span<const Change>)>& visitor);
     Row get(Owner caller, RowId id);
+    // Visitors and boundary checks run inside the engine lock and must not reenter it.
+    void visit(Owner caller, const RowVisitor& visitor, std::optional<uint32_t> schema = {});
+    bool scan(Owner caller, RowId after, const ScanRow& visitor, std::optional<uint32_t> schema = {},
+        const std::function<void()>& check = {});
     RowId insert(Owner caller, const Row& row, ChangeKind kind = ChangeKind::row);
     void update(Owner caller, RowId id, const Row& row, ChangeKind kind = ChangeKind::row);
     void erase(Owner caller, RowId id, ChangeKind kind = ChangeKind::row);
+    void restore_row(Owner caller, RowId id, const Row& row, ChangeKind kind = ChangeKind::row);
     Savepoint savepoint(Owner caller);
+    Savepoint statement_savepoint(Owner caller);
     void rollback_to(Owner caller, Savepoint id);
     void release_savepoint(Owner caller, Savepoint id);
     void rollback(Owner caller);
@@ -99,6 +110,7 @@ private:
     std::unique_lock<std::mutex> lock(Owner caller);
     void ensure_change(const Change& change) const;
     void mark(Change change);
+    Savepoint make_savepoint(size_t limit);
     size_t find(Savepoint id) const;
     void finish();
 

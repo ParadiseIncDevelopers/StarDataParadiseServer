@@ -226,14 +226,15 @@ Bytes Editor::record(PageId id, uint16_t index, std::vector<PageId>* references)
     return read_record(page, slot, [this](PageId link) { return read(link); }, references);
 }
 
-void Editor::replace(PageId id, uint16_t index, std::span<const Byte> bytes, bool append)
+void Editor::replace(PageId id, uint16_t index, std::span<const Byte> bytes, RowEdit edit)
 {
     const auto source = read(id);
     const auto count = check_heap(source);
-    if (append ? index != count : index >= count || !read_slot(source, index).total)
+    const bool append = edit == RowEdit::append;
+    if (append ? index != count : index >= count || (read_slot(source, index).total != 0) != (edit == RowEdit::replace))
         throw Error(Fault::missing, "Row slot does not exist");
 
-    if (!append)
+    if (edit == RowEdit::replace)
     {
         std::vector<PageId> old_chain;
         record(id, index, &old_chain);
@@ -286,6 +287,40 @@ Row Editor::get(RowId id)
     return decode(record(page, slot));
 }
 
+void Editor::visit(const RowVisitor& visitor, std::optional<uint32_t> schema)
+{
+    scan(0, [&](RowId id, const Row& row) { visitor(id, row); return true; }, schema);
+}
+
+bool Editor::scan(RowId after, const ScanRow& visitor, std::optional<uint32_t> schema,
+    const std::function<void()>& check)
+{
+    const auto read_page = [this, &check](PageId link) {
+        if (check) check();
+        return read(link);
+    };
+    const auto first_page = (std::max)(PageId{1}, static_cast<PageId>(after >> 32));
+    for (PageId id = first_page; id < dirty_.count; ++id)
+    {
+        if (check) check();
+        const auto page = read(id);
+        if (kind_of(page) != Kind::heap) continue;
+        const auto count = check_heap(page);
+        for (uint16_t index = 0; index < count; ++index)
+        {
+            const auto identity = (uint64_t{id} << 32) | (uint64_t{index} + 1);
+            if (identity <= after) continue;
+            const auto slot = read_slot(page, index);
+            if (!slot.total) continue;
+            if (schema && slot.length >= 8 && load_le<uint32_t>(page, size_t{slot.offset} + 4) != *schema) continue;
+            if (check) check();
+            const auto row = decode(read_record(page, slot, read_page, nullptr));
+            if ((!schema || row.schema == *schema) && !visitor(identity, row)) return false;
+        }
+    }
+    return true;
+}
+
 RowId Editor::insert(const Row& row)
 {
     const auto bytes = encode(row);
@@ -298,11 +333,11 @@ RowId Editor::insert(const Row& row)
             if (kind_of(image) != Kind::heap) continue;
             const auto slots = check_heap(image);
             if (slot_offset(static_cast<uint16_t>(slots + 1)) > load_le<uint16_t>(image, 22)) continue;
-            replace(id, slots, bytes, true);
+            replace(id, slots, bytes, RowEdit::append);
             return (uint64_t{id} << 32) | (uint64_t{slots} + 1);
         }
         const auto id = allocate(Kind::heap);
-        replace(id, 0, bytes, true);
+        replace(id, 0, bytes, RowEdit::append);
         return (uint64_t{id} << 32) | 1u;
     }
     catch (...) { restore(std::move(before)); throw; }
@@ -314,7 +349,7 @@ void Editor::update(RowId id, const Row& row)
     const auto [page, slot] = split(id);
     get(id);
     auto before = snapshot();
-    try { replace(page, slot, bytes, false); }
+    try { replace(page, slot, bytes, RowEdit::replace); }
     catch (...) { restore(std::move(before)); throw; }
 }
 
@@ -323,7 +358,18 @@ void Editor::erase(RowId id)
     const auto [page, slot] = split(id);
     get(id);
     auto before = snapshot();
-    try { replace(page, slot, {}, false); }
+    try { replace(page, slot, {}, RowEdit::replace); }
+    catch (...) { restore(std::move(before)); throw; }
+}
+
+void Editor::restore_row(RowId id, const Row& row)
+{
+    const auto bytes = encode(row);
+    const auto [page, slot] = split(id);
+    if (page >= dirty_.count || kind_of(read(page)) != Kind::heap)
+        throw Error(Fault::missing, "Deleted row page no longer exists");
+    auto before = snapshot();
+    try { replace(page, slot, bytes, RowEdit::restore); }
     catch (...) { restore(std::move(before)); throw; }
 }
 

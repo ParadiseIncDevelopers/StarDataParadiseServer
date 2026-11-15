@@ -1,0 +1,175 @@
+(* Etap 11–20 SQL, PL/SQL and History grammar. Keywords are ASCII case-insensitive. The lexer also
+   skips whitespace, -- line comments and non-nested /* block comments */. *)
+
+input         = statement, [ ";" ], end ;
+statement     = create | drop | alter | truncate | query | insert | update | delete
+              | explain | analyze | reindex | grant | revoke | create-routine | call | anonymous-block | trigger | history ;
+create        = "CREATE", ( "DATABASE", ident | "SCHEMA", schema-name
+              | "TABLE", table-name, "(", table-entry, { ",", table-entry }, ")"
+              | [ "UNIQUE" ], "INDEX", table-name, "ON", table-name, column-list, [ collation ]
+              | "SEQUENCE", table-name | "VIEW", table-name, "AS", query
+              | ( "USER" | "ROLE" ), ident ) ;
+drop          = "DROP", ( "DATABASE", ident | "SCHEMA", schema-name
+              | ( "TABLE" | "INDEX" | "VIEW" | "SEQUENCE" ), table-name ) ;
+alter         = "ALTER", ( "TABLE", table-name, "ADD", [ "COLUMN" ], ident, type, [ nullability ]
+              | "INDEX", table-name, "RENAME", "TO", ident ) ;
+truncate      = "TRUNCATE", [ "TABLE" ], table-name ;
+explain       = "EXPLAIN", [ "ANALYZE" ], query ;
+analyze       = "ANALYZE", [ "TABLE" ], table-name ;
+reindex       = "REINDEX", [ "INDEX" ], table-name, [ collation ] ;
+collation     = "COLLATE", ident ;
+
+grant          = "GRANT", ( ident, "TO", "USER", ident
+               | privileges, "ON", object-scope, "TO", recipient ) ;
+revoke         = "REVOKE", ( ident, "FROM", "USER", ident
+               | privileges, "ON", object-scope, "FROM", recipient ) ;
+privileges     = "ALL", [ "PRIVILEGES" ] | privilege, { ",", privilege } ;
+privilege      = "USAGE" | "SELECT" | "INSERT" | "UPDATE" | "DELETE" | "DDL"
+               | "EXECUTE" | "HISTORY" | "BACKUP" | "DEBUG" | "MONITOR" | "CONTROL" ;
+object-scope   = "GLOBAL" | "DATABASE", ident | "SCHEMA", schema-name
+               | ( "TABLE" | "VIEW" | "ROUTINE" | "MODEL" ), table-name ;
+recipient      = ( "USER" | "ROLE" ), ident ;
+
+history        = "HISTORY", ( history-log | history-diff | history-read | "VERIFY" | "STATUS"
+               | "RETAIN", "BEFORE", revision, [ "QUOTA", positive ]
+               | "PURGE", "BEFORE", revision | "PIN", pin-kind, string, "AT", revision
+               | "UNPIN", pin-kind, string | history-restore | history-revert ) ;
+history-restore = "RESTORE", ( table-name, "AS", "OF", revision, history-selection | history-apply ) ;
+history-revert  = "REVERT", ( table-name, revision, history-selection | history-apply ) ;
+history-selection = [ "ROW", positive ], [ "FIELD", ident ] ;
+history-apply  = "APPLY", string, "REQUEST", string ;
+history-log    = "LOG", [ "FOR", table-name ], [ "ROW", positive ],
+                 [ "FROM", revision ], [ "TO", revision ],
+                 [ "SINCE", utc-epoch ], [ "UNTIL", utc-epoch ], history-page ;
+history-diff   = "DIFF", table-name, "FROM", revision, "TO", revision,
+                 [ "ROW", positive ], history-page ;
+history-read   = "READ", table-name, "AS", "OF", revision, [ "ROW", positive ], history-page ;
+history-page   = [ "OFFSET", uint ], [ "LIMIT", positive ] ;
+utc-epoch      = "UTC", [ "-" | "+" ], uint ;
+revision       = "REVISION", positive ;
+pin-kind       = "SNAPSHOT" | "DATASET" | "BACKUP" | "RESTORE" ;
+positive       = ? nonzero unsigned integer ? ;
+
+table-entry   = column | table-key ;
+column        = ident, type, { nullability | "DEFAULT", expr
+              | "GENERATED", "BY", "DEFAULT", "AS", "IDENTITY" | column-key } ;
+nullability   = [ "NOT" ], "NULL" ;
+constraint-name = "CONSTRAINT", ident ;
+table-key     = [ constraint-name ], ( "PRIMARY", "KEY", column-list
+              | "UNIQUE", column-list | "FOREIGN", "KEY", column-list, references | check ) ;
+column-key    = [ constraint-name ], ( "PRIMARY", "KEY" | "UNIQUE" | references | check ) ;
+references    = "REFERENCES", table-name, column-list, { foreign-action } ;
+foreign-action = "ON", ( "DELETE" | "UPDATE" ), ( "NO", "ACTION" | "RESTRICT" ) ;
+check         = "CHECK", "(", expr, ")" ;
+column-list   = "(", ident, { ",", ident }, ")" ;
+
+type          = "BOOLEAN" | "INTEGER" | "INT" | "BIGINT" | "TEXT" | "BLOB"
+              | "DECIMAL", "(", uint, ",", uint, ")" | "DATE" | "TIME"
+              | "TIMESTAMP", "WITH", "TIME", "ZONE" ;
+
+query         = [ "WITH", cte, { ",", cte } ], select, { union-arm }, [ ordering ] ;
+cte           = ident, "AS", "(", query, ")" ;
+union-arm     = "UNION", [ "ALL" | "DISTINCT" ], select ;
+ordering      = "ORDER", "BY", order-term, { ",", order-term } ;
+order-term    = expr, [ collation ], [ "ASC" | "DESC" ] ;
+select        = select-head, select-tail ;
+select-head   = "SELECT", [ "ALL" | "DISTINCT" ], ( "*" | expressions ) ;
+select-tail   = [ "FROM", table-source, { join } ], [ "WHERE", expr ],
+                [ "GROUP", "BY", expressions ], [ "HAVING", expr ] ;
+                (* The wildcard requires FROM. *)
+table-source  = table-name, [ [ "AS" ], ident ] ;
+join          = ( [ "INNER" ] | "LEFT", [ "OUTER" ] ), "JOIN", table-source, "ON", expr
+              | "CROSS", "JOIN", table-source ;
+expressions   = expr, { ",", expr } ;
+insert        = "INSERT", "INTO", table-name, [ column-list ],
+                "VALUES", value-row, { ",", value-row } ;
+value-row     = "(", expr, { ",", expr }, ")" ;
+update        = "UPDATE", table-name, [ "AS", ident ],
+                "SET", assignment, { ",", assignment }, [ "WHERE", expr ] ;
+assignment    = ident, "=", expr ;
+delete        = "DELETE", "FROM", table-name, [ "AS", ident ], [ "WHERE", expr ] ;
+expr          = term, { "OR", term } ;
+term          = predicate, { "AND", predicate } ;
+predicate     = "NOT", predicate | comparison ;
+comparison    = sum, [ ( "=" | "<>" | "!=" | "<" | "<=" | ">" | ">=" ), sum
+              | "IS", [ "NOT" ], "NULL" ] ;
+sum           = product, { ( "+" | "-" ), product } ;
+product       = scalar, { ( "*" | "/" ), scalar } ;
+scalar        = "-", scalar | "(", expr, ")" | literal | column-name | named-parameter
+              | table-name, arguments
+              | "NEXT", "VALUE", "FOR", table-name | aggregate
+              | [ "EXISTS" ], "(", query, ")" ;
+aggregate     = "COUNT", "(", ( "*" | expr ), ")"
+              | ( "SUM" | "MIN" | "MAX" | "AVG" ), "(", expr, ")" ;
+named-parameter = ":", ( ident | ( "OLD" | "NEW" ), ".", ident ) ;
+literal       = uint | uint, ".", uint | string | "NULL" | "TRUE" | "FALSE"
+              | ( "DATE" | "TIME" | "TIMESTAMP", [ "WITH", "TIME", "ZONE" ] ), string ;
+
+schema-name   = [ ident, "." ], ident ;
+table-name    = [ schema-name, "." ], ident ;
+column-name   = [ table-name, "." ], ident ;
+
+create-routine = "CREATE", [ "OR", "REPLACE" ],
+                 ( "FUNCTION", table-name, [ parameters ], ( "RETURN" | "RETURNS" ), pl-type
+                 | "PROCEDURE", table-name, [ parameters ] ), routine-body, [ ident ] ;
+parameters     = "(", [ parameter, { ",", parameter } ], ")" ;
+parameter      = ident, ( [ "IN", [ "OUT" ] | "OUT" ], pl-type | "OUT", "REFCURSOR" ) ;
+pl-type        = type | "RECORD" | "COLLECTION" ;
+routine-body   = [ ( "AS" | "IS" ), [ "DECLARE" ], { local-declaration }
+                 | "DECLARE", { local-declaration } ], block ;
+trigger        = "CREATE", "TRIGGER", table-name, ( "BEFORE" | "AFTER" ),
+                 ( "INSERT" | "UPDATE" | "DELETE" ), "ON", table-name,
+                 "FOR", "EACH", "ROW", routine-body, [ ident ]
+               | "DROP", "TRIGGER", table-name ;
+anonymous-block = [ "DECLARE", { local-declaration } ], block ;
+local-declaration = ident, ( pl-type, [ ":=", expr ] | "REFCURSOR" ), ";" ;
+call           = "CALL", table-name, arguments ;
+arguments      = "(", [ expressions ], ")" ;
+block          = "BEGIN", program,
+                 [ "EXCEPTION", "WHEN", "OTHERS", "THEN", pl-statement, ";", program ],
+                 "END" ;
+program        = { pl-statement, ";" } ;
+pl-statement   = ident, ":=", expr | block | if-statement | case-statement | loop-statement
+               | ( "EXIT" | "CONTINUE" ), [ "WHEN", expr ]
+               | "RETURN", [ expr ] | "RAISE", [ ident ]
+               | select-into | cursor-operation | insert | update | delete ;
+select-into    = select-head, "INTO", targets, select-tail, { union-arm }, [ ordering ] ;
+targets        = ident, { ",", ident } ;
+cursor-operation = "OPEN", ident, "FOR", query | "FETCH", ident, "INTO", targets
+                 | "CLOSE", ident | "EMIT", ident, "AS", ident ;
+if-statement   = "IF", expr, "THEN", program, { "ELSIF", expr, "THEN", program },
+                 [ "ELSE", program ], "END", "IF" ;
+case-statement = "CASE", "WHEN", expr, "THEN", program, { "WHEN", expr, "THEN", program },
+                 [ "ELSE", program ], "END", "CASE" ;
+loop-statement = [ "WHILE", expr | "FOR", ident, "IN", expr, "..", expr ],
+                 "LOOP", program, "END", "LOOP" ;
+ident         = unquoted-name | quoted-name ;
+unquoted-name = ( letter | "_" ), { letter | "_" | digit } ;
+quoted-name   = '"', quoted-unit, { quoted-unit }, '"' ;
+quoted-unit   = '""' | ? non-quote UTF-8 code point ? ;
+string        = "'", { "''" | ? non-quote UTF-8 code point ? }, "'" ;
+uint          = digit, { digit } ;
+letter        = ? ASCII A–Z or a–z ? ;
+digit         = ? ASCII 0–9 ? ;
+end           = ? end of input ? ;
+
+(* Unquoted names are ASCII lowercased and cannot use reserved keywords. Quoted
+   names preserve UTF-8 bytes, including casing. Doubling a quote escapes it.
+   SQL source is bounded to 64 KiB and 4096 tokens, with a maximum expression
+   depth of 64, 128 columns per definition/expression list and 128 bytes per name.
+   There are at most 128 constraints per table, 512 INSERT value rows and
+   128 UPDATE assignments. A query accepts eight JOINs, eight UNION arms,
+   eight nonrecursive CTEs and twelve levels of nested query expressions.
+   A foreign key accepts at most one ON DELETE and one
+   ON UPDATE clause. Each column accepts one nullability and one DEFAULT or
+   IDENTITY clause. All tokens of the statement must be consumed. The parser
+   does not execute SQL. CREATE USER has no password clause. Role memberships
+   apply to users. Object grants require an explicit recipient kind and contain
+   no delegation or cascading options. PL/SQL uses typed parameters and
+   locals with up to 64 declarations per routine and 24 levels of blocks
+   and conditional arms. Nested blocks share lexical variables. Nested
+   DECLARE blocks are unavailable. REFCURSOR parameters require procedure OUT.
+   SQL column types remain scalar. Triggers are row-level, and hosted SQL
+   binds OLD/NEW fields with a qualified named parameter. History LIMIT is 1–256.
+   APPLY requires the preview plan ID and a 32-character lowercase hexadecimal
+   request token. *)

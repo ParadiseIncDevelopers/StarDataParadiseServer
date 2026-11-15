@@ -1,0 +1,11 @@
+# PL/SQL debugger, routine tests and profiler
+
+An authenticated control connection opens a debugger for a routine name and revision on a second authenticated connection. The target still prepares and executes its routine through the usual SQL calls. Debug controls require the current debug grant. A nonadministrator can attach to another connection for the same actor. The executor continues to check the target actor's privileges for hosted SQL.
+
+Breakpoints are pinned to the requested revision and source line. A stop reports the real root-to-leaf routine stack, instruction location and a bounded set of typed locals. Continue resumes the current request. Step into follows a nested call, step over stays at the current or an outer depth, and step out advances to an outer routine. Exception stop reports a typed runtime exception before its handler runs. Watch looks up a typed local in the stopped frame and leaves the frame and data unchanged.
+
+The paused request retains its transaction lease. Debug status includes whether the routine is active and its paused location. A pause is capped at three seconds and the debug invocation has an overall ten-second runtime cap subject to the shorter connection or transaction deadline. Closing the debugger or either participating connection wakes the worker. Failure in a debugged invocation releases its private transaction and active result resources.
+
+The profile_last operation returns bounded records from the most recent routine invocation, including nested invocations. Each record contains the immutable routine revision, inclusive and exclusive wall-clock microseconds, measured SQL wall time and the number of entered instructions.
+
+The routine_test operation takes a prepared routine, typed parameters, and expected named result sets or a named exception. It runs only in an isolated instance explicitly configured with routine_test_instance set to true. It opens a fresh transaction, compares actual typed output, and rolls back before responding. A caller requires the debug grant and the usual permissions for the routine and its data. The native SDK exposes these operations through ABI 1 and preserves earlier query and result APIs.

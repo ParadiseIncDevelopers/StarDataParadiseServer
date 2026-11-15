@@ -9,6 +9,7 @@ namespace
 {
 using namespace std::chrono_literals;
 constexpr size_t max_savepoints = 8;
+constexpr size_t max_internal_savepoints = 10;
 }
 
 Engine::Engine(const std::filesystem::path& path, Hooks hooks)
@@ -93,22 +94,39 @@ Header Engine::current()
 
 std::vector<Revision> Engine::history()
 {
+    std::vector<Revision> revisions;
+    visit_history([&](Revision&& revision) { revisions.push_back(std::move(revision)); });
+    return revisions;
+}
+
+void Engine::visit_history(const RevisionVisitor& visitor, const std::function<void()>& check)
+{
     const std::lock_guard lock(mutex_);
     require_usable();
-    std::vector<Revision> revisions;
-    const auto collect = [&](Frame&& frame) {
-        revisions.push_back({frame.batch.header.lsn, std::move(frame.changes)});
+    uint64_t last{};
+    const auto yield = [&](Frame&& frame) {
+        if (check) check();
+        if (frame.batch.header.lsn != last + 1)
+            throw Error(Fault::corrupt, "Published history has a WAL revision gap");
+        last = frame.batch.header.lsn;
+        if (visitor) visitor({last, std::move(frame.changes)});
     };
-    for (size_t index = 0; index + 1 < segments_.size(); ++index)
+    for (size_t index = 0; index < segments_.size(); ++index)
     {
-        File file(segments_[index].path, File::Mode::read_only);
-        if (scan(file, collect).incomplete_tail)
-            throw Error(Fault::corrupt, "Inactive WAL segment has an incomplete tail");
+        if (check) check();
+        const auto& segment = segments_[index];
+        if (segment.first != last + 1) throw Error(Fault::corrupt, "Published history is missing a WAL segment");
+        const bool active = index + 1 == segments_.size();
+        const auto result = [&] {
+            if (active) return scan(*wal_, yield);
+            File file(segment.path, File::Mode::read_only);
+            return scan(file, yield);
+        }();
+        if (result.first != segment.first || result.incomplete_tail || (!active && !result.commits))
+            throw Error(Fault::corrupt, "Published history contains an invalid WAL segment");
     }
-    const auto result = scan(*wal_, collect);
-    if (result.incomplete_tail || result.last != store_.header().lsn)
+    if (last != store_.header().lsn)
         throw Error(Fault::corrupt, "Published history and WAL disagree");
-    return revisions;
 }
 
 Checkpoint Engine::checkpoint(const RetentionPins& pins)
@@ -188,7 +206,7 @@ Transaction::Transaction(Engine& engine, Owner owner, uint64_t token)
     : engine_(engine), owner_(owner), token_(token), editor_(engine.store_)
 {
     changes_.reserve(change_count_limit);
-    saves_.reserve(max_savepoints);
+    saves_.reserve(max_savepoints + max_internal_savepoints);
 }
 
 Transaction::~Transaction()
@@ -210,10 +228,38 @@ std::unique_lock<std::mutex> Transaction::lock(Owner caller)
     return held;
 }
 
+void Transaction::ensure_active(Owner caller)
+{
+    const auto held = lock(caller);
+}
+
+void Transaction::visit_changes(Owner caller, const std::function<void(std::span<const Change>)>& visitor)
+{
+    const auto held = lock(caller);
+    visitor(changes_);
+}
+
 Row Transaction::get(Owner caller, RowId id)
 {
     const auto held = lock(caller);
     return editor_.get(id);
+}
+
+void Transaction::visit(Owner caller, const RowVisitor& visitor, std::optional<uint32_t> schema)
+{
+    scan(caller, 0, [&](RowId id, const Row& row) { visitor(id, row); return true; }, schema);
+}
+
+bool Transaction::scan(Owner caller, RowId after, const ScanRow& visitor, std::optional<uint32_t> schema,
+    const std::function<void()>& check)
+{
+    const auto held = lock(caller);
+    const auto boundary = [&] {
+        engine_.expire(Engine::Clock::now());
+        if (!engine_.active_) throw Error(Fault::cancelled, "Transaction expired during scan");
+        if (check) check();
+    };
+    return editor_.scan(after, visitor, schema, boundary);
 }
 
 void Transaction::ensure_change(const Change& change) const
@@ -258,10 +304,30 @@ void Transaction::erase(Owner caller, RowId id, ChangeKind kind)
     mark(std::move(change));
 }
 
+void Transaction::restore_row(Owner caller, RowId id, const Row& row, ChangeKind kind)
+{
+    const auto held = lock(caller);
+    Change change{id, kind, {}, encode(row)};
+    ensure_change(change);
+    editor_.restore_row(id, row);
+    mark(std::move(change));
+}
+
 Savepoint Transaction::savepoint(Owner caller)
 {
     const auto held = lock(caller);
-    if (saves_.size() == max_savepoints || !next_save_) throw Error(Fault::limit, "Savepoint limit reached");
+    return make_savepoint(max_savepoints);
+}
+
+Savepoint Transaction::statement_savepoint(Owner caller)
+{
+    const auto held = lock(caller);
+    return make_savepoint(max_savepoints + max_internal_savepoints);
+}
+
+Savepoint Transaction::make_savepoint(size_t limit)
+{
+    if (saves_.size() >= limit || !next_save_) throw Error(Fault::limit, "Savepoint limit reached");
     const auto point = next_save_++;
     saves_.push_back({point, editor_.snapshot(), changes_.size(), bytes_});
     return point;

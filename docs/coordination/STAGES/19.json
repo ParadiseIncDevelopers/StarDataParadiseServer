@@ -1,0 +1,257 @@
+{
+  "stage_id": 19,
+  "status": "PASSED",
+  "started_at": "2026-11-15T13:43:12.8237834+03:00",
+  "finished_at": "2026-11-15T14:01:52.3906241+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 18,
+      "file": "STAGES/18.json",
+      "sha256": "6b51b4c50667a32f86d1f93024c255c6a2d6efea6a023d2f8277015afa52cf59"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "history_seal_version": 1,
+    "native_product_candidate": "0.2.0",
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "0771acc3055ea3684e4dd48a6ee1b948300bf35f",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "HISTORY.md",
+        "sql/catalog.cpp",
+        "sql/catalog.hpp",
+        "sql/executor.cpp",
+        "sql/executor.hpp",
+        "sql/history_journal.cpp",
+        "sql/history_journal.hpp",
+        "sql/history_query.cpp",
+        "sql/history_query.hpp",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "storage/transactions.cpp",
+        "storage/transactions.hpp",
+        "tests/history_journal_smoke.cpp",
+        "tests/history_journal_storage.py",
+        "tests/history_rpc.py"
+      ],
+      "source_manifest": "out/sdp-m4/stage19/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "eed937e1ac6329beb1cbeaa50d0a2cac9047ff46c84d412de54ba90cc75733c4"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "c36a3f4a860509dd04b44dc884e25493874cb6a6",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "include/StarDataParadiseDLLler.h",
+        "StarDataParadiseDLLler/api.cpp",
+        "StarDataParadiseDLLler/transport.cpp",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py"
+      ],
+      "source_manifest": "out/sdp-m4/stage19/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "8de7235f83ed939d6484b93426ac22c7c37b7a6e3edf5bb48b4d650c1f62ec8a"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m4/stage19/workspace-before.json",
+    "archive_sha256": "14cec84f356178668a705e279a558a01354081c6904a1831b4fde414d132ca6c",
+    "repo": "StarDataParadiseServer",
+    "archive_path": "out/sdp-m4/stage19/workspace-before.zip"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m4/stage19/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/checkpoint.log",
+      "log_sha256": "28c9429cb56d4316986daca51e65803397655f7130b61206611f7b81e6d5262a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake -S . -B out/sdp-m4/stage19/build -G 'Visual Studio 18 2026' -A x64 -T v145 <pinned dependencies and legacy fixtures>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/configure.log",
+      "log_sha256": "35b9cd1da6258b5ca47969f20d872d080769da9e9c001705b328ff40880fa451",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m4/stage19/build --config Release --parallel 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/build-final.log",
+      "log_sha256": "5699c7ec0a2b43a7b8b200666465f5a914b8a6aef0ba2ba46533d9708faf381b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m4/stage19/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/ctest-final.log",
+      "log_sha256": "b593a7aca0f3bf34a1d4a01ae50cac2037a255f83df0a6fddaddd97627e2d1fa",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild StarDataParadiseServer.slnx /m:1 /p:Configuration=Release /p:Platform=x64; --version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/msbuild.log",
+      "log_sha256": "09cb6c2adfb368ca265d1f74a3e0823436a36963b8a48957d200db9938c29ef7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run isolated MSVC /W4 /WX grammar/regression corpus for History, SQL and PL/SQL",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/parser-agent/test.log",
+      "log_sha256": "51fcc330151283148d59ebd55f78f6cb280fa76c22f92a72b35a858c0c3f0db8",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python tests/history_journal_storage.py --runner <isolated Windows x64 Release history_journal_smoke.exe> --scratch <fresh fixtures>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/history-agent/test-final.log",
+      "log_sha256": "405df959e94282b5c89ccc91095ebb90f9af6e7bc57316d3c6c286837d9d22a7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cmake --build out/sdp-m4/stage19/build --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/build-final.log",
+      "log_sha256": "0232eccdcc5fe584a50c4ae8c00d9fb832396d82d3de63d0e6acaf30f0a612e9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "ctest --test-dir out/sdp-m4/stage19/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/ctest-final.log",
+      "log_sha256": "ec8b729cac9af93fd30083070d61b3ad3913eba5e33e77d3354275ad4b5bb4d5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cpack -G ZIP -C Release, package-final",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/cpack-final.log",
+      "log_sha256": "7930152d34ae04b2416ec7ca8e42da052660de921bfd760f2fecdbb2ec82d414",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "MSBuild StarDataParadiseDLLler.slnx, Release x64",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/msbuild-final.log",
+      "log_sha256": "ddf6c725737cb55c72b970269b43a160b4669d91249c733ad70869fc58e3c7f7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "dumpbin /exports and preserved ABI 1 symbols",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/exports.log",
+      "log_sha256": "e87772a6595102c6a9f09db7988be3b2bba83f458b0ef585affb297e48175191",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "python tests/package_integration.py --package <Stage19 ZIP> --server <Stage19 Server> --sql --security --plsql --debugger --history <test inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/integration-final.log",
+      "log_sha256": "49c83b5fb3a598db190a85a28cedbd8ac8feb1746ceb7c3ddaf91e092526d281",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m4/stage19/workspace-before.json --check --allow StarDataParadiseServer --allow StarDataParadiseDLLler",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m4/stage19/isolation.log",
+      "log_sha256": "82ae118696621845d3915687a8e964b25852621b9a28bad3833d2cea71abb38a",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S19-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek SQL INSERT, PK değiştiren UPDATE ve DELETE aynı stable row ID üzerinde işlendi. Tarihsel okuma, net diff, UTC dilimi, sayfalama ve binary SHA-256 özeti Native TLS ve SQL ile doğrulandı."
+    },
+    {
+      "id": "S19-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Rollback revision üretmedi. TLS process kill ve WAL marker öncesi/sonrası ayrı process kill ile yayınlanan veri ve seal aynı LSN durumunda kaldı."
+    },
+    {
+      "id": "S19-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Pin varken floor ilerlemesi reddedildi ve imaj okunabildi. Pin kaldırılıp floor ilerletilince eski istek revision_not_recoverable verdi. Pin ve floor yeniden açılışta korundu."
+    },
+    {
+      "id": "S19-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Kota aşıldığında veri, commit outcome ve revision yayınlanmadı. Current HISTORY+SELECT grant/revoke ve gizli kayıt filtreleri doğrulandı. CRC’si geçerli sahte seal ve yanlış outcome LSN reddedildi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage19/build/Release/StarDataParadiseServer.exe",
+      "sha256": "217ab5541780cc3e6834d90c552fee9be24a41e394d0be39f4bb131044da29db"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m4/stage19/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m4/stage19/package-final/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "6b00f354631431d5f00878278fe40018416ce5428c93b281e210486bc911dc91"
+    }
+  ],
+  "remaining_issues": [
+    "Retention mantıksal okunabilirlik sınırıdır. WAL v1 disk kurtarması için tam segment zinciri korunur ve fiziksel kotası ayrıca uygulanır.",
+    "Rule ve model katalogları uygulanacak sonraki etapların kapsamındadır. History v1 mevcut SQL katalog nesnelerini ve PL/SQL kaynaklarını gösterir."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 20
+}
