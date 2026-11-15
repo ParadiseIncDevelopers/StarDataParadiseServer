@@ -1,7 +1,7 @@
 # Sıradaki etap
 
-**21 Decision kural modeli**
+**31 Native SDK tamamlama ve paketleme**
 
-M4 kapanış kanıtı ve yedi proje sonuçları M4_REPORT.md dosyasında. Etap 21 başlamadan önce ilgili prompt, kapsam, mevcut capability ve test kayıtlarını doğrula.
+Native API ve ABI uyumunu tamamla. Son kabul edilen Server 0.3.0 ile kurulu paket ve mevcut istemcileri test et.
 
-[Etap 20 kabul kanıtı](STAGES/20.json)
+[Etap 30 kabul kanıtı](STAGES/30.json)

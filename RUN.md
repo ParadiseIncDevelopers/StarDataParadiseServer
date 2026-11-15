@@ -31,3 +31,7 @@ Operasyon ve kimlik doğrulama olayları ayrı log dosyalarına yazılır. Her l
 ## Storage maintenance
 
 A new instance can initialize a storage file explicitly with --initialize-storage. Use --check-storage for read-only validation, --recover-storage for offline replay and --checkpoint-storage for an offline checkpoint and retention summary. Server startup recovers verified committed WAL before it binds the listener. See DISK_FORMAT.md and RECOVERY.md for the on-disk format and recovery behavior.
+
+## Instance ve Health Center
+
+Birden fazla yerel instance için config içinde benzersiz `instance_name`, port ve ayrı data, log, temp dizinleri kullan. Hizmet kurulum ve kontrol adımları, health kontrolleri ve destek paketi [ADMIN.md](ADMIN.md) dosyasında. Doğrulanabilir yedek konumu `backup` config alanıyla etkinleşir. Geri yükleme akışı [BACKUP.md](BACKUP.md) dosyasında.

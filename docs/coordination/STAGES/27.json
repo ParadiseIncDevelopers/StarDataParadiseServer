@@ -1,0 +1,203 @@
+{
+  "stage_id": 27,
+  "status": "PASSED",
+  "started_at": "2026-11-15T16:50:36.9863858+03:00",
+  "finished_at": "2026-11-15T17:04:15.2514811+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 26,
+      "file": "STAGES/26.json",
+      "sha256": "5482a5366253f9f6004b74568b6e540d60b2466d85a15c56f41938cdd306c58d"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "model_format": 1,
+    "mlp_format": 1,
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "8fec43822f7f05a64b4807cbcd51f0806dddd78a",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "jobs/manager.cpp",
+        "jobs/manager.hpp",
+        "ml/DEEP_LEARNING.md",
+        "ml/mlp.cpp",
+        "ml/mlp.hpp",
+        "ml/model.cpp",
+        "ml/training.cpp",
+        "ml/training.hpp",
+        "MODELS.md",
+        "out/sdp-m6/stage28/native-agent/source/StarDataParadiseDLLler/StarDataParadiseDLLler.vcxproj.user",
+        "sql/session.cpp",
+        "StarDataParadiseServer/config.cpp",
+        "StarDataParadiseServer/server.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/mlp_rpc.py",
+        "tests/mlp_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m6/stage27/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "77162b2f2046190d11e77df3904b33636981b3600b3203d941c2ac0c3b5de110"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m6/stage27/workspace-before.zip",
+    "archive_sha256": "7c917020f3ba871be9add2e1ea6a1defa75a7d416c8ee25094560d253601a551",
+    "manifest": "out/sdp-m6/stage27/workspace-before.json",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Snapshot and verify all seven repos before Stage27",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/checkpoint.log",
+      "log_sha256": "b8b964a39b183262b4abb31e3476afa4943fef18f0262a7386e7cae027e28a77",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure rolling pinned Windows x64 Release with SDP_WITH_CPU_MLP ON",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/configure.log",
+      "log_sha256": "1ccd465cbe4f88597605a6613e0fa107199fdf972ab9c716c2a0e91c18c06e2f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build all CMake Release targets after MLP integration",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/build.log",
+      "log_sha256": "108221cf075451b4acbdaafab803dc0b9509796a60fce66a1d539e38f21db323",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run entire Stage27 Release CTest against candidate-matched Server",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/ctest-final.log",
+      "log_sha256": "abb0e5a5044209c484875b0d431e47f703b840720ce06113da6ebaf1f5a57a8c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure separate build without MLP or test dependencies",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/minimal-configure.log",
+      "log_sha256": "e491903a1939aba80e22190cd1f7a186f087053d77825a0b82145f4ac7852854",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build actual minimal Release binary with no MLP object",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/minimal-build.log",
+      "log_sha256": "1c2a824746f9bb165e353a5f4b2bd4b0dbbd453f9f917c659b988a29372ea3e7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run standalone MSVC /W4 /WX analytical gradients, SGD/Adam and held-out learning",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/mlp-gradient-agent/test-tracked.log",
+      "log_sha256": "9bf12a74ee700c2bc50c9466a751680401e730b8398736338d69b3bdbef7f9fc",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run exact full and separately built minimal binaries with real TLS, XOR, live worker failure/cancel and core separation",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/mlp-rpc-agent-final.log",
+      "log_sha256": "1f40d40c402eaa037f96332cbb2c56be2cf8ecf877977c69ea6ab4dcdaf6d659",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build official Visual Studio solution Release x64 and freeze artifact",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/msbuild.log",
+      "log_sha256": "8d307f33832461aadaeb15b1e6f610505b4eb42b7c61c758e762203cd09cae61",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run installed Stage23 Native SDK integration against exact Stage27",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/native-regression.log",
+      "log_sha256": "e339319cda6a6cb09455a14d9d22b542c0df8996c1eccd384dd43449e2169448",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify all six nonparticipating repositories against prior checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage27/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S27-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Analitik BCE ve gradyanlar merkezi sonlu farklarla eşleşti. Adam ve SGD ilk adımları bağımsız değerlerle doğrulandı. XOR held-out 8/8 ve BCE 0.00101624. TLS metrikleri ve tahminler bağımsız hesapla eşleşti."
+    },
+    {
+      "id": "S27-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Çalışan MLP worker PID sonlandırıldı ve ikinci job iptal edildi. Eşzamanlı SELECT devam etti. Yarım sonuç ve aktivasyon olmadı."
+    },
+    {
+      "id": "S27-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "MLP nesnesi olmadan derlenen ayrı executable MLP uçlarına 1004 döndürdü. Gerçek SQL, History ve Decision çalıştı. Runtime config kapatma ve yeniden açma aynı kalıcı instance üzerinde geçti."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage27/candidate/StarDataParadiseServer.exe",
+      "sha256": "61f302d549762ca4f036ac080c58281f41c8e308c5ea41deeba11339ba9bee7a"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage27/candidate/StarDataParadiseServer-vs.exe",
+      "sha256": "b2446b7bbc5afbfe5ce9f0e12814d988e6955b0f9c1a8f9201804ebd045aacad"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage27/candidate/StarDataParadiseServer-minimal.exe",
+      "sha256": "090c415f8b8e9b7c7d5e26289fbb51698fa2ab9ceab2b406d7046ff85cb2b016"
+    }
+  ],
+  "remaining_issues": [
+    "Bu etapta CPU MLP bir gizli-katman ailesiyle ikili sınıflandırma yapar. GPU yürütme doğrulanmadı.",
+    "Model boyutları, eğitim işi süresi ve aktarım bütçeleri sınırlıdır."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 28
+}

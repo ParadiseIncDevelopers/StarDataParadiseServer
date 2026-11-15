@@ -1,0 +1,202 @@
+{
+  "stage_id": 21,
+  "status": "PASSED",
+  "started_at": "2026-11-15T15:14:02.7665242+03:00",
+  "finished_at": "2026-11-15T15:28:13.2450508+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 20,
+      "file": "STAGES/20.json",
+      "sha256": "6d6c9d5f1bfe463aed0503b85dafe4e34d3a4cef9d2585017d2fdc8b57d31982"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "decision_catalog_version": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "8fec43822f7f05a64b4807cbcd51f0806dddd78a",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "CMakeLists.txt",
+        "DECISION.md",
+        "sql/binder.cpp",
+        "sql/catalog.cpp",
+        "sql/catalog.hpp",
+        "sql/decision_condition.cpp",
+        "sql/decision_condition.hpp",
+        "sql/decision.cpp",
+        "sql/decision.hpp",
+        "sql/definition.cpp",
+        "sql/executor.cpp",
+        "sql/history_query.cpp",
+        "sql/pl_ir.cpp",
+        "sql/pl_ir.hpp",
+        "sql/relational.hpp",
+        "sql/session.cpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "StarDataParadiseServer/config.cpp",
+        "StarDataParadiseServer/server.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "storage/transactions.cpp",
+        "storage/transactions.hpp",
+        "tests/decision_condition_smoke.cpp",
+        "tests/decision_rpc.py",
+        "tests/sql_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m5/stage21/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "796312c00e46fad0a6fc70db893b15c0518fc45e6c1f89afc1edcede9065017b"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m5/stage21/workspace-before.json",
+    "archive_path": "out/sdp-m5/stage21/workspace-before.zip",
+    "archive_sha256": "87a6f92d608f88cde70416f53e8297bc27d6a683b5328c91f14157763f100941",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m5/stage21/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/checkpoint.log",
+      "log_sha256": "86df305e3cff001529a9abfd4077d7b7c025a1b307cdc081a2046be72bb57989",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m4/stage20/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/baseline.log",
+      "log_sha256": "078e3ea644dc3b5a2e40ac483fa4b471233e09b38d0907468874e8dfcddca621",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake -S . -B out/sdp-m5/stage21/build -G Visual Studio 18 2026 -A x64 -T v145 <locked inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/configure.log",
+      "log_sha256": "207267f36e3806d9de54bf7c6274ed314ba361ab7635460b3b1499cb27cf79f3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m5/stage21/build --config Release --parallel 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/build-final.log",
+      "log_sha256": "43b1645b1a838fdd8e143cd8907ce09aad537083f1b3bb5d6b5b543f844a213a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m5/stage21/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/ctest-final.log",
+      "log_sha256": "85fedba5cb9fb54919d9d0bd6bc8620a09fa9a39946a9016a18b47c26f4c77c8",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSVC /W4 /WX Decision grammar, preceding cases and 30k malformed inputs",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/parser-agent/test.log",
+      "log_sha256": "a0c35bb09d9f4c5ab3cadc7f72c7b9145270874a5f026f07f4b8aa1a0b2cbcc5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python -B tests/decision_rpc.py --server <exact Stage21 EXE> --openssl <pinned EXE> --scratch <isolated fixtures>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/decision-rpc-agent-final.log",
+      "log_sha256": "bf7f710e9162e3ebf583f283d4675745ba00f427e947b214874ff6e90ccfb182",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Execute prior Native 0.2.0 installed package with SQL, security, PL/SQL, debug, History and restore against exact Stage21",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/native-regression.log",
+      "log_sha256": "9756934ea9cb45c3fc3f730e395d303d2c6362cf5b7bf999680361a93772bdad",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild StarDataParadiseServer.slnx /m:1 /p:Configuration=Release /p:Platform=x64 and --version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/msbuild.log",
+      "log_sha256": "de05064ac05ae8deaac30033afaeec07fb687f4c31fca6fbe0dd72d1b26376da",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m5/stage21/workspace-before.json --check --allow StarDataParadiseServer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage21/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S21-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Ödenmemiş order onayı doğrudan SQL, procedure, AFTER trigger ve History restore üzerinden reddedildi. Başarısız yazının outcome ve History kaydı oluşmadı."
+    },
+    {
+      "id": "S21-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "NULL ve eşit öncelik kesin sıralamayla çalıştı. İki TLS oturumu gerçekten aynı transaction lease’i bekledi, önceki commit ile rollback farklı ve doğru snapshot sonucu üretti. ACTOR ve saf PL/SQL ile tipli SET doğrulandı."
+    },
+    {
+      "id": "S21-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Karar kapalı yeniden başlatmada korumalı yazma reddedilirken olağan SQL çalıştı. Immutable kaynak ve active pointer atomik History imajında okundu. Bağımlı rutin değişiminde kural yeniden doğrulanana kadar yazma kapandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage21/build/Release/StarDataParadiseServer.exe",
+      "sha256": "e1c81d29cba7a0955fc44554ab34478edf6173ce9f1617b4c166a80f9243751f"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage21/vs/bin/StarDataParadiseServer.exe",
+      "sha256": "913fbabbb998442f432ce8b268e681f22999ef7203802d78e51d207c7efa8272"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage21/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    }
+  ],
+  "remaining_issues": [
+    "Decision saf skaler PL/SQL ve bütçe içindeki snapshot EXISTS ifadelerini kabul eder. Kurala bağlı şema/rutin değişince açık yeni doğrulama gerekir.",
+    "History apply, güncel hesaplama arşiv imajını değiştirecekse işlemi reddeder."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 22
+}

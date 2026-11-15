@@ -1,0 +1,264 @@
+{
+  "stage_id": 28,
+  "status": "PASSED",
+  "started_at": "2026-11-15T17:04:39.2944308+03:00",
+  "finished_at": "2026-11-15T17:23:46.6337983+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 27,
+      "file": "STAGES/27.json",
+      "sha256": "595b464240aed6bd154cec2ad1ec7196ac5ad4abfb5f55570113f7e6b988b5a4"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "model_format": 1,
+    "checkpoint_format": 1,
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "8fec43822f7f05a64b4807cbcd51f0806dddd78a",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "jobs/manager.cpp",
+        "jobs/manager.hpp",
+        "jobs/worker.cpp",
+        "ml/dataset.cpp",
+        "ml/dataset.hpp",
+        "ml/devices.cpp",
+        "ml/devices.hpp",
+        "ml/model.cpp",
+        "ml/model.hpp",
+        "ml/training.cpp",
+        "ml/training.hpp",
+        "MODELS.md",
+        "out/sdp-m6/stage29/native-agent/source/StarDataParadiseDLLler/StarDataParadiseDLLler.vcxproj.user",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/model_lifecycle_rpc.py",
+        "tests/model_lifecycle_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m6/stage28/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "f63401dd70225edb0cd4aea37a064bb4706d28245a95db39b6d184b9bd1a35a1"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "22f83f2b924a3e8ddea71f6cadf0534d563e944c",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "include/StarDataParadiseDLLler.h",
+        "StarDataParadiseDLLler/api.cpp",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py",
+        "tests/version_smoke.c"
+      ],
+      "source_manifest": "out/sdp-m6/stage28/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "08cfc1c08d736baa42aaaf81343edfdcaf37c3ffe2724ae1b0a2e8a5c8277e13"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m6/stage28/workspace-before.zip",
+    "manifest": "out/sdp-m6/stage28/workspace-before.json",
+    "archive_sha256": "7b8127659755f33b09d9e7d7c55d69c330762937ea39b843b8b1dee96c5d9fa7",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Snapshot and verify all seven repos before Stage28",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/checkpoint.log",
+      "log_sha256": "835dd848a18b8e2138b4cd6c84b29c118699decf83fc3a8e377848b5bfa47e5a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CMake configure pinned Windows x64 Release for checkpoint/lifecycle",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/configure.log",
+      "log_sha256": "a0e33e0010e8bba3bef4695984228ca59e44f4af362ba245cc0e3f8625d01ac8",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build all Windows CMake Release targets after final worker transfer validation",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/build.log",
+      "log_sha256": "918431c369302f108cf775a129296b684ee321246f1a0c5b1f65de72e5a96d3f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run full 44-case Server x64 Release suite",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/ctest-final.log",
+      "log_sha256": "111a2719f3849f6aa1cf48744d884345c401ef1dbbc5f9634a2a3919944db538",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Official Server Visual Studio solution win-x64 Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/msbuild.log",
+      "log_sha256": "2ce33036427a6cfd1082fb629bc1896a963e45f747e83ac4770ed426c1fad6fa",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Independent artifact retirement, publication LSN History pin, durable version gaps and restart",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/model-lifecycle-agent/test-tracked.log",
+      "log_sha256": "5343c522e499f52b397b74b1911034c78527dd4fc5cf86e74599dec4e86ca040",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Exact CMake TLS continuous/resumed equality, corrupt checksum, activation, rollback and GPU fallback",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/model-lifecycle-rpc-agent-rerun.log",
+      "log_sha256": "05fbe4c5ac0776cf59352e789617d2e25946d253b3c8f46615fd9ee29d00313e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Configure Native independent x64 Release SDK",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/configure.log",
+      "log_sha256": "e2fd4233bec9c0fc165acaaaa60ada549686c277995e77d2f0380146b39496d2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Build Native C ABI 1 Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/build.log",
+      "log_sha256": "8dd0a51d8f2644f5bdbb35c13a391bc289ee0149fbebad4943987105dc5dd157",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run C ABI/export smoke",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/ctest.log",
+      "log_sha256": "db457fbe6fddb7760f2f2d9928e3de79cccdf2b0ceb02c580f3a278e296e5c06",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Generate installed SDK package",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/cpack.log",
+      "log_sha256": "ba22e7486e608c55a13c4847906bee93659041342856d43df99dc459fd60afb9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Official Native `.slnx` Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/msbuild.log",
+      "log_sha256": "2e05c17f79082a9ea620c14fbd86011a1d7acfec155d81044de1b12cd67c9c94",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Verify 41 legacy exports and two new symbols",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/exports.log",
+      "log_sha256": "81c1ac46f1dd8806fa7c296e0c86b1a53216282393c667df289b8943fcde9b1b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run installed Native package consumer through all previous scenarios and dataset/model operations",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/integration.log",
+      "log_sha256": "0c7e8d31046f9992d8bcba4c298f934b735a471dd2d63ed4adfc30be047d7e5f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Check all five nonparticipating repositories against before snapshot",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage28/isolation.log",
+      "log_sha256": "82ae118696621845d3915687a8e964b25852621b9a28bad3833d2cea71abb38a",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S28-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İzole worker 13. epoch sonunda ağırlıkları, Adam moments, RNG draw ve iterator sınırını kalıcılaştırdı. Restart sonrası kayıt okundu. Değiştirilmiş SHA-256 reddedildi. Tam CPU eğitimle devam ettirilen eğitim ağırlık, metrics ve seed alanlarında birebir eşleşti."
+    },
+    {
+      "id": "S28-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Eşzamanlı tahminler atomik aktivasyon boyunca doğru v1/v2 skorları gördü. Düşük sürüme rollback, deactivate, active/History-pin reddi ve unpin sonrası kalıcı silme çalıştı."
+    },
+    {
+      "id": "S28-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek GPU eğitim backend’i yokken GPU isteği 1004, açık izinle CPU fallback ve gerçek backend gerekçesi döndü. GPU yürütme ayrı NOT_RUN olarak saklandı."
+    },
+    {
+      "id": "S28-GPU",
+      "mandatory": false,
+      "result": "NOT_RUN",
+      "evidence": "CUDA sürücü ve cihaz/bellek ön kontrolü var. Bu Release gerçek bir GPU eğitim backend’i içermiyor."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage28/candidate/StarDataParadiseServer.exe",
+      "sha256": "7047c7cc0e25b5037fa92c2808b1c7afe2a0f0cae9f8642ee6a23e9ac73c99ab"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage28/candidate/StarDataParadiseServer-vs.exe",
+      "sha256": "99e848270662b66f8baf16ae402835bd5d6b51741d4e1bda1f54fcc7e8e14640"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m6/stage28/package/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "166d8020ddd78ff4f2dbc7945f3312eee1808b7f3e3f7b30407102391513a42e"
+    }
+  ],
+  "remaining_issues": [
+    "MLP checkpoint tamamlanan epoch sınırında alınır ve restart sonrası yeni job olarak devam eder. Kaydedilmemiş bir kesinti interrupted/failed döner.",
+    "GPU yürütme yok. CUDA sürücü ön kontrolü ve açık CPU fallback kullanılabilir."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 29
+}

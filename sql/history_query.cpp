@@ -79,6 +79,8 @@ std::string_view kind_name(ObjectKind kind)
     case ObjectKind::view: return "view";
     case ObjectKind::routine: return "routine";
     case ObjectKind::sequence: return "sequence";
+    case ObjectKind::decision: return "decision";
+    case ObjectKind::model: return "model";
     }
     throw disk::Error(disk::Fault::corrupt, "Unknown history object kind");
 }

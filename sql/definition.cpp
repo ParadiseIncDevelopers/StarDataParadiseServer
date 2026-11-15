@@ -1,4 +1,5 @@
 #include "definition.hpp"
+#include "decision.hpp"
 #include "relational.hpp"
 #include "executor.hpp"
 #include "routines.hpp"
@@ -127,6 +128,7 @@ std::vector<ObjectId> object_dependencies(const Object& object)
 {
     if (object.kind == ObjectKind::view) return {view_definition(object)["base"].get<ObjectId>()};
     if (object.kind == ObjectKind::routine) return routine_dependencies(object);
+    if (object.kind == ObjectKind::decision) return decision_dependencies(object);
     return relational_dependencies(object);
 }
 

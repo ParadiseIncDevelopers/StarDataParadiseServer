@@ -1,0 +1,263 @@
+{
+  "stage_id": 22,
+  "status": "PASSED",
+  "started_at": "2026-11-15T15:28:13.4567150+03:00",
+  "finished_at": "2026-11-15T15:40:20.3226658+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 21,
+      "file": "STAGES/21.json",
+      "sha256": "e0aaecf4388905d355df02818b50ec32e33d4fb3587cb0ba2d826ce159adc23b"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "decision_catalog_version": 1,
+    "native_product_candidate": "0.2.0",
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "8fec43822f7f05a64b4807cbcd51f0806dddd78a",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "DECISION.md",
+        "sql/decision_condition.cpp",
+        "sql/decision_condition.hpp",
+        "sql/decision_inspection.cpp",
+        "sql/decision_inspection.hpp",
+        "sql/decision.cpp",
+        "sql/decision.hpp",
+        "sql/pl_runtime.cpp",
+        "sql/pl_runtime.hpp",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/decision_condition_smoke.cpp",
+        "tests/decision_inspection_rpc.py",
+        "tests/sql_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m5/stage22/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "5ec09f46cbcf8de5975ccf2ba0d68075d2a8878493a1857086ead88efcf51069"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "22f83f2b924a3e8ddea71f6cadf0534d563e944c",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "include/StarDataParadiseDLLler.h",
+        "StarDataParadiseDLLler/api.cpp",
+        "StarDataParadiseDLLler/transport.cpp",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py"
+      ],
+      "source_manifest": "out/sdp-m5/stage22/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "c59e86ab70630ea4c047e2974a9a12153f9c471a13224593a463eb809bc36cb4"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m5/stage22/workspace-before.zip",
+    "manifest": "out/sdp-m5/stage22/workspace-before.json",
+    "archive_sha256": "61beac2077839c8701a298a9dece88ce99a9196c430aa2229e43e23e2b81b9c6",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m5/stage22/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/checkpoint.log",
+      "log_sha256": "73bbd2068c2c6750d5ec8a33dd56c840a98861dccc9ab496e785335f239cfead",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake -S . -B out/sdp-m5/stage22/build -G Visual Studio 18 2026 -A x64 -T v145 <locked inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/configure.log",
+      "log_sha256": "94f975f03780691d464f161f61aeb57b4f868bb069e884841c0cbd2a645a9b32",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m5/stage22/build --config Release --parallel 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/build-final.log",
+      "log_sha256": "de35b864c8f54c678dd68eec5a504d23fc634215975d1d8bfd316fb28e5fbd43",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m5/stage22/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/ctest-final.log",
+      "log_sha256": "065af0c2539e99bb7be74329a93edf23cb9630d99654e229705a321059b6c3f4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run MSVC /W4 /WX focused Decision SQL and preceding parser corpus",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/parser-agent/test.log",
+      "log_sha256": "2a4891c981ba1b2d3912a2a0b5a96487fc5908490c1b674af02f97226520d279",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run actual TLS Decision explanation/WHATIF/corpus/metadata fixture against final Stage22",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/decision-inspection-rpc-agent.log",
+      "log_sha256": "1a39f625d486e8db96e2332ccbe0a06be70ae8fee091126ef26fd2a7d7390e0e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild StarDataParadiseServer.slnx /m:1 Release x64 with isolated outputs",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/msbuild.log",
+      "log_sha256": "c24eabee0e8e83b22ddcc1c2dd32da2d3581c1600055f22460c8f56d06ce26d6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "CMake x64 Release build",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/build.log",
+      "log_sha256": "e4859f8e3cc1b475bde9d1dcf11cb1994797bed536afbfbb23812981c7c64456",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "CMake CTest Native Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/ctest.log",
+      "log_sha256": "7c72f747111ac42db945b1023d27e986ca1f086f2e5eeb321a339f07be00ce5d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "CPack Release ZIP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/cpack.log",
+      "log_sha256": "eca588fea25c479d09c109e6e85c68b04d38dffc352b46b5a534f98bed106503",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "MSBuild StarDataParadiseDLLler.slnx Release x64",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/msbuild.log",
+      "log_sha256": "f84fd6130fdc256558cb85cc61309b5e472870b191ecf587abf8b9fb07a856c5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Compare ABI1 exports and check sdp_decision_command",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/exports.log",
+      "log_sha256": "a426081196205128f52cd9f630171cb9eca7e16a277f5b7924b5cedca92daa89",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run accepted Stage21 Server with Stage22 native package and preceding operations",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/integration-prior.log",
+      "log_sha256": "23ff0d5e9bd56d2143cba3b38cf9c2751ed4aa7b56b67a6768ed18da021929e8",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run exact Stage22 Server with Stage22 Native installed ZIP, including --decision and all SQL/PLSQL/History suites",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/integration-final.log",
+      "log_sha256": "da5ee998e0c56b24ce0ad95becebd2954ccd4546b6f19c15da564dfcdadffd48",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m5/stage22/workspace-before.json --check --allow StarDataParadiseServer --allow StarDataParadiseDLLler",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage22/isolation.log",
+      "log_sha256": "82ae118696621845d3915687a8e964b25852621b9a28bad3833d2cea71abb38a",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S22-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "WHYNOT gerçek çalışan ve kısa devre sonucu atlanan EXISTS düğümlerini, sürüm ve süreyi gösterdi. Gerekli güncel SELECT izni olmadan oracle engellendi. Kaynak ve operand değerleri sonuçta yok."
+    },
+    {
+      "id": "S22-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "SQL ve RPC WHATIF ile RECHECK tipli sonuç üretti, trigger çalışmadı. History head ve kapalı instance disk/WAL SHA değerleri korundu. Gerçek apply trigger’ı çalıştırdı."
+    },
+    {
+      "id": "S22-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Sürüm testi aynı snapshot üzerinde eski/yeni sonuçları karşılaştırdı. Ayrı TLS contender atomik aktivasyon sonrası yeni sürümü gördü. Tarihsel V1 korunurken purge sonrası eksik imaj unavailable oldu."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage22/build/Release/StarDataParadiseServer.exe",
+      "sha256": "3d80ff0d77bfdb2d6cd02864f9d3920cbc34944626a72d18d6738c93a7e97ae3"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage22/vs/bin/StarDataParadiseServer.exe",
+      "sha256": "4456ad78d983f1e9d9eb6e4b16cd39e722d60648a1f519e5df6949a222999939"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage22/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m5/stage22/package/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "ab8ff9f2f2cdacad0b545a503706bd2be3626bab89b8cfc20af20e873e6d0c67"
+    }
+  ],
+  "remaining_issues": [
+    "Tarihsel açıklama AS OF snapshot simülasyonudur. Harici read bağımlılığı eşit ve mevcut değilse unavailable döner.",
+    "RECHECK sonucu güncel eligibility ve hesaplamayı raporlar. Otomatik onay/iptal yazmaz."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 23
+}

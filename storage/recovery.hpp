@@ -34,6 +34,7 @@ struct Checkpoint
     size_t reclaimable{};
 };
 
+Page make_checkpoint(Checkpoint value);
 std::vector<Segment> segments(const std::filesystem::path& data);
 Recovery verify_database(const std::filesystem::path& data, bool repair = false,
     std::span<const RowId> index_candidates = {});

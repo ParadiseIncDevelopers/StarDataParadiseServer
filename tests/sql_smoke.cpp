@@ -1,5 +1,6 @@
 #include "binder.hpp"
 
+#include <array>
 #include <chrono>
 #include <filesystem>
 #include <iostream>
@@ -138,6 +139,69 @@ void type_test(const std::filesystem::path& file)
     require(parse_literal({Kind::text}, "İstanbul") == sdp::disk::Value{std::string("İstanbul")}, "UTF-8 lost");
 }
 
+void decision_parser_test()
+{
+    using Event = DecisionRule::Event;
+    using Effect = DecisionRule::Effect;
+    using Op = Expr::Op;
+    constexpr std::string_view definition =
+        "/* guard */ CREATE DECISION RULE \"Approve\" ON sales.orders FOR UPDATE PRIORITY 255 "
+        "WHEN (NEW.status = 'approved' AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.order_id = OLD.id)) THEN DENY;";
+    const auto guard = parse(definition);
+    require(guard.action == Action::create_decision_rule && guard.target.parts == std::vector<std::string>{"sales", "orders"} &&
+        guard.related.parts == std::vector<std::string>{"Approve"} && guard.decision &&
+        guard.decision->event == Event::update && guard.decision->effect == Effect::deny &&
+        guard.decision->priority == 255 && guard.decision->condition && !guard.decision->assignment &&
+        guard.decision->definition == definition,
+        "Decision guard identity or source was lost");
+    const auto& condition = *guard.decision->condition;
+    require(condition.op == Op::and_ && condition.args.at(0).args.at(0).name.parts.at(0) == "new" &&
+        condition.args.at(1).op == Op::logical_not && condition.args.at(1).args.at(0).op == Op::exists &&
+        condition.args.at(1).args.at(0).query &&
+        condition.args.at(1).args.at(0).query->target.parts.at(0) == "payments",
+        "Decision guard expression or EXISTS source was lost");
+
+    const auto compute = parse("CREATE DECISION RULE total ON orders FOR WRITE PRIORITY 0 WHEN (TRUE) "
+        "THEN SET \"Total\" = NEW.quantity * NEW.price");
+    require(compute.decision && compute.decision->event == Event::write && compute.decision->effect == Effect::compute &&
+        compute.decision->priority == 0 && compute.decision->assignment &&
+        compute.decision->assignment->column.parts.at(0) == "Total" &&
+        compute.decision->assignment->value.op == Op::multiply, "Decision assignment AST was lost");
+    const auto activate = parse("ALTER DECISION RULE total ON orders ACTIVATE VERSION 4294967295");
+    require(activate.action == Action::activate_decision_rule && activate.decision &&
+        activate.decision->version == UINT32_MAX && !activate.decision->condition, "Decision version AST was lost");
+    require(parse("CREATE TABLE decision (rule BIGINT, priority BIGINT, allow BOOLEAN, version BIGINT)").columns.size() == 4,
+        "Contextual Decision keywords changed existing identifiers");
+
+    expect(Code::range, [] { parse("ALTER DECISION RULE r ON t ACTIVATE VERSION 0"); });
+    expect(Code::range, [] { parse("ALTER DECISION RULE r ON t ACTIVATE VERSION 4294967296"); });
+    expect(Code::range, [] { parse("CREATE DECISION RULE r ON t FOR INSERT PRIORITY 4294967296 WHEN (TRUE) THEN ALLOW"); });
+    expect(Code::syntax, [] { parse("CREATE DECISION RULE r ON t FOR READ PRIORITY 1 WHEN (TRUE) THEN ALLOW"); });
+    expect(Code::syntax, [] { parse("CREATE DECISION RULE r ON t FOR DELETE PRIORITY 1 WHEN (TRUE) THEN SKIP"); });
+    expect(Code::syntax, [] { parse("CREATE DECISION RULE r ON t FOR DELETE PRIORITY 1 WHEN TRUE THEN DENY"); });
+    expect(Code::syntax, [] { parse("CREATE DECISION RULE r ON t FOR WRITE PRIORITY 1 WHEN (TRUE) THEN SET NEW.value=0"); });
+    expect(Code::unsupported, [] { parse("CREATE DECISION RULE r ON t FOR WRITE PRIORITY 1 WHEN (TRUE) THEN DENY; SELECT 1"); });
+
+    using Inspection = DecisionInspection::Kind;
+    constexpr std::array inspections{
+        std::pair{"EXPLAIN", Inspection::explain}, std::pair{"WHYNOT", Inspection::whynot},
+        std::pair{"WHATIF", Inspection::whatif}, std::pair{"TEST", Inspection::test},
+        std::pair{"RECHECK", Inspection::recheck}, std::pair{"VALIDATE", Inspection::validate}};
+    for (const auto& [verb, kind] : inspections)
+    {
+        const auto command = parse(std::string("DECISION ") + verb + " USING '{\"text\":\"İzmir''in\"}';");
+        require(command.action == Action::decision_inspect && command.decision_inspection &&
+            command.decision_inspection->kind == kind && command.decision_inspection->body == R"({"text":"İzmir'in"})",
+            "Decision inspection changed its operation or quoted JSON bytes");
+    }
+    require(parse("SELECT whatif, whynot, recheck, validate FROM decision").projection.size() == 4,
+        "Contextual inspection keywords changed existing identifiers");
+    expect(Code::syntax, [] { parse("DECISION REPORT USING '{}'"); });
+    expect(Code::syntax, [] { parse("DECISION VALIDATE '{}'"); });
+    expect(Code::syntax, [] { parse("DECISION EXPLAIN USING 1"); });
+    expect(Code::unsupported, [] { parse("DECISION WHATIF USING '{}'; SELECT 1"); });
+}
+
 void parser_test(const std::filesystem::path& file)
 {
     sdp::disk::Engine engine(file);
@@ -164,6 +228,7 @@ void parser_test(const std::filesystem::path& file)
         require(error.source().line == 2 && error.source().column >= 6, "Multiline error position incorrect");
     }
     expect(Code::limit, [] { parse(std::string(65537, 'A')); });
+    decision_parser_test();
     std::mt19937 random(0xFED9);
     for (size_t trial = 0; trial < 2500; ++trial)
     {

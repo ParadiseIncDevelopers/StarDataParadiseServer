@@ -4,24 +4,31 @@
 
 #include <chrono>
 #include <filesystem>
+#include <functional>
+#include <stop_token>
 #include <string>
 #include <string_view>
 #include <vector>
 
 namespace sdp::server
 {
-inline constexpr auto product_version = "0.2.0";
+inline constexpr auto product_version = "0.3.0";
 struct Config
 {
+    std::filesystem::path source;
     std::filesystem::path data;
     std::filesystem::path logs;
     std::filesystem::path temp;
+    std::filesystem::path backup;
     std::filesystem::path certificate;
     std::filesystem::path private_key;
+    std::string instance_name = "default";
     std::string bind = "127.0.0.1";
     uint16_t port = 7443;
     unsigned max_connections = 16;
     bool routine_test_instance{};
+    bool decision_enabled = true;
+    bool mlp_cpu_enabled = true;
     std::chrono::milliseconds timeout{10000};
 };
 
@@ -56,5 +63,5 @@ Config read_config(const std::filesystem::path& path);
 Admin load_admin(const Config& config);
 void bootstrap_admin(const Config& config, std::string_view username);
 void log_event(const Config& config, bool auth, std::string_view event, std::string_view correlation = {}) noexcept;
-int run(const Config& config);
+int run(const Config& config, std::stop_token stop = {}, const std::function<void()>& ready = {});
 }

@@ -352,6 +352,10 @@ public:
         else if (take_word("grant")) grant(statement, true);
         else if (take_word("revoke")) grant(statement, false);
         else if (take_word("history")) history(statement);
+        else if (take_word("decision")) decision_inspect(statement);
+        else if (take_word("train")) model_request(statement, ModelCommand::Kind::train, false);
+        else if (take_word("evaluate")) model_request(statement, ModelCommand::Kind::evaluate, false);
+        else if (take_word("predict")) model_request(statement, ModelCommand::Kind::predict, false);
         else if (take_word("call")) call_routine(statement);
         else if (word_is(current(), "begin") || word_is(current(), "declare")) anonymous_block(statement);
         else fail("Expected a supported SQL statement");
@@ -676,6 +680,11 @@ private:
 
     void object(Statement& statement, bool create)
     {
+        if (create && take_word("model"))
+        {
+            model_request(statement, ModelCommand::Kind::create, true);
+            return;
+        }
         bool replace = false;
         if (create && take_word("or"))
         {
@@ -689,6 +698,11 @@ private:
         }
         if (replace)
             throw Error(Code::unsupported, current().source, "CREATE OR REPLACE is only available for routines");
+        if (create && take_word("decision"))
+        {
+            decision_rule(statement, true);
+            return;
+        }
         if (take_word("trigger"))
         {
             trigger(statement, create);
@@ -1113,7 +1127,7 @@ private:
         return node;
     }
 
-    uint64_t unsigned_history_number(uint64_t minimum = 1, uint64_t maximum = UINT64_MAX)
+    uint64_t unsigned_number(uint64_t minimum, uint64_t maximum, const char* range_error)
     {
         if (current().kind != TokenKind::integer) fail("Expected an unsigned integer");
         const auto token = consume();
@@ -1121,8 +1135,13 @@ private:
         const auto end = token.text.data() + token.text.size();
         const auto parsed = std::from_chars(token.text.data(), end, result);
         if (parsed.ec != std::errc{} || parsed.ptr != end || result < minimum || result > maximum)
-            throw Error(Code::range, token.source, "History number is out of range");
+            throw Error(Code::range, token.source, range_error);
         return result;
+    }
+
+    uint64_t unsigned_history_number(uint64_t minimum = 1, uint64_t maximum = UINT64_MAX)
+    {
+        return unsigned_number(minimum, maximum, "History number is out of range");
     }
 
     int64_t history_epoch()
@@ -1331,8 +1350,89 @@ private:
             throw Error(Code::unsupported, current().source, "GRANT and REVOKE options are unavailable");
     }
 
+    void decision_rule(Statement& statement, bool create)
+    {
+        using Event = DecisionRule::Event;
+        using Effect = DecisionRule::Effect;
+        expect_word("rule", "Expected RULE after DECISION");
+        statement.related = name(1);
+        expect_word("on", "Expected ON before the protected table");
+        statement.target = name(3);
+        auto& rule = statement.decision.emplace();
+        if (!create)
+        {
+            statement.action = Action::activate_decision_rule;
+            expect_word("activate", "Expected ACTIVATE for an existing Decision rule");
+            expect_word("version", "Expected VERSION after ACTIVATE");
+            rule.version = static_cast<uint32_t>(unsigned_number(1, UINT32_MAX, "Decision version is out of range"));
+            return;
+        }
+
+        statement.action = Action::create_decision_rule;
+        expect_word("for", "Expected FOR before the Decision event");
+        if (take_word("insert")) rule.event = Event::insert;
+        else if (take_word("update")) rule.event = Event::update;
+        else if (take_word("delete")) rule.event = Event::delete_;
+        else if (take_word("write")) rule.event = Event::write;
+        else fail("Expected INSERT, UPDATE, DELETE or WRITE");
+        expect_word("priority", "Expected PRIORITY before the Decision condition");
+        rule.priority = static_cast<uint32_t>(unsigned_number(0, UINT32_MAX, "Decision priority is out of range"));
+        expect_word("when", "Expected WHEN before the Decision condition");
+        expect(TokenKind::lparen, "Expected '(' before the Decision condition");
+        rule.condition = expression(1, 1).node;
+        expect(TokenKind::rparen, "Expected ')' after the Decision condition");
+        expect_word("then", "Expected THEN after the Decision condition");
+        if (take_word("allow")) rule.effect = Effect::allow;
+        else if (take_word("deny")) rule.effect = Effect::deny;
+        else
+        {
+            expect_word("set", "Expected ALLOW, DENY or SET");
+            rule.effect = Effect::compute;
+            auto column = name(1);
+            expect(TokenKind::eq, "Expected '=' after the computed column");
+            rule.assignment = Assignment{std::move(column), expression(1, 1).node};
+        }
+        rule.definition.assign(input_);
+    }
+
+    void decision_inspect(Statement& statement)
+    {
+        using Kind = DecisionInspection::Kind;
+        Kind kind;
+        if (take_word("explain")) kind = Kind::explain;
+        else if (take_word("whynot")) kind = Kind::whynot;
+        else if (take_word("whatif")) kind = Kind::whatif;
+        else if (take_word("test")) kind = Kind::test;
+        else if (take_word("recheck")) kind = Kind::recheck;
+        else if (take_word("validate")) kind = Kind::validate;
+        else fail("Expected EXPLAIN, WHYNOT, WHATIF, TEST, RECHECK or VALIDATE");
+        expect_word("using", "Expected USING before the Decision request");
+        if (current().kind != TokenKind::quoted_text) fail("Expected a quoted Decision JSON request");
+        statement.action = Action::decision_inspect;
+        statement.decision_inspection = DecisionInspection{kind, consume().text};
+    }
+
+    void model_request(Statement& statement, ModelCommand::Kind kind, bool after_model)
+    {
+        if (!after_model) expect_word("model", "Expected MODEL");
+        expect_word("using", "Expected USING before the model request");
+        if (current().kind != TokenKind::quoted_text) fail("Expected a quoted model JSON request");
+        statement.action = Action::model_command;
+        statement.model = ModelCommand{kind, consume().text};
+    }
+
     void alter(Statement& statement)
     {
+        if (take_word("model"))
+        {
+            model_request(statement, ModelCommand::Kind::activate, true);
+            return;
+        }
+        if (take_word("decision"))
+        {
+            decision_rule(statement, false);
+            return;
+        }
         if (take_word("index"))
         {
             statement.action = Action::rename_index;

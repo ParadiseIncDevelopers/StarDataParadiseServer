@@ -22,5 +22,15 @@
 | 18 PL/SQL debugger, test ve profil | PASSED | [Satır adımı, watch, izole test, örneklem ve TLS kapanışı](STAGES/18.json) |
 | 19 History log, diff, saklama ve bütünlük | PASSED | [Stable ID, WAL atomikliği, UTC, pin, kota ve tamper testi](STAGES/19.json) |
 | 20 History restore ve revert | PASSED | [Stable restore, çakışma, crash ve yedi proje regression](STAGES/20.json) |
+| 21 Deterministik Decision kuralları | PASSED | [Yazma uygulaması, immutable sürüm, izolasyon ve kapalı modül](STAGES/21.json) |
+| 22 Decision açıklama ve simülasyonu | PASSED | [Gerçek koşul izi, salt okunur simülasyon, corpus ve Native API](STAGES/22.json) |
+| 23 Kalıcı işler ve zamanlayıcı | PASSED | [Durable queue, worker yalıtımı, kotalar, takvim, restart ve yetki](STAGES/23.json) |
+| 24 SQL dataset ve sızıntısız veri hazırlama | PASSED | [Immutable snapshot, training-only fit, yalıtılmış PL/SQL ve lineage](STAGES/24.json) |
+| 25 Denetimli öğrenme ve model kaydı | PASSED | [Dört gerçek CPU algoritması, immutable artifact, aktivasyon ve M5](STAGES/25.json) |
+| 26 K-Means, DBSCAN ve PCA | PASSED | [Küme ve noise kanıtı, PCA reconstruction, deney karşılaştırması ve job izolasyonu](STAGES/26.json) |
+| 27 CPU üzerinde MLP | PASSED | [Sonlu fark, XOR held-out, worker izolasyonu ve fiziksel minimal derleme](STAGES/27.json) |
+| 28 CPU checkpoint ve model yaşam döngüsü | PASSED | [Yeniden başlatmadan sonra birebir CPU resume, History pin ve Native ABI 1](STAGES/28.json) |
+| 29 Doğrulanmış yedek ve geri yükleme | PASSED | [Tutarlı fiziksel ve logical yedek, bağımsız restore, zamanlama ve Native API](STAGES/29.json) |
+| 30 Instance yönetimi, Health Center ve M6 | PASSED | [Gerçek Windows hizmet izolasyonu, sağlık ölçümleri ve yedi proje](STAGES/30.json) |
 
 [M1 temel altyapı raporu](M1_REPORT.md) · [M2 istemci ve depolama raporu](M2_REPORT.md) · [M3 SQL ve güvenlik raporu](M3_REPORT.md) · [Sıradaki etap](NEXT_TASK.md)

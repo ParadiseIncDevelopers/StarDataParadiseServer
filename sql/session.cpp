@@ -5,10 +5,22 @@
 #include "definition.hpp"
 #include "debugger.hpp"
 #include "history_restore.hpp"
+#include "decision.hpp"
+#include "decision_inspection.hpp"
+#include "../jobs/manager.hpp"
+#include "../jobs/worker.hpp"
+#include "../ml/dataset.hpp"
+#include "../ml/preprocess.hpp"
+#include "../ml/model.hpp"
+#include "../ml/training.hpp"
+#include "../ml/clustering.hpp"
+#include "../ml/pca.hpp"
+#include "../ml/devices.hpp"
 #include "wire_values.hpp"
 
 #include <algorithm>
 #include <charconv>
+#include <cmath>
 #include <limits>
 #include <openssl/crypto.h>
 
@@ -196,6 +208,35 @@ HistoryCommand history_request(std::string_view op, const Json& body)
     return command;
 }
 
+std::string_view decision_op(DecisionInspection::Kind kind)
+{
+    using K = DecisionInspection::Kind;
+    switch (kind)
+    {
+    case K::explain: return "decision_explain";
+    case K::whynot: return "decision_whynot";
+    case K::whatif: return "decision_whatif";
+    case K::test: return "decision_test";
+    case K::recheck: return "decision_recheck";
+    case K::validate: return "decision_validate";
+    }
+    reject(W::invalid_argument);
+}
+
+std::string_view model_op(ModelCommand::Kind kind)
+{
+    using K = ModelCommand::Kind;
+    switch (kind)
+    {
+    case K::create: return "model_create";
+    case K::train: return "model_train";
+    case K::evaluate: return "model_evaluate";
+    case K::predict: return "model_predict";
+    case K::activate: return "model_activate";
+    }
+    reject(W::invalid_argument);
+}
+
 void ensure_rows_in_frame(const Json& result)
 {
     // The fixed wire envelope and correlation identifiers also consume space.
@@ -253,10 +294,10 @@ private:
 
 Session::Session(disk::Engine& engine, disk::Owner owner, std::string actor, std::chrono::milliseconds timeout,
     std::function<int64_t()> outcome_clock, std::filesystem::path temporary, Security* security, Principal principal,
-    bool test_instance)
+    bool test_instance, jobs::Manager* jobs)
     : engine_(engine), owner_(owner), actor_(std::move(actor)), timeout_((std::min)(timeout, 20'000ms)),
       outcome_clock_(outcome_clock ? std::move(outcome_clock) : utc_seconds), temporary_(std::move(temporary)),
-      security_(security), principal_(std::move(principal)), test_instance_(test_instance)
+      security_(security), principal_(std::move(principal)), test_instance_(test_instance), jobs_(jobs)
 {
 }
 
@@ -286,18 +327,19 @@ void Session::check_deadline() const
 
 std::unique_ptr<disk::Transaction> Session::begin()
 {
-    if (!security_) return engine_.begin(owner_, 0ms, cancellation_, timeout_);
+    if (!security_) return engine_.begin(owner_, 0ms, cancellation_, timeout_, actor_);
     lock_wait_started_.store(Clock::now().time_since_epoch().count());
     struct ClearWait
     {
         std::atomic<Clock::duration::rep>& value;
         ~ClearWait() { value.store(0); }
     } clear{lock_wait_started_};
-    return engine_.begin(owner_, (std::min)(timeout_, 1500ms), cancellation_, timeout_);
+    return engine_.begin(owner_, (std::min)(timeout_, 1500ms), cancellation_, timeout_, actor_);
 }
 
 std::vector<Requirement> Session::authorize(Catalog& catalog, const Statement& statement)
 {
+    if (statement.decision && security_ && !principal_.administrator) reject(W::permission_denied);
     if (!security_ || principal_.administrator) return {};
     if (security_ddl(statement)) reject(W::permission_denied);
     try
@@ -380,7 +422,7 @@ Json Session::prepare(const Json& body)
     auto statement = parse(wire::string_field(body, "sql"));
     auto types = read_parameter_types(optional_object(body, "parameter_types"));
     if (result_) reject(W::invalid_state);
-    if (statement.history)
+    if (statement.history || statement.decision_inspection || statement.model)
     {
         if (!types.empty()) reject(W::invalid_argument);
     }
@@ -404,6 +446,16 @@ Json Session::execute(const Json& body)
     const auto limit = unsigned_field(body, "row_limit", maximum_results, maximum_results);
     if (!limit) reject(W::invalid_argument);
     auto parameters = read_parameters(optional_object(body, "parameters"), it->second.parameter_types);
+    if (const auto& model = it->second.statement.model)
+    {
+        if (!parameters.empty() || body.contains("request_token")) reject(W::invalid_argument);
+        return {{"affected_rows", 0}, {"model", model_request(model_op(model->kind), wire::parse_payload(model->body))}};
+    }
+    if (const auto& inspect = it->second.statement.decision_inspection)
+    {
+        if (!parameters.empty() || body.contains("request_token")) reject(W::invalid_argument);
+        return {{"affected_rows", 0}, {"decision", decision(decision_op(inspect->kind), wire::parse_payload(inspect->body))}};
+    }
     if (it->second.statement.history)
     {
         if (!parameters.empty() || body.contains("request_token")) reject(W::invalid_argument);
@@ -729,6 +781,541 @@ Json Session::metadata()
     return response;
 }
 
+Json Session::backup_request(std::string_view operation, const Json& body)
+{
+    if (!jobs_ || !security_) reject(W::unsupported);
+    if (!principal_.administrator) reject(W::permission_denied);
+    if (transaction_ || result_) reject(W::invalid_state);
+    if (!jobs_->backup_enabled()) reject(W::module_unavailable);
+    if (operation == "backup_submit")
+    {
+        for (const auto& field : body.items())
+            if (field.key() != "request_token" && field.key() != "max_bytes") reject(W::invalid_argument);
+        auto request = body;
+        request["kind"] = "backup";
+        return job_request("job_submit", request);
+    }
+    if (operation == "backup_status" || operation == "backup_cancel")
+    {
+        if (body.size() != 1 || !body.contains("job_id")) reject(W::invalid_argument);
+        return job_request(operation == "backup_status" ? "backup_job_status" : "backup_job_cancel", body);
+    }
+    return jobs_->inspect_backup(operation, body, [this] { check_deadline(); });
+}
+
+Json Session::job_request(std::string_view operation, const Json& body)
+{
+    if (!jobs_ || !security_) reject(W::unsupported);
+    if (operation == "job_capabilities")
+    {
+        if (!body.empty()) reject(W::invalid_argument);
+        return jobs_->capabilities();
+    }
+    if (result_) reject(W::invalid_state);
+    const bool submit = operation == "job_submit" || operation == "job_schedule_create";
+    const auto* token = submit ? &token_field(body) : nullptr;
+    std::unique_ptr<disk::Transaction> local;
+    auto& tx = use(local);
+    const auto save = local ? std::optional<disk::Savepoint>{} : std::optional(tx.statement_savepoint(owner_));
+    try
+    {
+        const auto recorded = token ? outcome(tx, *token) : std::optional<Outcome>{};
+        auto reply = jobs_->request(tx, owner_, actor_, principal_.administrator, operation, body,
+            [this] { check_deadline(); });
+        if (!reply.dataset.empty())
+        {
+            const auto dataset = ml::require_dataset(tx, owner_, reply.dataset, principal_);
+            ml::require_dataset_read(dataset, Catalog(tx, owner_, [this] { check_deadline(); }), *security_, principal_);
+        }
+        if (recorded && reply.changed) reject(W::invalid_state);
+        if (reply.changed && local)
+        {
+            if (token) reply.body["lsn"] = std::to_string(commit(tx, *token));
+            else
+            {
+                HistoryJournal(engine_, tx, owner_, [this] { check_deadline(); }).seal(actor_, outcome_clock_());
+                reply.body["lsn"] = std::to_string(tx.commit(owner_));
+            }
+        }
+        else if (recorded && recorded->expires > outcome_clock_()) reply.body["lsn"] = std::to_string(recorded->lsn);
+        if (save) tx.release_savepoint(owner_, *save);
+        return std::move(reply.body);
+    }
+    catch (...)
+    {
+        if (save)
+        {
+            try { tx.rollback_to(owner_, *save); tx.release_savepoint(owner_, *save); }
+            catch (...) { close_transaction(); }
+        }
+        throw;
+    }
+}
+
+Json Session::create_dataset(disk::Transaction& tx, const Json& body)
+{
+    const auto& token = token_field(body);
+    if (body.size() > 5) reject(W::invalid_argument);
+    for (const auto& item : body.items())
+        if (item.key() != "request_token" && item.key() != "sql" && item.key() != "parameter_types" &&
+            item.key() != "parameters" && item.key() != "options") reject(W::invalid_argument);
+    const auto fingerprint = ml::dataset_fingerprint(body);
+    const auto check = [this] { check_deadline(); };
+    Catalog catalog(tx, owner_, check);
+    if (auto existing = ml::dataset_by_request(tx, owner_, actor_, token))
+    {
+        if (existing->content.at("request_fingerprint") != fingerprint) reject(W::invalid_state);
+        ml::require_dataset_read(*existing, catalog, *security_, principal_);
+        auto summary = ml::dataset_summary(*existing, false);
+        if (const auto previous = outcome(tx, token); previous && previous->expires > outcome_clock_())
+            summary["lsn"] = std::to_string(previous->lsn);
+        return summary;
+    }
+    if (outcome(tx, token)) reject(W::invalid_state);
+    const auto& source = wire::string_field(body, "sql");
+    const auto& options = wire::object_field(body, "options");
+    const auto statement = parse(source);
+    if (statement.action != Action::select) reject(W::invalid_argument);
+    auto required = access_requirements(catalog, statement);
+    enforce(*security_, principal_, required);
+    const auto parameter_types = read_parameter_types(optional_object(body, "parameter_types"));
+    const auto parameters = read_parameters(optional_object(body, "parameters"), parameter_types);
+    auto plan = sdp::sql::bind(catalog, statement, parameter_types);
+
+    Json source_rows = Json::array(), typed_rows = Json::array(), names = Json::array(), types = Json::array();
+    size_t snapshot_bytes{};
+    const auto normalized = [&](const disk::Value& value, Type type) -> Json {
+        if (std::holds_alternative<std::monostate>(value)) return nullptr;
+        switch (type.kind)
+        {
+        case Kind::integer: return std::get<int64_t>(value);
+        case Kind::boolean: return truth(value) == Truth::true_;
+        case Kind::decimal:
+        {
+            const auto& number = std::get<disk::Decimal>(value);
+            double unscaled{};
+            const auto* end = number.unscaled.data() + number.unscaled.size();
+            const auto parsed = std::from_chars(number.unscaled.data(), end, unscaled);
+            if (parsed.ec != std::errc{} || parsed.ptr != end) reject(W::invalid_state);
+            return unscaled * std::pow(10.0, -static_cast<double>(number.scale));
+        }
+        case Kind::text:
+        case Kind::date:
+        case Kind::time:
+        case Kind::timestamp_tz:
+        {
+            const auto& text = std::get<std::string>(value);
+            if (text.size() > 4096) reject(W::resource_limit);
+            return text;
+        }
+        default: reject(W::unsupported);
+        }
+    };
+    const auto capture = [&](std::span<const Projection> columns, auto&& fetch) {
+        if (columns.empty() || columns.size() > 128) reject(W::resource_limit);
+        for (const auto& column : columns)
+        {
+            if (std::find(names.begin(), names.end(), Json(column.column)) != names.end()) reject(W::invalid_argument);
+            names.push_back(column.column);
+            types.push_back(type_name(column.expression.type));
+        }
+        for (;;)
+        {
+            check();
+            auto batch = fetch();
+            for (const auto& row : batch.rows)
+            {
+                if (row.size() != columns.size()) reject(W::internal);
+                if (source_rows.size() == ml::dataset_rows) reject(W::resource_limit);
+                auto raw = Json::array(), typed = Json::array();
+                for (size_t i = 0; i < row.size(); ++i)
+                {
+                    const auto type = columns[i].expression.type;
+                    raw.push_back(normalized(row[i], type));
+                    typed.push_back(write_value(row[i], type));
+                }
+                snapshot_bytes += raw.dump().size() + typed.dump().size();
+                if (snapshot_bytes > 192 * 1024) reject(W::resource_limit);
+                source_rows.push_back(std::move(raw));
+                typed_rows.push_back(std::move(typed));
+            }
+            if (batch.done) break;
+        }
+    };
+    if (auto* selected = std::get_if<SelectPlan>(&plan))
+    {
+        Cursor cursor(std::move(*selected), parameters, ml::dataset_rows + 1);
+        capture(cursor.plan().projection, [&] { return cursor.fetch(tx, owner_, 64, batch_budget, check); });
+    }
+    else if (const auto* advanced = std::get_if<AdvancedSelection>(&plan); advanced && advanced->mode == QueryMode::execute)
+    {
+        auto rows = materialize(*advanced, tx, parameters, static_cast<uint32_t>(ml::dataset_rows + 1));
+        capture(rows.columns, [&] { return fetch_materialized(rows, 64); });
+    }
+    else reject(W::unsupported);
+
+    const auto count = source_rows.size();
+    const auto revision = engine_.current().lsn;
+    Json snapshot{{"columns", std::move(names)}, {"rows", std::move(source_rows)}};
+    auto prepared = ml::prepare_dataset(snapshot, options, check);
+    ml::Dataset dataset{0, ml::dataset_id(), actor_, token, {
+        {"format", 1}, {"revision", std::to_string(revision)}, {"row_count", count},
+        {"byte_count", snapshot.dump().size()}, {"query", source}, {"column_types", std::move(types)},
+        {"source", std::move(snapshot)}, {"typed_rows", std::move(typed_rows)},
+        {"prepared", std::move(prepared)}, {"options", options}, {"requirements", ml::dataset_authors(required)},
+        {"request_fingerprint", fingerprint}}};
+    ml::insert_dataset(tx, owner_, dataset);
+    auto reply = ml::dataset_summary(dataset, false);
+    reply["lsn"] = std::to_string(commit(tx, token));
+    return reply;
+}
+
+Json Session::dataset_request(std::string_view operation, const Json& body)
+{
+    if (!security_ || !jobs_) reject(W::unsupported);
+    if (transaction_ || result_) reject(W::invalid_state);
+    auto tx = begin();
+    if (operation == "dataset_create") return create_dataset(*tx, body);
+    if (operation != "dataset_get" && operation != "dataset_delete" && operation != "dataset_plsql_submit")
+        reject(W::unsupported);
+    const auto check = [this] { check_deadline(); };
+    const auto dataset = ml::require_dataset(*tx, owner_, wire::string_field(body, "dataset_id"), principal_);
+    if (operation == "dataset_delete")
+    {
+        if (body.size() != 1) reject(W::invalid_argument);
+        Catalog catalog(*tx, owner_, check);
+        if (jobs_->references_dataset(*tx, owner_, dataset.id, check) || ml::model_references_dataset(catalog, dataset.id))
+            reject(W::invalid_state);
+        ml::remove_dataset(*tx, owner_, dataset);
+        HistoryJournal(engine_, *tx, owner_, check).seal(actor_, outcome_clock_());
+        return {{"deleted", true}, {"lsn", std::to_string(tx->commit(owner_))}};
+    }
+    Catalog catalog(*tx, owner_, check);
+    ml::require_dataset_read(dataset, catalog, *security_, principal_);
+    if (operation == "dataset_get")
+    {
+        if (body.size() != 1) reject(W::invalid_argument);
+        auto response = ml::dataset_summary(dataset, true);
+        ensure_rows_in_frame(response);
+        return response;
+    }
+    if (body.size() != 5) reject(W::invalid_argument);
+    const auto& token = token_field(body);
+    const auto name = parse_history_target(wire::string_field(body, "routine"));
+    const auto routine = catalog.resolve(ObjectKind::routine, name);
+    const auto permitted = object_access(catalog.list(), routine, "execute");
+    enforce(*security_, principal_, {&permitted, 1});
+    const auto definition = wire::parse_payload(routine.definition);
+    const auto& source = wire::string_field(definition, "sql");
+    jobs::validate_dataset_routine(source);
+    const auto& indices = body.at("indices");
+    const auto& arguments = wire::object_field(body, "arguments");
+    if (!indices.is_array() || indices.empty() || indices.size() > 64 || arguments.size() > 32)
+        reject(W::invalid_argument);
+    const auto& columns = dataset.content.at("source").at("columns");
+    const auto& rows = dataset.content.at("typed_rows");
+    std::map<std::string, size_t, std::less<>> mappings;
+    for (const auto& item : arguments.items())
+    {
+        if (!item.value().is_string()) reject(W::invalid_argument);
+        const auto column = std::ranges::find(columns, item.value());
+        if (column == columns.end()) reject(W::invalid_argument);
+        mappings.emplace(item.key(), static_cast<size_t>(column - columns.begin()));
+    }
+    auto calls = Json::array();
+    for (const auto& value : indices)
+    {
+        check_deadline();
+        if (!value.is_number_unsigned() || value.get<uint64_t>() >= rows.size()) reject(W::invalid_argument);
+        const auto& row = rows.at(value.get<size_t>());
+        auto args = Json::object();
+        for (const auto& [parameter, column] : mappings) args[parameter] = row.at(column);
+        calls.push_back(std::move(args));
+    }
+    const auto previous = outcome(*tx, token);
+    jobs::validate_dataset_calls(source, calls);
+    auto reply = jobs_->submit_dataset_job(*tx, owner_, actor_, token, dataset.id,
+        {{"kind", "dataset_plsql"}, {"source", source}, {"calls", std::move(calls)}}, check);
+    if (reply.changed)
+    {
+        if (previous) reject(W::invalid_state);
+        reply.body["lsn"] = std::to_string(commit(*tx, token));
+    }
+    else if (previous && previous->expires > outcome_clock_()) reply.body["lsn"] = std::to_string(previous->lsn);
+    return std::move(reply.body);
+}
+
+Json Session::compare_models(disk::Transaction& tx, Catalog& catalog, const Json& body)
+{
+    if (body.size() != 2 || !body.contains("runs")) reject(W::invalid_argument);
+    const auto& split = wire::string_field(body, "split");
+    const auto& runs = body.at("runs");
+    if ((split != "train" && split != "validation" && split != "test") ||
+        !runs.is_array() || runs.size() < 2 || runs.size() > 8) reject(W::invalid_argument);
+
+    Json results = Json::array();
+    std::string first_dataset, first_metric;
+    bool matching_dataset = true, matching_metric = true, same_sample_scope = true, defined = true;
+    std::optional<std::vector<bool>> dbscan_scope;
+    for (const auto& run : runs)
+    {
+        check_deadline();
+        if (!run.is_object() || run.size() != 2) reject(W::invalid_argument);
+        const auto name = parse_history_target(wire::string_field(run, "name"));
+        const auto model = ml::require_model(catalog, name, principal_);
+        const auto requested = unsigned_field(run, "version", UINT32_MAX);
+        if (!requested) reject(W::invalid_argument);
+        const auto version = ml::model_version(model, requested);
+        const auto dataset = ml::require_dataset(tx, owner_, version.at("dataset_id").get<std::string>(), principal_);
+        ml::require_dataset_read(dataset, catalog, *security_, principal_);
+        const auto algorithm = model.metadata.at("algorithm").get<std::string>();
+        if (algorithm == "mlp" && !jobs_->mlp_enabled()) reject(W::unsupported);
+        const auto output = ml::load_model(tx, owner_, model, version);
+        const auto& metrics = output.at("metrics").at(split);
+        const auto metric = algorithm == "linear" ? "regression_error" : algorithm == "pca" ? "reconstruction_error" :
+            algorithm == "dbscan" ? "silhouette_without_noise" : algorithm == "kmeans" ? "silhouette_all_samples" :
+            "binary_classification";
+        if (results.empty())
+        {
+            first_dataset = dataset.id;
+            first_metric = metric;
+        }
+        matching_dataset = matching_dataset && first_dataset == dataset.id;
+        matching_metric = matching_metric && first_metric == metric;
+        if (metrics.contains("silhouette") && metrics.at("silhouette").is_null()) defined = false;
+        if (algorithm == "dbscan" && split == "train")
+        {
+            std::vector<bool> in_scope;
+            for (const auto& label : output.at("artifact").at("labels")) in_scope.push_back(label.get<int64_t>() >= 0);
+            if (dbscan_scope) same_sample_scope = same_sample_scope && *dbscan_scope == in_scope;
+            else dbscan_scope.emplace(std::move(in_scope));
+        }
+        results.push_back({{"name", model.object.name}, {"version", requested}, {"algorithm", algorithm},
+            {"dataset_id", dataset.id}, {"metric", metric}, {"metrics", metrics}});
+    }
+    const auto comparable = matching_dataset && matching_metric && same_sample_scope && defined;
+    const auto reason = !matching_dataset ? Json("different_dataset") : !matching_metric ? Json("different_metric") :
+        !defined ? Json("undefined_metric") : !same_sample_scope ? Json("different_sample_scope") : Json(nullptr);
+    return {{"comparable", comparable}, {"reason", reason}, {"split", split}, {"runs", std::move(results)}};
+}
+
+Json Session::enqueue_model(disk::Transaction& tx, int64_t model, std::string_view dataset,
+    const std::string& token, Json payload, const WorkCheck& check)
+{
+    const auto previous = outcome(tx, token);
+    auto reply = jobs_->submit_dataset_job(tx, owner_, actor_, token, dataset, std::move(payload), check, model);
+    if (reply.changed)
+    {
+        if (previous) reject(W::invalid_state);
+        reply.body["lsn"] = std::to_string(commit(tx, token));
+    }
+    else if (previous && previous->expires > outcome_clock_()) reply.body["lsn"] = std::to_string(previous->lsn);
+    return std::move(reply.body);
+}
+
+Json Session::model_request(std::string_view operation, const Json& body)
+{
+    if (!jobs_ || !security_) reject(W::unsupported);
+    if (transaction_ || result_) reject(W::invalid_state);
+    auto tx = begin();
+    const auto check = [this] { check_deadline(); };
+    Catalog catalog(*tx, owner_, check);
+    if (operation == "model_compare") return compare_models(*tx, catalog, body);
+    if (operation == "model_devices") return ml::model_devices(body, jobs_->mlp_enabled());
+    const auto name = parse_history_target(wire::string_field(body, "name"));
+    if (operation == "model_create")
+    {
+        if (body.size() != 3) reject(W::invalid_argument);
+        if (!security_->allowed(principal_, "ddl")) reject(W::permission_denied);
+        const auto& token = token_field(body);
+        if (outcome(*tx, token)) reject(W::invalid_state);
+        const auto& algorithm = wire::string_field(body, "algorithm");
+        if (algorithm == "mlp" && !jobs_->mlp_enabled()) reject(W::unsupported);
+        ml::create_model(catalog, name, algorithm, actor_);
+        auto info = ml::model_status(ml::require_model(catalog, name, principal_));
+        info["lsn"] = std::to_string(commit(*tx, token));
+        return info;
+    }
+    auto model = ml::require_model(catalog, name, principal_);
+    const auto& algorithm = model.metadata.at("algorithm").get_ref<const std::string&>();
+    if (algorithm == "mlp" && !jobs_->mlp_enabled()) reject(W::unsupported);
+    if (operation == "model_status")
+    {
+        if (body.size() != 1) reject(W::invalid_argument);
+        return ml::model_status(model);
+    }
+    if (operation == "model_checkpoint" || operation == "model_resume")
+    {
+        if (body.size() != (operation == "model_checkpoint" ? 2 : 4) || algorithm != "mlp")
+            reject(W::invalid_argument);
+        const auto saved = jobs_->checkpoint(*tx, owner_, actor_, principal_.administrator, model.object.id,
+            wire::string_field(body, "job_id"), check);
+        const auto& dataset_id = saved.metadata.at("dataset_id").get_ref<const std::string&>();
+        const auto dataset = ml::require_dataset(*tx, owner_, dataset_id, principal_);
+        ml::require_dataset_read(dataset, catalog, *security_, principal_);
+        if (operation == "model_checkpoint") return saved.metadata;
+        const auto& token = token_field(body);
+        if (wire::string_field(body, "checksum") != saved.metadata.at("checksum").get_ref<const std::string&>())
+            reject(W::invalid_state);
+        const auto& current = dataset.content.at("prepared");
+        if (saved.payload.at("features") != current.at("features") ||
+            saved.payload.at("target") != current.at("target") || saved.payload.at("split") != current.at("split"))
+            reject(W::invalid_state);
+        return enqueue_model(*tx, model.object.id, dataset_id, token, saved.payload, check);
+    }
+    if (operation == "model_train")
+    {
+        for (const auto& entry : body.items())
+            if (entry.key() != "request_token" && entry.key() != "name" && entry.key() != "dataset_id" &&
+                entry.key() != "seed" && entry.key() != "options" && entry.key() != "pause_after_epoch" &&
+                entry.key() != "device" && entry.key() != "device_index" && entry.key() != "memory_mib" &&
+                entry.key() != "allow_cpu_fallback") reject(W::invalid_argument);
+        const auto& token = token_field(body);
+        const auto dataset = ml::require_dataset(*tx, owner_, wire::string_field(body, "dataset_id"), principal_);
+        ml::require_dataset_read(dataset, catalog, *security_, principal_);
+        const auto& prepared = dataset.content.at("prepared");
+        const auto& target = prepared.at("target");
+        const bool supervised = ml::supervised_algorithm(algorithm);
+        if (supervised)
+        {
+            if (!target.is_array() || target.size() != prepared.at("features").size()) reject(W::invalid_argument);
+            const auto classes = prepared.at("target_classes").size();
+            if ((algorithm == "linear" && classes) || (algorithm != "linear" && classes && classes != 2))
+                reject(W::invalid_argument);
+        }
+        const auto options = optional_object(body, "options");
+        if (options.dump().size() > 1024) reject(W::resource_limit);
+        if (body.contains("seed") && !body.at("seed").is_number_unsigned()) reject(W::invalid_argument);
+        const auto seed = body.value("seed", uint64_t{});
+        Json payload{{"kind", ml::training_kind(algorithm)}, {"algorithm", algorithm}, {"seed", seed}, {"options", options},
+            {"features", prepared.at("features")}, {"target", target}, {"split", prepared.at("split")}};
+        if (body.contains("pause_after_epoch"))
+        {
+            const auto pause = unsigned_field(body, "pause_after_epoch", 999);
+            if (!pause || algorithm != "mlp" || pause >= unsigned_field(options, "epochs", 1000, 120))
+                reject(W::invalid_argument);
+            payload["pause_after_epoch"] = pause;
+        }
+        if (auto selected = ml::choose_device(body); !selected.is_null()) payload["device"] = std::move(selected);
+        return enqueue_model(*tx, model.object.id, dataset.id, token, std::move(payload), check);
+    }
+    if (operation == "model_deactivate")
+    {
+        if (body.size() != 2) reject(W::invalid_argument);
+        const auto& token = token_field(body);
+        if (outcome(*tx, token)) reject(W::invalid_state);
+        ml::deactivate_model(catalog, model);
+        return {{"active_version", nullptr}, {"lsn", std::to_string(commit(*tx, token))}};
+    }
+    if (operation == "model_delete")
+    {
+        const auto requested = unsigned_field(body, "version", UINT32_MAX);
+        if (body.size() != 3 || !requested) reject(W::invalid_argument);
+        const auto& token = token_field(body);
+        if (outcome(*tx, token)) reject(W::invalid_state);
+        HistoryJournal journal(engine_, *tx, owner_, check);
+        try { ml::delete_model_version(*tx, owner_, catalog, model, requested, journal); }
+        catch (const HistoryPinned&) { throw HistoryError(W::invalid_state, "retention_pinned"); }
+        return {{"version", requested}, {"deleted", true}, {"lsn", std::to_string(commit(*tx, token))}};
+    }
+    const bool select_version = operation == "model_activate" || operation == "model_rollback";
+    if (!select_version && operation != "model_evaluate" && operation != "model_predict") reject(W::unsupported);
+    const auto requested = unsigned_field(body, "version", UINT32_MAX);
+    if (select_version && (!requested || body.size() != 3)) reject(W::invalid_argument);
+    if (operation == "model_predict" && (body.size() != 2 || body.contains("version"))) reject(W::invalid_argument);
+    if (operation == "model_evaluate" && !(body.size() == 1 || (body.size() == 2 && requested)))
+        reject(W::invalid_argument);
+    const auto version = ml::model_version(model, requested);
+    const auto dataset = ml::require_dataset(*tx, owner_, version.at("dataset_id").get<std::string>(), principal_);
+    ml::require_dataset_read(dataset, catalog, *security_, principal_);
+    auto output = ml::load_model(*tx, owner_, model, version);
+    if (select_version)
+    {
+        const auto& token = token_field(body);
+        if (outcome(*tx, token)) reject(W::invalid_state);
+        const auto features = output.at("width").get<size_t>();
+        const auto& active = model.metadata.at("active");
+        if (dataset.content.at("prepared").at("transforms").at("width").get<size_t>() != features ||
+            !ml::check_model_artifact(algorithm, output.at("artifact"), features)) reject(W::invalid_state);
+        if (operation == "model_rollback" && (active.is_null() || requested >= active.get<uint32_t>()))
+            reject(W::invalid_state);
+        if (!active.is_null() && active != requested)
+        {
+            const auto current = ml::model_version(model, 0);
+            const auto active_dataset = ml::require_dataset(*tx, owner_,
+                current.at("dataset_id").get<std::string>(), principal_);
+            ml::require_dataset_read(active_dataset, catalog, *security_, principal_);
+            if (ml::model_input_schema(active_dataset) != ml::model_input_schema(dataset))
+                reject(W::invalid_state);
+        }
+        ml::activate_model(catalog, model, requested);
+        return {{"version", requested}, {"active_version", requested}, {"lsn", std::to_string(commit(*tx, token))}};
+    }
+    if (operation == "model_evaluate")
+    {
+        output["version"] = version.at("version");
+        output["checksum"] = version.at("checksum");
+        output["dataset_id"] = version.at("dataset_id");
+        output["run_id"] = version.at("run_id");
+        output["options"] = version.at("options");
+        output["runtime"] = version.at("runtime");
+        return output;
+    }
+    const auto& prepared = dataset.content.at("prepared");
+    if (algorithm == "dbscan") reject(W::unsupported);
+    const auto features = ml::transform_features(prepared.at("transforms"), wire::object_field(body, "features"));
+    if (algorithm == "kmeans")
+    {
+        const auto cluster = ml::assign_cluster(output.at("artifact"), features);
+        return {{"version", version.at("version")}, {"algorithm", algorithm}, {"prediction", cluster}, {"cluster", cluster}};
+    }
+    if (algorithm == "pca")
+    {
+        const auto scores = ml::transform_pca(output.at("artifact"), features);
+        return {{"version", version.at("version")}, {"algorithm", algorithm}, {"prediction", scores},
+            {"reconstruction", ml::reconstruct_pca(output.at("artifact"), scores)}};
+    }
+    const auto predicted = ml::predict_supervised(algorithm, output.at("artifact"), features);
+    Json response{{"version", version.at("version")}, {"algorithm", algorithm}, {"prediction", predicted}};
+    if (algorithm != "linear")
+    {
+        const auto label = predicted >= 0.5 ? 1u : 0u;
+        response["prediction"] = label;
+        response["label"] = label;
+        response["probability"] = predicted;
+        const auto& classes = prepared.at("target_classes");
+        if (classes.is_array() && classes.size() == 2) response["label_value"] = classes.at(label);
+    }
+    return response;
+}
+
+Json Session::decision(std::string_view operation, const Json& body)
+{
+    if (!security_) reject(W::unsupported);
+    if (result_ || transaction_) reject(W::invalid_state);
+    if (operation == "decision_create" || operation == "decision_activate")
+    {
+        if (!principal_.administrator) reject(W::permission_denied);
+        if (body.size() != 2) reject(W::invalid_argument);
+        const auto& source = wire::string_field(body, "sql");
+        const auto& token = token_field(body);
+        const auto action = operation == "decision_create" ? Action::create_decision_rule : Action::activate_decision_rule;
+        if (parse(source).action != action) reject(W::invalid_argument);
+        const auto prepared = prepare({{"sql", source}});
+        const auto& id = wire::string_field(prepared, "statement_id");
+        try
+        {
+            auto response = execute({{"statement_id", id}, {"request_token", token}});
+            prepared_.erase(id);
+            return response;
+        }
+        catch (...) { prepared_.erase(id); throw; }
+    }
+    auto tx = begin();
+    const auto check = [this] { check_deadline(); };
+    return inspect_decision(engine_, *tx, owner_, *security_, principal_, operation, body, check);
+}
+
 Json Session::restore_history(const HistoryCommand& command)
 {
     const auto check = [this] { check_deadline(); };
@@ -1002,6 +1589,20 @@ Json Session::request(std::string_view op, Json& body)
     if (op == "password_set") return password(body);
     if (op == "profile_last") return {{"samples", last_profile_}};
     if (op == "routine_test") return test_routine(body);
+    if (op.starts_with("decision_")) return decision(op, body);
+    if (op.starts_with("job_")) return job_request(op, body);
+    if (op.starts_with("dataset_")) return dataset_request(op, body);
+    if (op.starts_with("model_")) return model_request(op, body);
+    if (op.starts_with("backup_")) return backup_request(op, body);
+    if (op == "admin_maintenance_submit")
+    {
+        if (!security_ || !principal_.administrator) reject(W::permission_denied);
+        if (transaction_ || result_) reject(W::invalid_state);
+        if (body.size() != 2 || !body.contains("action")) reject(W::invalid_argument);
+        auto options = body;
+        options["kind"] = "maintenance";
+        return job_request("job_submit", options);
+    }
     if (op.starts_with("history_")) return history(history_request(op, body));
     if (security_ && (op.starts_with("history") || op.starts_with("backup") || op.starts_with("debug")))
     {
@@ -1039,6 +1640,12 @@ Json Session::dispatch(uint32_t id, std::string_view op, Json& body, std::string
     deadline_ = Clock::now() + timeout_;
     cancellation_ = cancellation;
     try { return wire::success(id, request(op, body)); }
+    catch (const DecisionError& error)
+    {
+        auto response = wire::failure(id, error.code(), correlation);
+        response["error"]["decision_reason"] = error.reason();
+        return response;
+    }
     catch (const HistoryError& error)
     {
         auto response = wire::failure(id, error.code(), correlation);
@@ -1067,15 +1674,27 @@ Json Session::dispatch(uint32_t id, std::string_view op, Json& body, std::string
             close_transaction();
         auto response = wire::failure(id, disk_code(error.fault()), correlation);
         bool history_apply = (op == "history_restore" || op == "history_revert") && body.contains("plan_id");
+        bool model_apply = op == "model_create" || op == "model_train" || op == "model_resume" ||
+            op == "model_activate" || op == "model_rollback" || op == "model_deactivate" || op == "model_delete";
         if (op == "execute" && body.contains("statement_id") && body.at("statement_id").is_string())
         {
             const auto statement = prepared_.find(body.at("statement_id").get_ref<const std::string&>());
             if (statement != prepared_.end() && statement->second.statement.history)
                 history_apply = !statement->second.statement.history->plan_id.empty();
+            if (statement != prepared_.end() && statement->second.statement.model)
+            {
+                const auto kind = statement->second.statement.model->kind;
+                model_apply = kind == ModelCommand::Kind::create || kind == ModelCommand::Kind::train ||
+                    kind == ModelCommand::Kind::activate;
+            }
         }
         response["error"]["unknown_outcome"] = error.fault() == disk::Fault::uncertain &&
             (op == "tx_commit" || op == "password_set" || op == "history_retain" || op == "history_purge" ||
-             op == "history_pin" || op == "history_unpin" || history_apply ||
+             op == "history_pin" || op == "history_unpin" || history_apply || model_apply ||
+             op == "decision_create" || op == "decision_activate" || op == "job_submit" ||
+             op == "job_schedule_create" || op == "job_cancel" || op == "job_schedule_cancel" ||
+             op == "backup_submit" || op == "backup_cancel" || op == "admin_maintenance_submit" ||
+             op == "dataset_create" || op == "dataset_delete" || op == "dataset_plsql_submit" ||
              (op == "execute" && body.contains("request_token")));
         return response;
     }

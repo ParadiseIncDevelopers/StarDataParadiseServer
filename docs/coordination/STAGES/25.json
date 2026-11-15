@@ -1,0 +1,259 @@
+{
+  "stage_id": 25,
+  "status": "PASSED",
+  "started_at": "2026-11-15T16:11:20.0898129+03:00",
+  "finished_at": "2026-11-15T16:29:53.8423799+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 24,
+      "file": "STAGES/24.json",
+      "sha256": "c42941b8c5ee3f104df6b92f96a695598713c0446ddfd7eeeebc1f35ca1462ad"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "model_format": 1,
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "8fec43822f7f05a64b4807cbcd51f0806dddd78a",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "jobs/manager.cpp",
+        "jobs/manager.hpp",
+        "jobs/worker.cpp",
+        "ml/linear_models.cpp",
+        "ml/linear_models.hpp",
+        "ml/LINEAR_MODELS.md",
+        "ml/model.cpp",
+        "ml/model.hpp",
+        "ml/training.cpp",
+        "ml/training.hpp",
+        "ml/tree_models.cpp",
+        "ml/tree_models.hpp",
+        "MODELS.md",
+        "sql/catalog.cpp",
+        "sql/catalog.hpp",
+        "sql/history_query.cpp",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/linear_models_smoke.cpp",
+        "tests/model_rpc.py",
+        "tests/tree_models_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m5/stage25/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "d6829b04b91ffdfec72b0ea4cf93005bc005c3add2671acf501555193b2f4623"
+    }
+  ],
+  "checkpoint": {
+    "archive_sha256": "979f21907a8f02d24056cd0750a1e2a3c357701f4aa7fd5ceb233b77bd652ed7",
+    "archive_path": "out/sdp-m5/stage25/workspace-before.zip",
+    "manifest": "out/sdp-m5/stage25/workspace-before.json",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Snapshot and verify all seven repos before Stage25",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/checkpoint.log",
+      "log_sha256": "461a8e4d7f05692423a44b3f6c38e62f13fa75894e0b99f4437677c669b96116",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CMake separate Windows x64 Release Stage25 with pinned dependencies",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/configure.log",
+      "log_sha256": "9aed0258563ae955479f798cd2797778e2f8067f156424e020ec89740f3aedb9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m5/stage25/build --config Release --parallel 3",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/build-final.log",
+      "log_sha256": "f74b1b51c5ee26017a62dbcb45915d4ae6173610e73e3732e8968b3b59ab1779",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Full Stage25 Windows Release CTest including models",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/ctest-final.log",
+      "log_sha256": "19bc4f4398e48568e308893593f338bc2a00a4c9000a187149a57a6cb4cb6ecf",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run independent analytic linear/ridge and reference logistic fit tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/linear-models-agent/test.log",
+      "log_sha256": "6abc993ead986a9753ce92e775863103b752debd8b077e44b4fe092007a8f197",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run independent CART and seeded forest held-out fit and artifact tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/tree-agent/test.log",
+      "log_sha256": "3abe6619cf6e1f18ae7eacbc12a387e87a45e9a657f2fd77960cf0445eb9d18a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run exact final Stage25 model RPC suite, including restart and concurrent activation",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/model-rpc-agent-first.log",
+      "log_sha256": "123effec241ef17f963e15add622919b7f170fe178382a0ee0c0f9e09c8ef038",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Official Server .slnx Release x64 and version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/msbuild.log",
+      "log_sha256": "691df479fbf8c9cba9360f325f728ce36016dc898317cdf7175250ad730864b7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run released-scope Runtime API regression on installed Stage23 Native package vs exact Stage25",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/native-regression.log",
+      "log_sha256": "21cdf5dc4eb49191e25069e85234991e925dcb24b91bc1dbe688cc468ec02839",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run Workbench Release CTest with exact Stage25 server and installed Stage23 SDK DLL",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/client-regression/workbench/ctest.log",
+      "log_sha256": "6bb4449246819cc771efde6ccb7c39b3cc2fee4257d51584b4a18e72dd820ff8",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run CLI Release CTest with exact Stage25 server and installed Stage23 SDK DLL",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/client-regression/cli/ctest.log",
+      "log_sha256": "465ec89b97b4a5e61400a774d1abb33caf82315924fdba8b447dd2e71c4a1411",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify all six out-of-scope repos unchanged vs checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage25/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "pwsh -NoProfile -File ci.ps1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/milestone/test.log",
+      "log_sha256": "c6c4eb97096a589b7b8dbe3f7cd80b330640b5b32c21b7efe55c768320828918",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.Java",
+      "command": "pwsh -NoProfile -File ci.ps1 -Gradle <locked local Gradle 9.3.1>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/milestone/test.log",
+      "log_sha256": "b7436ea0359dbf6db7097a39c27362ae0e8860046f5c250fa5ba5afa270a1845",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.Python",
+      "command": "pwsh -NoProfile -File ci.ps1 -Wheelhouse <locked local wheelhouse>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/milestone/test.log",
+      "log_sha256": "774d9e79d013694898f798a867de37393b81a6213307ae4f8bd21067fb19d4f7",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S25-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek y=3x+7 fixture’ında katsayı, intercept ve held-out tahmin doğru. Analitik ridge ve ill-conditioned doğrulama geçti."
+    },
+    {
+      "id": "S25-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Logistic, CART ve random forest fit edildi. Ayrı train/validation/test confusion, accuracy, precision, recall ve F1 bağımsız hesaplarla eşleşti. Saf test örnekleri eğitim kapsamına alınmadı."
+    },
+    {
+      "id": "S25-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Worker tek atomic version yayınladı. İki TLS oturumu aktivasyon sırasında V1/V2 ile eşleşen değerler gördü. Restart aynı aktif version ve digest döndü. Hatalı options ve yetki reddi registry’yi değiştirmedi."
+    },
+    {
+      "id": "S25-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "37 Server CTest, bağımsız VS çözümü, Native paket, Workbench 2/2, CLI 4/4, .NET/Java/Python paket testleri geçti."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage25/build/Release/StarDataParadiseServer.exe",
+      "sha256": "662683a8b2426b5a05cbcfc689d3fd723e2ef2f6f0c78b2aaba1d9b039cf6d40"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage25/vs/bin/StarDataParadiseServer.exe",
+      "sha256": "96bd1298e7a843864097a3dee983d656ef922da2599d9870c112c773712186c5"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage25/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m5/stage23/package/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "a7514dbc2c0fbf926d8d72dbf4ba95aae1004c842ff9f96e205208d568316f48"
+    }
+  ],
+  "remaining_issues": [
+    "Etap 25 CPU model biçimi ve wire yolu kullanılır. Logistic/tree/forest bu versiyonda ikili sınıftır.",
+    "Eğitim ve artifact boyutları worker, dataset ve registry kotalarıyla sınırlıdır.",
+    "ML için Native typed yaşam döngüsü Etap 28 kapsamındadır."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 26
+}

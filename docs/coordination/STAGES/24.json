@@ -1,0 +1,196 @@
+{
+  "stage_id": 24,
+  "status": "PASSED",
+  "started_at": "2026-11-15T15:55:57.7864539+03:00",
+  "finished_at": "2026-11-15T16:11:19.8908687+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 23,
+      "file": "STAGES/23.json",
+      "sha256": "3fad41b3f578ff6e5054653aa9edb7361abdbe91dae8a39fbd02d8c38c0ee801"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "dataset_format": 1,
+    "preprocessing_format": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "8fec43822f7f05a64b4807cbcd51f0806dddd78a",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "DATASET.md",
+        "jobs/manager.cpp",
+        "jobs/manager.hpp",
+        "jobs/worker.cpp",
+        "jobs/worker.hpp",
+        "ml/dataset.cpp",
+        "ml/dataset.hpp",
+        "ml/pl_dataset_job.cpp",
+        "ml/pl_dataset_job.hpp",
+        "ml/preprocess.cpp",
+        "ml/preprocess.hpp",
+        "ml/PREPROCESSING.md",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/dataset_rpc.py",
+        "tests/job_worker_smoke.cpp",
+        "tests/preprocess_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m5/stage24/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "336a0ce761dbdb2fdc04dedd74c26dce2b7cd128140b77acf18eb38b32be69ad"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m5/stage24/workspace-before.json",
+    "repo": "StarDataParadiseServer",
+    "archive_path": "out/sdp-m5/stage24/workspace-before.zip",
+    "archive_sha256": "7676b09d936087b4140ec6dcc56b07a4cd225b9b4037bfec1b5f73d12aaab530"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Snapshot and verify all seven repos before Stage24",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/checkpoint.log",
+      "log_sha256": "dc3869d45f301d7fd8499ca19f2333b81eea050ab81dbd5f7814d790ffb50227",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake -S . -B out/sdp-m5/stage24/build using pinned separate build inputs",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/configure-final.log",
+      "log_sha256": "3a64273a8db7ceee9e0854745f935a89f38188c51a4ea9ee4d4d75efa28bb321",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m5/stage24/build --config Release --parallel 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/build-final.log",
+      "log_sha256": "387d222c5d7640f4c72d013064d26decd512824aa912f4782fb2ef3b650d9376",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Full Stage24 Windows Release CTest with dataset/preprocess/worker/TLS",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/ctest-final.log",
+      "log_sha256": "2096ce04ac4e17363342c812a9d83dfc2535f0535396e6401d550d2276d0c4dd",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Focused /W4 /WX train-only preprocessing, split/transform/cancellation tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/preprocess-agent/test.log",
+      "log_sha256": "1c2d6768c82dae04297d9923cbaafe11a7fc8b2ffcf0c88380e456e946ac94db",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Focused isolated Windows PL/SQL worker, types, size and purity tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/pl-worker-agent/test.log",
+      "log_sha256": "84e1538a07a369e21f246adb0dc6792b0a6f0444a88de9a7ec71245b8b76f9c5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run exact final Stage24 TLS dataset, worker, auth and lineage tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/dataset-rpc-agent-final.log",
+      "log_sha256": "6430e8955771727a4aeb19e46e109a49e02fbb712880aaeb5a5dadbacf75fde5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Official .slnx Release x64 isolated build and --version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/msbuild.log",
+      "log_sha256": "140abb9be59785b3af015665819a71ed7a3767449fcb079792d7e4dec94786a5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run installed Stage23 Native package against exact Stage24 with SQL/security/PLSQL/History/Decision/Jobs",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/native-regression.log",
+      "log_sha256": "f150ccd1b5f89b1f22b932339312ec6bd0a4b580ffca06e08ef6759c257ef51a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify unchanged source files across six out-of-scope repos",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage24/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S24-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Parametreli sorgu gerçek revision snapshot’ını materyalize etti. Kaynak değişirken bağımsız worker sabit snapshot’tan typed scalar/record/result_set üretti. Yeniden başlatmada aynı satırlar döndü."
+    },
+    {
+      "id": "S24-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Uç test sayıları ve yeni kategori train fit’ini değiştirmedi. Train-only impute/scale/vocab tekrar kullanıldı. Seed, grup ayrımı, stratifikasyon ve kesin zaman sırası doğrulandı."
+    },
+    {
+      "id": "S24-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Başka actor, canlı SELECT revoke ve silinmiş kaynak sample erişimini engelledi. İşi sahibi olsa bile revoke sonrası türetilmiş sonuç verilmedi. İş referanslı dataset silme reddedildi, referanssız dataset silindi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage24/build/Release/StarDataParadiseServer.exe",
+      "sha256": "a70d58c9b45d3584368963901849ce46cd884d3e22df272a67bf4f2b40e5ccdb"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage24/vs/bin/StarDataParadiseServer.exe",
+      "sha256": "ac335bec1dc34747e242ae21f26616e247e24ae2c2bc99fec5affefe63bfe38b"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage24/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    }
+  ],
+  "remaining_issues": [
+    "Materyalizasyon 1024 satır ve disk/worker IPC kota sınırlarıyla çalışır. BLOB/compound kolonlar dataset kaynağına alınmaz.",
+    "Zaman split sütunu tutarlı UTC tamsayı birimi ister.",
+    "Worker PL/SQL SQL host erişimi olmayan saf routine’leri yürütür. Native dataset typed arayüzü ileri milestone kapsamındadır."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 25
+}

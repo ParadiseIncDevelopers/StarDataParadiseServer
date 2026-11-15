@@ -67,5 +67,6 @@ struct Program
 // Bind SQL expressions in the same catalog and rights context as the caller.
 using HostType = std::function<sql::Type(const sql::Expr&, std::span<const sql::Type>, std::span<const Binding>)>;
 Program compile(const Routine& routine, uint64_t revision = 1, const HostType& host = {});
+Program compile_expression(std::span<const Variable> inputs, const sql::Expr& expression, const HostType& host = {});
 std::string serialize(const Program& program);
 }

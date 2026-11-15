@@ -60,11 +60,27 @@ struct ProfileSample
     uint64_t instructions;
 };
 
+enum class ExpressionState { evaluated, skipped, failed };
+
+struct ExpressionSample
+{
+    uint32_t id;
+    uint32_t parent_id;
+    sql::Expr::Op op;
+    sql::Source source;
+    ExpressionState state;
+    std::optional<sql::Truth> truth;
+    uint64_t elapsed_ns;
+};
+
+using ExpressionObserver = std::function<void(const ExpressionSample&)>;
+
 struct Instrumentation
 {
     // A callback sees the live frames from outermost to innermost until it returns.
     std::function<void(std::span<const TraceFrame>, bool exception)> trace;
     std::function<void(const ProfileSample&)> profile;
+    ExpressionObserver expression;
 };
 
 Result invoke(const Program& program, std::span<const disk::Value> arguments, const SqlCallback& sql = {},

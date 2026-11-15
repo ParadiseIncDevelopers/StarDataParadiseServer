@@ -1,0 +1,432 @@
+{
+  "stage_id": 30,
+  "status": "PASSED",
+  "started_at": "2026-11-15T17:34:53.8572360+03:00",
+  "finished_at": "2026-11-15T18:21:27.3609451+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 29,
+      "file": "STAGES/29.json",
+      "sha256": "85a45e789b7064ba451739649c43104f0c91be48bb568fb3392c2d277ee46d8c"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "server_version": "0.3.0",
+    "native_version": "0.3.0",
+    "wire_version": 1,
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "8fec43822f7f05a64b4807cbcd51f0806dddd78a",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "ADMIN.md",
+        "CMakeLists.txt",
+        "jobs/manager.cpp",
+        "jobs/manager.hpp",
+        "RUN.md",
+        "sql/session.cpp",
+        "StarDataParadiseServer/config.cpp",
+        "StarDataParadiseServer/operations.cpp",
+        "StarDataParadiseServer/operations.hpp",
+        "StarDataParadiseServer/server.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "StarDataParadiseServer/support_bundle.cpp",
+        "StarDataParadiseServer/support_bundle.hpp",
+        "StarDataParadiseServer/windows_service.cpp",
+        "StarDataParadiseServer/windows_service.hpp",
+        "storage/transactions.cpp",
+        "storage/transactions.hpp",
+        "tests/admin_health_rpc.py"
+      ],
+      "source_manifest": "out/sdp-m6/stage30/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "7c3081f6cc4c7877dfda2eaae5aeb2ea5d03d69f96028b7a2829ee52dc4399ef"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "22f83f2b924a3e8ddea71f6cadf0534d563e944c",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "CMakeLists.txt",
+        "include/StarDataParadiseDLLler.h",
+        "StarDataParadiseDLLler/api.cpp",
+        "StarDataParadiseDLLler/transport.cpp",
+        "StarDataParadiseDLLler/version.cpp",
+        "tests/consumer/CMakeLists.txt",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py",
+        "tests/version_smoke.c"
+      ],
+      "source_manifest": "out/sdp-m6/stage30/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "1299dc1685dad88ce1104bde5a4bfd17e1faf52393eaa048190a203898389245"
+    }
+  ],
+  "checkpoint": {
+    "archive_sha256": "245b125ccfcfced6164086aca99a0eabe337460a7cc9ea3aaa2f10a3163e317f",
+    "repo": "StarDataParadiseServer",
+    "manifest": "out/sdp-m6/stage30/workspace-before.json",
+    "archive_path": "out/sdp-m6/stage30/workspace-before.zip"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Snapshot and verify all seven repos before Stage30",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/checkpoint.log",
+      "log_sha256": "0ae7cda180db87e3785292726377938a8caf06158ec0190d9fbfe3e4a6e8e72d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure full Windows x64 pinned Release 0.3.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/configure.log",
+      "log_sha256": "9881e5f9c5955312f76522dd8724e9d49bcc31d3d27a5f50b92e1450fd0d82e9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build all full CMake Release targets",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/build.log",
+      "log_sha256": "558a71fcea7e69a2ffce1840e2b17807e5c73acb1b1e59260c5f5fcf95c5a6f1",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run full Windows x64 Release CTest 47-case suite",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/ctest-final.log",
+      "log_sha256": "bee09e112353722e67abd8f387b1cb211344a452a19a5ad5a6c7478ed257299d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure separate Windows Release build with SDP_WITH_CPU_MLP OFF",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/minimal-configure.log",
+      "log_sha256": "6c6d7c834963df2577d3c925d88fd052f574d70f29e5790d12ddbec99b734372",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build Windows x64 MLP-free Server and verify exact compiled target",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/minimal-build.log",
+      "log_sha256": "5202d1ebbbb73a8dc11020a4429e90416e4834cf901d55e9a4e7fce5591cc20c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build official Server solution and confirm v0.3.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/msbuild.log",
+      "log_sha256": "19cd1159716926fe453bfced49219d9d39229a1f384ba7a290f9afc5541fbb34",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Exact 0.3.0 TLS independent instances, issued health evidence, config, support and maintenance",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/admin-health-rpc-agent-full.log",
+      "log_sha256": "058a2a04a88b84c475feb634bf4f43ea331d88d4cd9cf1eced3ef1246089eca2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Exact MLP-free 0.3.0 administration TLS",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/admin-health-rpc-agent-minimal.log",
+      "log_sha256": "d55ae0e79746ddf6c97741dab912f68245fd45d1fed6bdebd122cf3d94a74b77",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Exact full/MLP-free 0.3.0 supervised learning and core SQL, History, Decision",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/mlp-rpc-agent-full-minimal.log",
+      "log_sha256": "72d6bbb27b31e0d65b4a47881227b9fbcab5f3f4d03b03d02a1504fcfbb1047a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Elevated Windows SCM exact Release install/start/read/stop/remove for two private instances",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/service-agent/scm-e2e.log",
+      "log_sha256": "5f07c6c5ed1ddd24cd39f882a117e356efdcb4397601379bd8b817b1702da8e2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Real CLI status outside registered service, reject direct service dispatcher",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/service-agent/integrated-scm-cmake.log",
+      "log_sha256": "af14337a15bbf840460483fd391e4104f9fd162a180f3fdb89edc4bb8ff15191",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Independent support redaction, hard-link exclusion and no-overwrite Windows test",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/support-agent/test-final.log",
+      "log_sha256": "8899ba351ff3a2905d2a989acc6f3e055ed3f14e97a45e58e709d92eab04dda0",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Configure independent Native 0.3.0 x64 Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/configure.log",
+      "log_sha256": "7f82f8769acbbacfc79a919a40b9c88cb9c4ca8ffd9d1a03efdfb06199020047",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Build all Native 0.3.0 SDK targets",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/build.log",
+      "log_sha256": "525e1e606a0ec46a7fec064e0fe922585dce45906a8f078ce6d2092ab4d2db2b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run C ABI and export tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/ctest.log",
+      "log_sha256": "ee91fd0db0a1ffc8562107fde8c181526f5e2bf889119e0f75eb946c27f4d9d4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Produce exact Windows Native SDK ZIP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/cpack.log",
+      "log_sha256": "72be12dcd3ef5caa47bbd2f417149ca0fecb1567e31d889967ebf0b810fc91ab",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Build official Native solution",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/msbuild.log",
+      "log_sha256": "a967e84e7bd38d6b6cad624732e12cbf9ef09a3450b342de5d6f22491fbf8723",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Verify 44 legacy exports and one new symbol, ABI1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/exports.log",
+      "log_sha256": "327a75a7c9eabf7a96d252f86fbc20f583563aff4226e0197f900577503dbc93",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run all 24 installed Native SDK runtime scenarios on exact Server 0.3.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/integration.log",
+      "log_sha256": "dac120feb661709c257f2a52d7a745e16d3f90e0c5c475638d82c947f3178d35",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure Workbench x64 from current source and locked Qt dependencies",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/client-regression/workbench/configure.log",
+      "log_sha256": "b9617be621ba6b48553b166f67069a5f41d8ee1620a3bfc174802005b6dfa9ce",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build current Workbench Release, preserving user source changes",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/client-regression/workbench/build.log",
+      "log_sha256": "fee12f6b079963d747ffcc5a1e8363a93eacdcf3be20e3e188c946609b57fe58",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run 2 Workbench tests with exact 0.3.0 Server and Native binary",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/client-regression/workbench/ctest.log",
+      "log_sha256": "69cb7e561ec7fafa1d70b4599fce6abd147d6970a13938cb859721ef791f87b7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure current CLI x64 from source",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/client-regression/cli/configure.log",
+      "log_sha256": "b393030cef425753e32f314c3f551155fc2a5f41d7b7b5da6ca969f03b052362",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build current CLI Release, preserving user source changes",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/client-regression/cli/build.log",
+      "log_sha256": "66342bfcad1608162faba7453d35280c161b1b9ee492f6d63861aa8a236fd4fb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run 4 CLI tests with exact 0.3.0 Server and Native DLL",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/client-regression/cli/ctest.log",
+      "log_sha256": "791661707f5bc9eabcbc3e019b490b1181a64fc8fa6193bd74121c75a5cac368",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Generate checked, reproducible full/minimal ZIP files and execute extracted version commands",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/release/package.log",
+      "log_sha256": "6dbef0f165f66ca3df0167f1213ba9fc6f4cee298b14b853d8f83c03bacd9ad1",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify five nonparticipating repositories against Stage30 check",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage30/isolation.log",
+      "log_sha256": "82ae118696621845d3915687a8e964b25852621b9a28bad3833d2cea71abb38a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "pwsh -NoProfile -File ci.ps1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/milestone/test.log",
+      "log_sha256": "c6c4eb97096a589b7b8dbe3f7cd80b330640b5b32c21b7efe55c768320828918",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.Java",
+      "command": "pwsh -NoProfile -File ci.ps1 -Gradle <locked Gradle 9.3.1>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/milestone/test.log",
+      "log_sha256": "47d92d44c272705bdc2f745417eac679aa76ae0780a61dcb5ca103a139918610",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.Python",
+      "command": "pwsh -NoProfile -File ci.ps1 -Wheelhouse <pinned offline wheelhouse>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/milestone/test.log",
+      "log_sha256": "98c47c6b12da3487272932ca5cd0dc5840109e0d7d012ebeed0e98233157ba11",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S30-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Two independent Windows services used separate virtual accounts, TLS and SQL storage. After stopping and removing Red, Blue retained its PID and SQL data. Both exact services and isolated test directories were removed."
+    },
+    {
+      "id": "S30-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Başlangıçta health UNKNOWN. Ölçüm sonrası gerçek storage, sertifika, History ve job kanıtları doğrulandı. Backup yalnız doğrulanmış manifest kanıtıyla OK oldu."
+    },
+    {
+      "id": "S30-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Geçersiz config mevcut veriyi veya geçerli dosyayı değiştirmedi. Doğru config atomik uygulandı ve önceki içerik saklandı. Gizli test değeri, hard link ve izin dışı log dosyası redacted bundle’a girmedi."
+    },
+    {
+      "id": "S30-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Server 47/47 ve full/minimal TLS kapsamı, Native 2/2 + 24 kurulu çalışma zamanı kontrolü, Workbench 2/2, CLI 4/4, ayrı .NET/Java/Python paket kontrolleri geçti. İndeks, ANALYZE istatistiği ve integrity işleri tamamlandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage30/candidate/StarDataParadiseServer.exe",
+      "sha256": "254aab57d3125f38b6d338e8a0005f6dc390db3fa38ccc904b7fcee0b0da7054"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage30/candidate/StarDataParadiseServer-vs.exe",
+      "sha256": "c7ba119e0f769e4790f50926289971eb9787d41b3ac9ec53d7d0cd036874d0d0"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage30/candidate/StarDataParadiseServer-minimal.exe",
+      "sha256": "14ccbbc4e0b70157f2f67766856c67545676c4f39b3fe25cd61204e6a2ab73c2"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage30/release/StarDataParadiseServer-0.3.0-win-x64.zip",
+      "sha256": "af313542a7e5adfdb1fa982ba5f1b88a7a2a1eec9a4dd4df23c58b2da678d83c"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage30/release/StarDataParadiseServer-0.3.0-minimal-win-x64.zip",
+      "sha256": "009955b7c770632281b6701b75da66c4c684e6bda58b7d72ebf222e8a10b8b1f"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage30/release/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m6/stage30/package/StarDataParadiseDLLler-0.3.0-win-x64.zip",
+      "sha256": "742e6f75c664efc24a14d1640399f623bf8f90da4e18512ced10e1469e195877"
+    }
+  ],
+  "remaining_issues": [
+    "GPU eğitim backend’i ve PITR bu paketlerle unavailable. Linux ve macOS runtime hedefleri NOT_RUN. .NET, Java ve Python SDK’larında M6 yerel paket smoke kapsamı var.",
+    "WorkBench ve CLI ürün sürümleri 0.1.0. Native ABI 1 0.3.0 runtime ile etkin test edildi."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 31
+}

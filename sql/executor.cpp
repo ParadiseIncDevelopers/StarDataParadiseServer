@@ -1,6 +1,7 @@
 #include "executor.hpp"
 #include "routines.hpp"
 #include "definition.hpp"
+#include "decision.hpp"
 
 #include <algorithm>
 #include <set>
@@ -114,11 +115,14 @@ disk::Value assign_value(const Column& column, const BoundExpression& expression
 }
 
 void apply_row(disk::Transaction& transaction, disk::Owner owner, const Object& table, TableMutation& mutation,
-    disk::RowId row, const Values* before, const Values* after, const WorkCheck& check = {},
-    const InvokerCheck& invoker = {}, bool triggers = false)
+    disk::RowId row, const Values* before, Values* after, const WorkCheck& check = {},
+    const InvokerCheck& invoker = {}, bool triggers = false, const Values* expected_history_image = nullptr)
 {
     const std::string_view event = !before ? "insert" : !after ? "delete" : "update";
     if (triggers) fire_triggers(transaction, owner, table, "before", event, before, after, check, invoker);
+    apply_decision(transaction, owner, mutation.catalog_snapshot(), table, before, after, check);
+    if (expected_history_image && *after != *expected_history_image)
+        throw DecisionError(wire::Code::invalid_state, "history_image_changed");
     mutation.inspect(row, before, after);
     if (!after) transaction.erase(owner, row);
     else if (before) transaction.update(owner, row, encode_record(table, *after));
@@ -148,6 +152,7 @@ size_t execute_mutation(disk::Transaction& transaction, disk::Owner owner, const
     verify_schema(transaction, owner, plan.table, check);
     validate_parameters(plan, parameters);
     TableMutation mutation(transaction, owner, plan.table, check);
+    require_decision_module(mutation.catalog_snapshot(), plan.table.id, transaction.decision_enabled());
     if (plan.action == Action::insert)
     {
         for (const auto& values : plan.rows)
@@ -189,6 +194,9 @@ size_t execute_mutation(disk::Transaction& transaction, disk::Owner owner, const
 void execute_ddl(disk::Transaction& transaction, disk::Owner owner, const Statement& statement, const WorkCheck& check)
 {
     Catalog catalog(transaction, owner, check);
+    if (statement.decision && !transaction.decision_enabled())
+        throw DecisionError(wire::Code::module_unavailable, "module_unavailable");
+    if (decision_ddl(catalog, statement, true)) return;
     if (statement.action == Action::analyze)
     {
         analyze_table(transaction, owner, catalog, statement.target, check);
@@ -201,17 +209,19 @@ void execute_ddl(disk::Transaction& transaction, disk::Owner owner, const Statem
     {
         const auto table = catalog.resolve(ObjectKind::table, statement.target);
         TableMutation mutation(transaction, owner, table, check);
+        require_decision_module(mutation.catalog_snapshot(), table.id, transaction.decision_enabled());
         for (const auto id : match_rows(transaction, owner, table, {}, {}, check))
         {
             poll(check);
             const auto before = read_table_row(transaction, owner, table, id);
-            apply_row(transaction, owner, table, mutation, id, &before, nullptr);
+            apply_row(transaction, owner, table, mutation, id, &before, nullptr, check);
         }
         return;
     }
     const auto planned = catalog.validate(statement);
     if (statement.action == Action::drop_table)
     {
+        check_decision_drop(catalog.list(), planned);
         relational_ddl(catalog, statement);
         if (has_trigger_dependency(catalog, planned.id))
             throw Error(Code::constraint, statement.source, "Table has a dependent trigger");
@@ -221,7 +231,7 @@ void execute_ddl(disk::Transaction& transaction, disk::Owner owner, const Statem
         {
             poll(check);
             const auto before = read_table_row(transaction, owner, planned, id);
-            apply_row(transaction, owner, planned, mutation, id, &before, nullptr);
+            apply_row(transaction, owner, planned, mutation, id, &before, nullptr, check);
         }
         mutation.drop_indexes();
     }
@@ -342,6 +352,7 @@ void apply_history_rows(disk::Transaction& transaction, disk::Owner owner, const
     statement_write(transaction, owner, check, [&] {
         verify_schema(transaction, owner, table, check);
         TableMutation mutation(transaction, owner, table, check);
+        require_decision_module(mutation.catalog_snapshot(), table.id, transaction.decision_enabled());
         std::set<disk::RowId> used;
         for (const auto& edit : mutations)
         {
@@ -375,8 +386,11 @@ void apply_history_rows(disk::Transaction& transaction, disk::Owner owner, const
             if (current != edit.before)
                 throw Error(Code::constraint, {}, "Current row differs from the History preview");
             if (edit.before != edit.after)
+            {
+                auto after = edit.after;
                 apply_row(transaction, owner, table, mutation, edit.id, edit.before ? &*edit.before : nullptr,
-                    edit.after ? &*edit.after : nullptr, check, invoker, true);
+                    after ? &*after : nullptr, check, invoker, true, edit.after ? &*edit.after : nullptr);
+            }
         }
         return mutations.size();
     });

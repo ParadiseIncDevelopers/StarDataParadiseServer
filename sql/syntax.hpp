@@ -52,13 +52,43 @@ enum class Action
     select, insert, update, delete_, create_index, drop_index, rename_index, truncate_table,
     create_view, drop_view, create_sequence, drop_sequence, explain, explain_analyze, analyze, reindex,
     create_user, create_role, grant, revoke, create_routine, call_routine, pl_block,
-    create_trigger, drop_trigger, history
+    create_trigger, drop_trigger, history, create_decision_rule, activate_decision_rule, decision_inspect,
+    model_command
 };
 
 struct Assignment
 {
     Name column;
     Expr value;
+};
+
+struct DecisionRule
+{
+    enum class Event { insert, update, delete_, write };
+    enum class Effect { allow, deny, compute };
+
+    Event event{};
+    Effect effect{};
+    uint32_t priority{};
+    uint32_t version{};
+    std::optional<Expr> condition;
+    std::optional<Assignment> assignment;
+    std::string definition;
+};
+
+struct DecisionInspection
+{
+    enum class Kind { explain, whynot, whatif, test, recheck, validate };
+
+    Kind kind;
+    std::string body;
+};
+
+struct ModelCommand
+{
+    enum class Kind { create, train, evaluate, predict, activate };
+    Kind kind;
+    std::string body;
 };
 
 struct ConstraintDefinition
@@ -151,6 +181,9 @@ struct Statement
     std::string trigger_timing;
     std::string trigger_event;
     std::optional<HistoryCommand> history;
+    std::optional<DecisionRule> decision;
+    std::optional<DecisionInspection> decision_inspection;
+    std::optional<ModelCommand> model;
 };
 
 Statement parse(std::string_view sql);

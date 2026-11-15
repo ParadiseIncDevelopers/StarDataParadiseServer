@@ -87,3 +87,5 @@ Etap 11 katalog, SQL grameri ve tip denetimi kabul kanıtı [Etap 11 kaydında](
 Etap 12–15 SQL ve güvenlik kabul kanıtları [M3 raporunda](M3_REPORT.md).
 
 Etap 16–20 PL/SQL ve History kabul kanıtları [M4 raporunda](M4_REPORT.md).
+
+Etap 21–25 Decision, Jobs ve CPU model kabul kanıtları [M5 raporunda](M5_REPORT.md).

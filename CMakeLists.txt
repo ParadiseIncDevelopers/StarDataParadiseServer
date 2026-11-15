@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.2)
-project(StarDataParadiseServer VERSION 0.2.0 LANGUAGES CXX)
+project(StarDataParadiseServer VERSION 0.3.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -7,18 +7,21 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 include(CTest)
+option(SDP_WITH_CPU_MLP "Build the CPU MLP training module" ON)
 
 add_executable(StarDataParadiseServer
     StarDataParadiseServer/StarDataParadiseServer.cpp
 
     StarDataParadiseServer/service.cpp
-    StarDataParadiseServer/storage_admin.cpp)
+    StarDataParadiseServer/storage_admin.cpp
+    StarDataParadiseServer/operations.cpp StarDataParadiseServer/support_bundle.cpp
+    StarDataParadiseServer/windows_service.cpp)
 
 if(BUILD_TESTING)
     add_test(NAME help COMMAND StarDataParadiseServer --help)
     set_tests_properties(help PROPERTIES PASS_REGULAR_EXPRESSION "Usage: StarDataParadiseServer")
     add_test(NAME version COMMAND StarDataParadiseServer --version)
-    set_tests_properties(version PROPERTIES PASS_REGULAR_EXPRESSION "^StarDataParadiseServer 0[.]2[.]0")
+    set_tests_properties(version PROPERTIES PASS_REGULAR_EXPRESSION "^StarDataParadiseServer 0[.]3[.]0")
     add_test(NAME invalid_option COMMAND ${CMAKE_COMMAND}
         "-DPROGRAM=$<TARGET_FILE:StarDataParadiseServer>" -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/invalid_option.cmake")
 endif()
@@ -64,10 +67,18 @@ target_compile_definitions(sdp_storage PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
 add_library(sdp_sql STATIC sql/syntax.cpp sql/types.cpp sql/catalog.cpp sql/binder.cpp
     sql/executor.cpp sql/session.cpp sql/wire_values.cpp
     sql/btree.cpp sql/definition.cpp sql/relational.cpp sql/advanced.cpp sql/collation.cpp sql/security.cpp sql/access.cpp sql/pl_ir.cpp sql/pl_runtime.cpp sql/routines.cpp sql/debugger.cpp
-    sql/history_journal.cpp sql/history_query.cpp sql/history_restore.cpp)
+    sql/history_journal.cpp sql/history_query.cpp sql/history_restore.cpp
+    sql/decision.cpp sql/decision_condition.cpp sql/decision_inspection.cpp
+    jobs/manager.cpp jobs/schedule.cpp jobs/worker.cpp backup/archive.cpp
+    ml/dataset.cpp ml/preprocess.cpp ml/pl_dataset_job.cpp
+    ml/model.cpp ml/training.cpp ml/devices.cpp ml/linear_models.cpp ml/tree_models.cpp ml/clustering.cpp ml/pca.cpp)
+if(SDP_WITH_CPU_MLP)
+    target_sources(sdp_sql PRIVATE ml/mlp.cpp)
+    set_source_files_properties(ml/training.cpp PROPERTIES COMPILE_DEFINITIONS SDP_WITH_CPU_MLP=1)
+endif()
 target_include_directories(sdp_sql PUBLIC sql)
 target_compile_options(sdp_sql PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/utf-8>)
-target_link_libraries(sdp_sql PUBLIC sdp_storage sdp_wire sdp_server_config)
+target_link_libraries(sdp_sql PUBLIC sdp_storage sdp_wire sdp_server_config PRIVATE advapi32)
 target_link_libraries(StarDataParadiseServer PRIVATE sdp_sql)
 
 if(BUILD_TESTING)
@@ -125,6 +136,91 @@ if(BUILD_TESTING)
         add_test(NAME sql_${part} COMMAND sql_smoke ${part} "${CMAKE_CURRENT_BINARY_DIR}/sql-fixtures")
         set_tests_properties(sql_${part} PROPERTIES TIMEOUT 60)
     endforeach()
+    add_executable(linear_models_smoke tests/linear_models_smoke.cpp)
+    target_include_directories(linear_models_smoke PRIVATE ml)
+    target_link_libraries(linear_models_smoke PRIVATE sdp_sql)
+    add_test(NAME ml_linear_models COMMAND linear_models_smoke)
+    add_executable(tree_models_smoke tests/tree_models_smoke.cpp)
+    target_include_directories(tree_models_smoke PRIVATE ml)
+    target_link_libraries(tree_models_smoke PRIVATE sdp_sql)
+    add_test(NAME ml_tree_models COMMAND tree_models_smoke)
+    add_test(NAME model_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/model_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/model-rpc")
+    set_tests_properties(model_rpc PROPERTIES TIMEOUT 120)
+    if(SDP_WITH_CPU_MLP)
+        add_executable(mlp_smoke tests/mlp_smoke.cpp)
+        target_include_directories(mlp_smoke PRIVATE ml)
+        target_link_libraries(mlp_smoke PRIVATE sdp_sql)
+        add_test(NAME ml_mlp COMMAND mlp_smoke)
+        add_test(NAME mlp_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/mlp_rpc.py"
+            --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+            --scratch "${CMAKE_CURRENT_BINARY_DIR}/mlp-rpc")
+        set_tests_properties(mlp_rpc PROPERTIES TIMEOUT 150)
+    endif()
+    if(SDP_WITH_CPU_MLP)
+        add_test(NAME model_lifecycle_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/model_lifecycle_rpc.py"
+            --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+            --scratch "${CMAKE_CURRENT_BINARY_DIR}/model-lifecycle-rpc")
+        set_tests_properties(model_lifecycle_rpc PROPERTIES TIMEOUT 150)
+    endif()
+    add_executable(model_lifecycle_smoke tests/model_lifecycle_smoke.cpp)
+    target_include_directories(model_lifecycle_smoke PRIVATE ml)
+    target_link_libraries(model_lifecycle_smoke PRIVATE sdp_sql)
+    add_test(NAME model_lifecycle_catalog COMMAND model_lifecycle_smoke "${CMAKE_CURRENT_BINARY_DIR}/model-lifecycle-fixtures")
+    add_executable(physical_snapshot_smoke tests/physical_snapshot_smoke.cpp)
+    target_link_libraries(physical_snapshot_smoke PRIVATE sdp_storage)
+    add_test(NAME backup_physical_snapshot COMMAND physical_snapshot_smoke "${CMAKE_CURRENT_BINARY_DIR}/physical-snapshot-fixtures")
+    add_test(NAME admin_health_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/admin_health_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/admin-health-rpc")
+    set_tests_properties(admin_health_rpc PROPERTIES TIMEOUT 150)
+    add_test(NAME backup_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/backup_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/backup-rpc")
+    set_tests_properties(backup_rpc PROPERTIES TIMEOUT 150)
+    add_executable(clustering_smoke tests/clustering_smoke.cpp)
+    target_link_libraries(clustering_smoke PRIVATE sdp_sql)
+    add_test(NAME ml_clustering COMMAND clustering_smoke)
+    add_executable(pca_smoke tests/pca_smoke.cpp)
+    target_include_directories(pca_smoke PRIVATE ml)
+    target_link_libraries(pca_smoke PRIVATE sdp_sql)
+    add_test(NAME ml_pca COMMAND pca_smoke)
+    add_test(NAME unsupervised_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/unsupervised_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/unsupervised-rpc")
+    set_tests_properties(unsupervised_rpc PROPERTIES TIMEOUT 120)
+    add_executable(preprocess_smoke tests/preprocess_smoke.cpp)
+    target_include_directories(preprocess_smoke PRIVATE ml)
+    target_link_libraries(preprocess_smoke PRIVATE sdp_sql)
+    add_test(NAME dataset_preprocessing COMMAND preprocess_smoke)
+    add_test(NAME dataset_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/dataset_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/dataset-rpc")
+    set_tests_properties(dataset_rpc PROPERTIES TIMEOUT 120)
+    add_executable(job_worker_smoke tests/job_worker_smoke.cpp)
+    target_include_directories(job_worker_smoke PRIVATE jobs)
+    target_link_libraries(job_worker_smoke PRIVATE sdp_sql)
+    add_test(NAME job_worker COMMAND job_worker_smoke "${CMAKE_CURRENT_BINARY_DIR}/job-worker-fixtures")
+    set_tests_properties(job_worker PROPERTIES TIMEOUT 60)
+    add_executable(schedule_smoke tests/schedule_smoke.cpp)
+    target_include_directories(schedule_smoke PRIVATE jobs)
+    target_link_libraries(schedule_smoke PRIVATE sdp_sql)
+    add_test(NAME schedule_calendar COMMAND schedule_smoke)
+    add_test(NAME jobs_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/jobs_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/jobs-rpc")
+    set_tests_properties(jobs_rpc PROPERTIES TIMEOUT 120)
+    add_executable(decision_condition_smoke tests/decision_condition_smoke.cpp)
+    target_link_libraries(decision_condition_smoke PRIVATE sdp_sql)
+    add_test(NAME decision_condition COMMAND decision_condition_smoke "${CMAKE_CURRENT_BINARY_DIR}/decision-condition")
+    add_test(NAME decision_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/decision_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/decision-rpc")
+    add_test(NAME decision_inspection_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/decision_inspection_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/decision-inspection-rpc")
+    set_tests_properties(decision_condition decision_rpc decision_inspection_rpc PROPERTIES TIMEOUT 120)
     add_test(NAME history_restore_rpc COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/history_restore_rpc.py"
         --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
         --scratch "${CMAKE_CURRENT_BINARY_DIR}/restore-rpc")

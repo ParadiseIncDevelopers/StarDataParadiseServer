@@ -304,8 +304,9 @@ class Interpreter
 {
 public:
     Interpreter(const Program& program, Meter& meter, const SqlCallback& host, const sql::WorkCheck& check,
-        const HostAction& action)
-        : program_(program), meter_(meter), host_(host), check_(check), action_(action), frame_claim_(meter)
+        const HostAction& action, const ExpressionObserver& observer)
+        : program_(program), meter_(meter), host_(host), check_(check), action_(action), observer_(observer),
+          frame_claim_(meter)
     {
         frame_claim_.add(program.slots.size() * sizeof(disk::Value), program.name.source);
         frame_.resize(program.slots.size());
@@ -374,6 +375,52 @@ private:
 
     disk::Value expression(const TypedExpr& expr, size_t depth = 0)
     {
+        if (!observer_) return evaluate(expr, depth);
+
+        ExpressionSample sample{++expression_count_, expression_parent_, expr.op, expr.source,
+            ExpressionState::evaluated, {}, 0};
+        struct RestoreParent
+        {
+            uint32_t& current;
+            uint32_t parent;
+            ~RestoreParent() { current = parent; }
+        } restore{expression_parent_, expression_parent_};
+        expression_parent_ = sample.id;
+        const auto started = Clock::now();
+        const auto elapsed = [&] {
+            return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - started).count());
+        };
+        disk::Value output;
+        try
+        {
+            output = evaluate(expr, depth);
+            const bool outcome = !sample.parent_id || !expr.args.empty() || expr.op == Op::exists ||
+                expr.op == Op::subquery || expr.op == Op::routine_call;
+            if (outcome && (expr.type.kind == sql::Kind::boolean || expr.type.kind == sql::Kind::null))
+                sample.truth = sql::truth(output, expr.source);
+        }
+        catch (...)
+        {
+            sample.state = ExpressionState::failed;
+            sample.elapsed_ns = elapsed();
+            observer_(sample);
+            throw;
+        }
+        sample.elapsed_ns = elapsed();
+        observer_(sample);
+        return output;
+    }
+
+    void skipped(const TypedExpr& expr, uint32_t parent)
+    {
+        if (!observer_) return;
+        const ExpressionSample sample{++expression_count_, parent, expr.op, expr.source, ExpressionState::skipped, {}, 0};
+        for (const auto& arg : expr.args) skipped(arg, sample.id);
+        observer_(sample);
+    }
+
+    disk::Value evaluate(const TypedExpr& expr, size_t depth)
+    {
         meter_.lexical_depth(depth, expr.source);
         meter_.step(expr.source, check_);
         const auto operand = [&](size_t index) {
@@ -416,13 +463,21 @@ private:
         case Op::and_:
         {
             const auto left = sql::truth(operand(0), expr.source);
-            if (left == sql::Truth::false_) return sql::boolean_value(left);
+            if (left == sql::Truth::false_)
+            {
+                if (observer_) skipped(expr.args.at(1), expression_parent_);
+                return sql::boolean_value(left);
+            }
             return sql::boolean_value(sql::logical_and(left, sql::truth(operand(1), expr.source)));
         }
         case Op::or_:
         {
             const auto left = sql::truth(operand(0), expr.source);
-            if (left == sql::Truth::true_) return sql::boolean_value(left);
+            if (left == sql::Truth::true_)
+            {
+                if (observer_) skipped(expr.args.at(1), expression_parent_);
+                return sql::boolean_value(left);
+            }
             return sql::boolean_value(sql::logical_or(left, sql::truth(operand(1), expr.source)));
         }
         case Op::add: case Op::subtract: case Op::multiply: case Op::divide:
@@ -628,10 +683,13 @@ private:
     const SqlCallback& host_;
     const sql::WorkCheck& check_;
     const HostAction& action_;
+    const ExpressionObserver& observer_;
     Reservation frame_claim_;
     std::vector<disk::Value> frame_;
     std::optional<disk::Value> returned_;
     std::exception_ptr exception_;
+    uint32_t expression_count_{};
+    uint32_t expression_parent_{};
 };
 }
 
@@ -648,7 +706,7 @@ Result invoke(const Program& program, std::span<const disk::Value> arguments, co
     auto& meter = active_meter ? *active_meter : *local;
     Activation activation(meter, program);
     meter.step(program.name.source, check);
-    Interpreter runtime(program, meter, host, check, action);
+    Interpreter runtime(program, meter, host, check, action, instrumentation.expression);
     try { return runtime.run(arguments); }
     catch (const RuntimeError& error)
     {

@@ -12,8 +12,9 @@ constexpr size_t max_savepoints = 8;
 constexpr size_t max_internal_savepoints = 10;
 }
 
-Engine::Engine(const std::filesystem::path& path, Hooks hooks)
-    : path_(path), hooks_(std::move(hooks)), store_((verify_database(path, true), path), false, 16, hooks_.store),
+Engine::Engine(const std::filesystem::path& path, Hooks hooks, bool decision_enabled)
+    : path_(path), hooks_(std::move(hooks)), decision_enabled_(decision_enabled),
+      store_((verify_database(path, true), path), false, 16, hooks_.store),
       segments_(segments(path))
 {
     if (segments_.empty())
@@ -54,7 +55,7 @@ void Engine::release(uint64_t token)
 }
 
 std::unique_ptr<Transaction> Engine::begin(Owner owner, std::chrono::milliseconds wait,
-    std::stop_token stop, std::chrono::milliseconds lifetime)
+    std::stop_token stop, std::chrono::milliseconds lifetime, std::string actor)
 {
     if (!owner || wait < 0ms || wait > 30s || lifetime <= 0ms || lifetime > 30s)
         throw Error(Fault::invalid, "Transaction ownership or time limit is invalid");
@@ -74,7 +75,7 @@ std::unique_ptr<Transaction> Engine::begin(Owner owner, std::chrono::millisecond
     }
     if (!next_) throw Error(Fault::limit, "Transaction ticket limit reached");
     const auto token = next_++;
-    auto transaction = std::unique_ptr<Transaction>(new Transaction(*this, owner, token));
+    auto transaction = std::unique_ptr<Transaction>(new Transaction(*this, owner, token, std::move(actor)));
     active_ = Lease{owner, token, Clock::now() + lifetime};
     return transaction;
 }
@@ -202,8 +203,8 @@ uint64_t Engine::commit(Frame frame)
     return frame.batch.header.lsn;
 }
 
-Transaction::Transaction(Engine& engine, Owner owner, uint64_t token)
-    : engine_(engine), owner_(owner), token_(token), editor_(engine.store_)
+Transaction::Transaction(Engine& engine, Owner owner, uint64_t token, std::string actor)
+    : engine_(engine), owner_(owner), token_(token), actor_(std::move(actor)), editor_(engine.store_)
 {
     changes_.reserve(change_count_limit);
     saves_.reserve(max_savepoints + max_internal_savepoints);
@@ -228,6 +229,12 @@ std::unique_lock<std::mutex> Transaction::lock(Owner caller)
     return held;
 }
 
+Integrity Transaction::inspect_committed(Owner caller)
+{
+    const auto guard = lock(caller);
+    return engine_.store_.inspect();
+}
+
 void Transaction::ensure_active(Owner caller)
 {
     const auto held = lock(caller);
@@ -237,6 +244,89 @@ void Transaction::visit_changes(Owner caller, const std::function<void(std::span
 {
     const auto held = lock(caller);
     visitor(changes_);
+}
+
+PhysicalSnapshot Transaction::copy_physical_snapshot(Owner caller, const std::filesystem::path& destination_data,
+    uint64_t max_bytes, const std::function<void()>& check)
+{
+    const auto held = lock(caller);
+    if (!changes_.empty() || destination_data.empty())
+        throw Error(Fault::invalid, "Snapshot requires a read transaction and a destination");
+    const auto boundary = [&] {
+        engine_.expire(Engine::Clock::now());
+        if (!engine_.active_) throw Error(Fault::cancelled, "Transaction expired during snapshot");
+        if (check) check();
+    };
+    boundary();
+
+    auto& storage = engine_.store_.file_;
+    const auto header = engine_.store_.header();
+    const auto data_bytes = uint64_t{header.pages} * page_size;
+    const auto active_bytes = engine_.wal_->size();
+    auto archived_remaining = engine_.archived_bytes_;
+    if (storage.size() != data_bytes || !active_bytes || active_bytes > wal_quota || archived_remaining > wal_quota - active_bytes)
+        throw Error(Fault::corrupt, "Invalid data or WAL length for physical snapshot");
+    const auto total = data_bytes + active_bytes + archived_remaining + page_size;
+    if (total > max_bytes) throw Error(Fault::limit, "Physical snapshot exceeds the byte budget");
+
+    auto checkpoint_name = destination_data;
+    checkpoint_name += ".checkpoint";
+    if (std::filesystem::symlink_status(checkpoint_name).type() != std::filesystem::file_type::not_found)
+        throw Error(Fault::invalid, "Physical snapshot destination already has checkpoint metadata");
+    const auto parent = destination_data.parent_path();
+    if (std::filesystem::space(parent.empty() ? std::filesystem::path(".") : parent).available < total)
+        throw Error(Fault::limit, "Insufficient space for physical snapshot");
+
+    Page physical_header{};
+    storage.read(0, physical_header);
+    if (physical_header != make_header(header))
+        throw Error(Fault::corrupt, "Physical snapshot header differs from the published storage");
+
+    PhysicalSnapshot result{header, retention(header.lsn, engine_.segments_.front().first, {}, {}), total, {}};
+    result.files.reserve(engine_.segments_.size() + 2);
+    std::array<Byte, 64 * 1024> block;
+    const auto copy = [&](File& source, const std::filesystem::path& destination, uint64_t length) {
+        boundary();
+        File output(destination, File::Mode::create_new);
+        for (uint64_t offset = 0; offset < length;)
+        {
+            boundary();
+            const auto count = static_cast<size_t>((std::min)(uint64_t{block.size()}, length - offset));
+            auto bytes = std::span(block).first(count);
+            source.read(offset, bytes);
+            output.write(offset, bytes);
+            offset += count;
+        }
+        boundary();
+        output.flush();
+        result.files.push_back(destination);
+    };
+
+    copy(storage, destination_data, data_bytes);
+    const auto last = engine_.segments_.size() - 1;
+    for (size_t index = 0; index < last; ++index)
+    {
+        boundary();
+        const auto& archived = engine_.segments_[index];
+        File source(archived.path, File::Mode::read_only);
+        const auto length = source.size();
+        if (!length || length > archived_remaining)
+            throw Error(Fault::corrupt, "Archived WAL length changed before physical snapshot");
+        archived_remaining -= length;
+        copy(source, segment_path(destination_data, archived.first), length);
+    }
+    if (archived_remaining) throw Error(Fault::corrupt, "Archived WAL length differs from the published total");
+    copy(*engine_.wal_, segment_path(destination_data, engine_.segments_.back().first), active_bytes);
+    boundary();
+    {
+        const auto checkpoint = make_checkpoint(result.checkpoint);
+        File output(checkpoint_name, File::Mode::create_new);
+        output.write(0, checkpoint);
+        boundary();
+        output.flush();
+    }
+    result.files.push_back(std::move(checkpoint_name));
+    return result;
 }
 
 Row Transaction::get(Owner caller, RowId id)

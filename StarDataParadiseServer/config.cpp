@@ -211,23 +211,51 @@ Config read_config(const std::filesystem::path& path)
         auto root = std::filesystem::absolute(path).parent_path();
         const auto json = wire::parse_payload(read_text(path, max_config, "Cannot read configuration"));
         constexpr std::array keys{"data_dir", "log_dir", "temp_dir", "tls_certificate", "tls_private_key",
-            "bind", "allow_remote", "port", "max_connections", "timeout_ms", "routine_test_instance"};
+            "bind", "allow_remote", "port", "max_connections", "timeout_ms", "routine_test_instance", "decision_enabled", "mlp_cpu_enabled", "backup", "instance_name"};
         for (const auto& field : json.items())
             if (std::find(keys.begin(), keys.end(), field.key()) == keys.end())
                 throw StartupError("Unrecognized configuration key");
 
         Config result;
+        result.source = std::filesystem::canonical(path);
+        if (json.contains("instance_name"))
+        {
+            result.instance_name = wire::string_field(json, "instance_name");
+            if (result.instance_name.empty() || result.instance_name.size() > 32 ||
+                result.instance_name.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789_-") != std::string::npos)
+                throw StartupError("Invalid instance name");
+        }
         result.data = configured_path(json, root, "data_dir", true);
         result.logs = configured_path(json, root, "log_dir", true);
         result.temp = configured_path(json, root, "temp_dir", true);
         result.certificate = configured_path(json, root, "tls_certificate", false);
         result.private_key = configured_path(json, root, "tls_private_key", false);
+        if (json.contains("backup"))
+        {
+            result.backup = configured_path(json, root, "backup", true);
+            const auto overlaps = [](const auto& first, const auto& second) {
+                auto parent = second;
+                while (!parent.empty())
+                {
+                    if (std::filesystem::equivalent(first, parent)) return true;
+                    const auto next = parent.parent_path();
+                    if (next == parent) break;
+                    parent = next;
+                }
+                return false;
+            };
+            for (const auto& path : {result.data, result.logs, result.temp})
+                if (overlaps(path, result.backup) || overlaps(result.backup, path))
+                    throw StartupError("The backup directory must be independent of data, log and temp directories");
+        }
         if (std::filesystem::equivalent(result.data, result.logs) ||
             std::filesystem::equivalent(result.data, result.temp) ||
             std::filesystem::equivalent(result.logs, result.temp))
             throw StartupError("Data, log and temp directories must differ");
 
         result.routine_test_instance = json.value("routine_test_instance", false);
+        result.decision_enabled = json.value("decision_enabled", true);
+        result.mlp_cpu_enabled = json.value("mlp_cpu_enabled", true);
         if (json.contains("bind")) result.bind = wire::string_field(json, "bind");
         const bool allow_remote = json.value("allow_remote", false);
         asio::error_code ec;

@@ -147,6 +147,9 @@
     <ClCompile Include="StarDataParadiseServer.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="service.cpp" />
+    <ClCompile Include="operations.cpp" />
+    <ClCompile Include="support_bundle.cpp" />
+    <ClCompile Include="windows_service.cpp" />
     <ClCompile Include="storage_admin.cpp" />
     <ClCompile Include="..\sql\syntax.cpp" />
     <ClCompile Include="..\sql\types.cpp" />
@@ -169,6 +172,26 @@
     <ClCompile Include="..\sql\history_journal.cpp" />
     <ClCompile Include="..\sql\history_query.cpp" />
     <ClCompile Include="..\sql\history_restore.cpp" />
+    <ClCompile Include="..\sql\decision.cpp" />
+    <ClCompile Include="..\sql\decision_condition.cpp" />
+    <ClCompile Include="..\sql\decision_inspection.cpp" />
+    <ClCompile Include="..\jobs\manager.cpp" />
+    <ClCompile Include="..\backup\archive.cpp" />
+    <ClCompile Include="..\jobs\schedule.cpp" />
+    <ClCompile Include="..\jobs\worker.cpp" />
+    <ClCompile Include="..\ml\dataset.cpp" />
+    <ClCompile Include="..\ml\preprocess.cpp" />
+    <ClCompile Include="..\ml\pl_dataset_job.cpp" />
+    <ClCompile Include="..\ml\model.cpp" />
+    <ClCompile Include="..\ml\devices.cpp" />
+    <ClCompile Include="..\ml\training.cpp">
+      <PreprocessorDefinitions Condition="'$(SDP_WITH_CPU_MLP)' != 'OFF'">SDP_WITH_CPU_MLP=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="..\ml\mlp.cpp" Condition="'$(SDP_WITH_CPU_MLP)' != 'OFF'" />
+    <ClCompile Include="..\ml\linear_models.cpp" />
+    <ClCompile Include="..\ml\tree_models.cpp" />
+    <ClCompile Include="..\ml\clustering.cpp" />
+    <ClCompile Include="..\ml\pca.cpp" />
     <ClCompile Include="..\storage\disk.cpp" />
     <ClCompile Include="..\storage\heap.cpp" />
     <ClCompile Include="..\storage\wal.cpp" />
@@ -177,6 +200,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="server.hpp" />
+    <ClInclude Include="operations.hpp" />
+    <ClInclude Include="support_bundle.hpp" />
+    <ClInclude Include="windows_service.hpp" />
     <ClInclude Include="..\sql\diagnostic.hpp" />
     <ClInclude Include="..\sql\syntax.hpp" />
     <ClInclude Include="..\sql\types.hpp" />
@@ -200,6 +226,24 @@
     <ClInclude Include="..\sql\history_journal.hpp" />
     <ClInclude Include="..\sql\history_query.hpp" />
     <ClInclude Include="..\sql\history_restore.hpp" />
+    <ClInclude Include="..\sql\decision.hpp" />
+    <ClInclude Include="..\sql\decision_condition.hpp" />
+    <ClInclude Include="..\sql\decision_inspection.hpp" />
+    <ClInclude Include="..\jobs\manager.hpp" />
+    <ClInclude Include="..\backup\archive.hpp" />
+    <ClInclude Include="..\jobs\schedule.hpp" />
+    <ClInclude Include="..\jobs\worker.hpp" />
+    <ClInclude Include="..\ml\dataset.hpp" />
+    <ClInclude Include="..\ml\preprocess.hpp" />
+    <ClInclude Include="..\ml\pl_dataset_job.hpp" />
+    <ClInclude Include="..\ml\model.hpp" />
+    <ClInclude Include="..\ml\devices.hpp" />
+    <ClInclude Include="..\ml\training.hpp" />
+    <ClInclude Include="..\ml\mlp.hpp" />
+    <ClInclude Include="..\ml\linear_models.hpp" />
+    <ClInclude Include="..\ml\tree_models.hpp" />
+    <ClInclude Include="..\ml\clustering.hpp" />
+    <ClInclude Include="..\ml\pca.hpp" />
     <None Include="..\sql\SQL.ebnf" />
   </ItemGroup>
   <ItemDefinitionGroup>

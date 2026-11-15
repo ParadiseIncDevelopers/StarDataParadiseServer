@@ -1,4 +1,5 @@
 #include "binder.hpp"
+#include "decision.hpp"
 #include "advanced.hpp"
 #include "routines.hpp"
 #include "definition.hpp"
@@ -303,7 +304,7 @@ Plan bind(Catalog& catalog, const Statement& statement, const ParameterTypes& pa
     }
     if (statement.action == Action::insert || statement.action == Action::update || statement.action == Action::delete_)
         return Binder(catalog, statement, parameters).mutate();
-    if (!routine_ddl(catalog, statement, false) && !auxiliary_ddl(catalog, statement, false) &&
+    if (!decision_ddl(catalog, statement, false) && !routine_ddl(catalog, statement, false) && !auxiliary_ddl(catalog, statement, false) &&
         !relational_ddl(catalog, statement)) catalog.validate(statement);
     return statement;
 }

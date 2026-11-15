@@ -78,7 +78,7 @@ public:
         program_.revision = revision;
     }
 
-    Program run()
+    Program run(const SqlExpr* scalar = nullptr)
     {
         if (!program_.revision) throw Error(Code::type, routine_.name.source, "Invalid zero routine revision");
         if (routine_.function)
@@ -128,6 +128,15 @@ public:
         auto body = block(routine_.body, {}, 0);
         for (auto& instruction : body) program_.body.push_back(std::move(instruction));
         program_.handlers = block(routine_.handlers, {0, true}, 0);
+        if (scalar)
+        {
+            Instruction result{};
+            result.kind = Statement::return_;
+            result.source = scalar->source;
+            result.first = expression(*scalar, 0);
+            program_.returns = result.first->type;
+            program_.body.push_back(std::move(result));
+        }
         return std::move(program_);
     }
 
@@ -581,6 +590,14 @@ Json write_block(const std::vector<Instruction>& instructions)
 Program compile(const Routine& routine, uint64_t revision, const HostType& host)
 {
     return Compiler(routine, revision, host).run();
+}
+
+Program compile_expression(std::span<const Variable> inputs, const SqlExpr& expression, const HostType& host)
+{
+    Routine routine{};
+    routine.name = {{"decision_expression"}, expression.source};
+    routine.variables.assign(inputs.begin(), inputs.end());
+    return Compiler(routine, 1, host).run(&expression);
 }
 
 std::string serialize(const Program& program)

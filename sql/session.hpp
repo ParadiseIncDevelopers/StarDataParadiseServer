@@ -6,6 +6,8 @@
 #include <atomic>
 #include <sdp/wire.hpp>
 
+namespace sdp::jobs { class Manager; }
+
 namespace sdp::sql
 {
 class Debugger;
@@ -16,7 +18,7 @@ class Session
 public:
     Session(disk::Engine& engine, disk::Owner owner, std::string actor, std::chrono::milliseconds timeout,
         std::function<int64_t()> outcome_clock = {}, std::filesystem::path temporary = {},
-        Security* security = nullptr, Principal principal = {}, bool test_instance = false);
+        Security* security = nullptr, Principal principal = {}, bool test_instance = false, jobs::Manager* jobs = nullptr);
     ~Session();
     wire::Json dispatch(uint32_t id, std::string_view op, wire::Json& body, std::string_view correlation,
         std::stop_token cancellation = {});
@@ -65,6 +67,15 @@ private:
     wire::Json transact(std::string_view op, const wire::Json& body);
     wire::Json metadata();
     wire::Json history(const HistoryCommand& command);
+    wire::Json decision(std::string_view operation, const wire::Json& body);
+    wire::Json job_request(std::string_view operation, const wire::Json& body);
+    wire::Json backup_request(std::string_view operation, const wire::Json& body);
+    wire::Json dataset_request(std::string_view operation, const wire::Json& body);
+    wire::Json create_dataset(disk::Transaction& tx, const wire::Json& body);
+    wire::Json model_request(std::string_view operation, const wire::Json& body);
+    wire::Json enqueue_model(disk::Transaction& tx, int64_t model, std::string_view dataset,
+        const std::string& token, wire::Json payload, const WorkCheck& check);
+    wire::Json compare_models(disk::Transaction& tx, Catalog& catalog, const wire::Json& body);
     wire::Json restore_history(const HistoryCommand& command);
     std::unique_ptr<disk::Transaction> begin();
     disk::Transaction& use(std::unique_ptr<disk::Transaction>& local);
@@ -90,6 +101,7 @@ private:
     Security* security_;
     Principal principal_;
     bool test_instance_;
+    jobs::Manager* jobs_;
     std::atomic<std::shared_ptr<Debugger>> debugger_;
     std::unique_ptr<HistoryPlan> history_plan_;
     wire::Json last_profile_ = wire::Json::array();

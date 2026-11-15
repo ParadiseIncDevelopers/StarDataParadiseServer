@@ -233,6 +233,17 @@ Checkpoint retention(uint64_t published, uint64_t history, std::optional<uint64_
     return {published, floor};
 }
 
+Page make_checkpoint(Checkpoint value)
+{
+    Page content{};
+    std::ranges::copy(checkpoint_magic, content.begin());
+    put<uint32_t>(content, 8, 1);
+    put<uint64_t>(content, 16, value.published);
+    put<uint64_t>(content, 24, value.retain_from);
+    seal(content);
+    return content;
+}
+
 void save_checkpoint(const std::filesystem::path& data, Checkpoint value, const std::function<void()>& before_publish)
 {
     const auto destination = checkpoint_path(data);
@@ -242,12 +253,7 @@ void save_checkpoint(const std::filesystem::path& data, Checkpoint value, const 
     temporary += ".pending." + std::to_string(GetCurrentProcessId()) + "." + std::to_string(GetTickCount64())
         + "." + std::to_string(++sequence);
 
-    Page content{};
-    std::ranges::copy(checkpoint_magic, content.begin());
-    put<uint32_t>(content, 8, 1);
-    put<uint64_t>(content, 16, value.published);
-    put<uint64_t>(content, 24, value.retain_from);
-    seal(content);
+    const auto content = make_checkpoint(value);
     {
         File file(temporary, File::Mode::create_new);
         file.write(0, content);

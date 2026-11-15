@@ -1,0 +1,199 @@
+{
+  "stage_id": 26,
+  "status": "PASSED",
+  "started_at": "2026-11-15T16:29:54.1306508+03:00",
+  "finished_at": "2026-11-15T16:50:23.6119377+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 25,
+      "file": "STAGES/25.json",
+      "sha256": "3a3e63d44e99d4b01bdd44b27f05f382a70b5767d11f8ce499ad6228a5ca9a5e"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "model_format": 1,
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "8fec43822f7f05a64b4807cbcd51f0806dddd78a",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "jobs/manager.cpp",
+        "jobs/worker.cpp",
+        "ml/clustering.cpp",
+        "ml/clustering.hpp",
+        "ml/model.cpp",
+        "ml/pca.cpp",
+        "ml/pca.hpp",
+        "ml/PCA.md",
+        "ml/training.cpp",
+        "ml/training.hpp",
+        "MODELS.md",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/clustering_smoke.cpp",
+        "tests/pca_smoke.cpp",
+        "tests/unsupervised_rpc.py"
+      ],
+      "source_manifest": "out/sdp-m6/stage26/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "4acf9eb6fe42a285c84a24b15908cb305d93d861822bed2ddc8ee3efe09c0dfe"
+    }
+  ],
+  "checkpoint": {
+    "repo": "StarDataParadiseServer",
+    "archive_sha256": "024f2db0c1e77a2cd78f124ce054a6c6e7ad942157fb5824f732612c4330960e",
+    "archive_path": "out/sdp-m6/stage26/workspace-before.zip",
+    "manifest": "out/sdp-m6/stage26/workspace-before.json"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Snapshot and verify all seven repos before Stage26",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/checkpoint.log",
+      "log_sha256": "98deda40c21ada70b5d194734e7fc1187cf6bc60b37c8594cd18e17e0ccaea80",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure Stage26 Release x64 with pinned dependencies",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/configure.log",
+      "log_sha256": "8c59a2f5dc01eeb093867f643644793de2cb0d739c93a3733b863bdacd2f1cd0",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m6/stage26/build --config Release --parallel 2 with Visual Studio node reuse and multiprocess compilation disabled",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/build-final.log",
+      "log_sha256": "697f39bee275eaf2d59a539cb134c6403778f4e2a8f061a82f1a330c16f6f4b2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run complete Stage26 Windows x64 CTest against exact build",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/ctest-final.log",
+      "log_sha256": "4a7ff9f3c7cbcaa77ca02aaceed44ee43a689d690d25659f95deaf298eedd07c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Independent x64 MSVC tests for seeded K-Means, DBSCAN and exact silhouette",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/clustering-agent/test.log",
+      "log_sha256": "1c0d1ee967e04a1065861cd11cae32fc60917181402fc2a98a3b17432e3192d2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Independent x64 MSVC PCA covariance, shape, reconstruction and numerical bounds",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/pca-agent/test.log",
+      "log_sha256": "2610981f144dd9ca383efdcdd8581b4c75aef870cd5af8e0d31c0e809e56e1ca",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Official Visual Studio solution x64 Release and executable version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/msbuild.log",
+      "log_sha256": "8f33ee0e633a13713ba1c751c3975abfdf1df24791a4086a35bea9cc61886404",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run independent TLS clustering, PCA and experiment fixture on frozen CMake Release binary",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/unsupervised-rpc-agent-final.log",
+      "log_sha256": "248456964119d38cdc954e24d2533306821c92b4e56e387b4eb6ce960ad02dd1",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "All installed Stage23 Native ABI 1 integration scenarios against exact Stage26 executable",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/native-regression.log",
+      "log_sha256": "43f87808a82d66648c973c0763ba975bc13fb1299c043eb5fde8ce67dab64b57",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Check all six out-of-scope repositories against checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m6/stage26/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S26-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "K-Means merkezleri ve yeni örnek ataması bağımsız hesapla doğrulandı. DBSCAN iki yoğun küme ve iki noise satırı üretti. Silhouette her bölümde bağımsız Euclidean hesapla karşılaştırıldı."
+    },
+    {
+      "id": "S26-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "PCA held-out projection ve reconstruction bilinen geometrik sonuçla eşleşti. Eğitim ortalaması holdout içermedi. Analitik eigensystem, covariance ve explained variance kontrolleri geçti."
+    },
+    {
+      "id": "S26-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Geçersiz k/eps ve boş veri reddedildi. Tek kümede silhouette null ve gerekçe döndü. Farklı noise maskesi karşılaştırılmadı. Quota, job cancel, scratch temizliği ve restart doğrulandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage26/candidate/StarDataParadiseServer.exe",
+      "sha256": "306cd7d4e1173e5a3be6d811f4fde33861d938ac9287c407eb1f7425573ec5c5"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage26/candidate/StarDataParadiseServer-vs.exe",
+      "sha256": "bb02d29a60761d5290089f27c9a91342813bd0eaf2dd2ca92351810c149cae20"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m6/stage26/candidate/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m5/stage23/package/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "a7514dbc2c0fbf926d8d72dbf4ba95aae1004c842ff9f96e205208d568316f48"
+    }
+  ],
+  "remaining_issues": [
+    "DBSCAN yalnız eğitimde etiket ve silhouette üretir. Yeni ve held-out örnekler için unsupported veya unavailable döner.",
+    "Eğitim kayıt ve model katmanı izole CPU worker kotalarına tabidir."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 27
+}

@@ -8,7 +8,7 @@ namespace sdp::sql
 inline constexpr std::string_view default_database = "main";
 inline constexpr std::string_view default_schema = "public";
 
-enum class ObjectKind { database = 1, schema, table, index, view, routine, sequence };
+enum class ObjectKind { database = 1, schema, table, index, view, routine, sequence, decision, model };
 using ObjectId = int64_t;
 
 struct Column

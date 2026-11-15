@@ -1,9 +1,10 @@
-(* Etap 11–20 SQL, PL/SQL and History grammar. Keywords are ASCII case-insensitive. The lexer also
+(* Etap 11–22 SQL, PL/SQL, History and Decision grammar. Keywords are ASCII case-insensitive. The lexer also
    skips whitespace, -- line comments and non-nested /* block comments */. *)
 
 input         = statement, [ ";" ], end ;
 statement     = create | drop | alter | truncate | query | insert | update | delete
-              | explain | analyze | reindex | grant | revoke | create-routine | call | anonymous-block | trigger | history ;
+              | explain | analyze | reindex | grant | revoke | create-routine | call | anonymous-block | trigger | history
+              | decision-rule | activate-decision-rule | decision-inspection ;
 create        = "CREATE", ( "DATABASE", ident | "SCHEMA", schema-name
               | "TABLE", table-name, "(", table-entry, { ",", table-entry }, ")"
               | [ "UNIQUE" ], "INDEX", table-name, "ON", table-name, column-list, [ collation ]
@@ -49,6 +50,18 @@ utc-epoch      = "UTC", [ "-" | "+" ], uint ;
 revision       = "REVISION", positive ;
 pin-kind       = "SNAPSHOT" | "DATASET" | "BACKUP" | "RESTORE" ;
 positive       = ? nonzero unsigned integer ? ;
+
+decision-rule = "CREATE", "DECISION", "RULE", ident, "ON", table-name, "FOR", decision-event,
+                "PRIORITY", uint, "WHEN", "(", expr, ")", "THEN", decision-effect ;
+decision-event = "INSERT" | "UPDATE" | "DELETE" | "WRITE" ;
+decision-effect = "ALLOW" | "DENY" | "SET", assignment ;
+activate-decision-rule = "ALTER", "DECISION", "RULE", ident, "ON", table-name,
+                         "ACTIVATE", "VERSION", positive ;
+decision-inspection = "DECISION", ( "EXPLAIN" | "WHYNOT" | "WHATIF" | "TEST" | "RECHECK" | "VALIDATE" ),
+                      "USING", string ;
+(* Decision priority and version use unsigned 32-bit integers. New Decision keywords
+   are contextual. Expression type and determinism checks occur during binding.
+   The inspection string is a JSON object validated by the Decision request handler. *)
 
 table-entry   = column | table-key ;
 column        = ident, type, { nullability | "DEFAULT", expr
@@ -173,3 +186,5 @@ end           = ? end of input ? ;
    binds OLD/NEW fields with a qualified named parameter. History LIMIT is 1–256.
    APPLY requires the preview plan ID and a 32-character lowercase hexadecimal
    request token. *)
+
+model-command = ("CREATE" | "TRAIN" | "EVALUATE" | "PREDICT" | "ALTER"), "MODEL", "USING", quoted-text ;

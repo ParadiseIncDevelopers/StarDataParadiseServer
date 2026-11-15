@@ -55,6 +55,7 @@ public:
     void inspect(disk::RowId id, const RowValues* before, const RowValues* after);
     void index(disk::RowId id, const RowValues* before, const RowValues* after);
     void drop_indexes();
+    const std::vector<Object>& catalog_snapshot() const noexcept { return snapshot_; }
 
 private:
     disk::Transaction& transaction_;

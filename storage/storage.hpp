@@ -150,6 +150,7 @@ public:
     Integrity inspect(std::span<const RowId> index_candidates = {});
 
 private:
+    friend class Transaction;
     File file_;
     Header header_;
     size_t capacity_;

@@ -30,14 +30,24 @@ struct Revision
 };
 using RevisionVisitor = std::function<void(Revision&&)>;
 
+struct PhysicalSnapshot
+{
+    Header header;
+    Checkpoint checkpoint;
+    uint64_t bytes{};
+    std::vector<std::filesystem::path> files;
+};
+
+
 class Transaction;
 class Engine
 {
 public:
-    explicit Engine(const std::filesystem::path& path, Hooks hooks = {});
+    explicit Engine(const std::filesystem::path& path, Hooks hooks = {}, bool decision_enabled = true);
 
     std::unique_ptr<Transaction> begin(Owner owner, std::chrono::milliseconds wait,
-        std::stop_token stop = {}, std::chrono::milliseconds lifetime = std::chrono::seconds(20));
+        std::stop_token stop = {}, std::chrono::milliseconds lifetime = std::chrono::seconds(20),
+        std::string actor = {});
     void disconnect(Owner owner);
     Header current();
     std::vector<Revision> history();
@@ -61,6 +71,7 @@ private:
 
     std::filesystem::path path_;
     Hooks hooks_;
+    const bool decision_enabled_;
     Store store_;
     std::vector<Segment> segments_;
     std::unique_ptr<File> wal_;
@@ -80,7 +91,14 @@ public:
     Transaction& operator=(const Transaction&) = delete;
 
     void ensure_active(Owner caller);
+    Integrity inspect_committed(Owner caller);
+    bool decision_enabled() const noexcept { return engine_.decision_enabled_; }
+    std::string_view actor() const noexcept { return actor_; }
     void visit_changes(Owner caller, const std::function<void(std::span<const Change>)>& visitor);
+    // Caller owns a fresh private staging directory and removes it on failure.
+    // The check runs under the Engine lock and cannot reenter the database.
+    PhysicalSnapshot copy_physical_snapshot(Owner caller, const std::filesystem::path& destination_data,
+        uint64_t max_bytes, const std::function<void()>& check = {});
     Row get(Owner caller, RowId id);
     // Visitors and boundary checks run inside the engine lock and must not reenter it.
     void visit(Owner caller, const RowVisitor& visitor, std::optional<uint32_t> schema = {});
@@ -106,7 +124,7 @@ private:
         size_t bytes;
     };
     friend class Engine;
-    Transaction(Engine& engine, Owner owner, uint64_t token);
+    Transaction(Engine& engine, Owner owner, uint64_t token, std::string actor);
     std::unique_lock<std::mutex> lock(Owner caller);
     void ensure_change(const Change& change) const;
     void mark(Change change);
@@ -117,6 +135,7 @@ private:
     Engine& engine_;
     Owner owner_;
     uint64_t token_;
+    const std::string actor_;
     Editor editor_;
     std::vector<Change> changes_;
     std::vector<Saved> saves_;

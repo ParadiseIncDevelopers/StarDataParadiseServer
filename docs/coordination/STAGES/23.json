@@ -1,0 +1,283 @@
+{
+  "stage_id": 23,
+  "status": "PASSED",
+  "started_at": "2026-11-15T15:40:20.5125283+03:00",
+  "finished_at": "2026-11-15T15:55:57.5722782+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 22,
+      "file": "STAGES/22.json",
+      "sha256": "0c07f7de25f6d83fe2386e9a1c03f786380da11fd743694b06e9a7dc2b01cae5"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "wire_version": 1,
+    "job_format": 1,
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "8fec43822f7f05a64b4807cbcd51f0806dddd78a",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "JOBS.md",
+        "jobs/manager.cpp",
+        "jobs/manager.hpp",
+        "jobs/schedule.cpp",
+        "jobs/schedule.hpp",
+        "jobs/SCHEDULE.md",
+        "jobs/worker.cpp",
+        "jobs/worker.hpp",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/job_worker_smoke.cpp",
+        "tests/jobs_rpc.py",
+        "tests/schedule_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m5/stage23/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "c57377d9ca6b0c104870106c6f503e1e360102f14c3878d422e9ebbeea7a864a"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "22f83f2b924a3e8ddea71f6cadf0534d563e944c",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "include/StarDataParadiseDLLler.h",
+        "StarDataParadiseDLLler/api.cpp",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py"
+      ],
+      "source_manifest": "out/sdp-m5/stage23/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "cf05fa2d8660cba5b8e3144cf65c175c078088b550c3308a46b36319d8c8b06e"
+    }
+  ],
+  "checkpoint": {
+    "archive_sha256": "1309b68977c41ed46abad868a2918b9fa3402bbaba2b16abb6672cf818e988b9",
+    "manifest": "out/sdp-m5/stage23/workspace-before.json",
+    "archive_path": "out/sdp-m5/stage23/workspace-before.zip",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m5/stage23/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/checkpoint.log",
+      "log_sha256": "d879cb3e1099246e43f6e5a52a888dbcbc0f4a062ba74664a363605e19256f37",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CMake separate Stage23 Windows x64 v145 Release with pinned inputs",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/configure.log",
+      "log_sha256": "7894446c33a20ea1133596ef0803ed4a5f47838d6d12d19d2d6d243e814b8752",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m5/stage23/build --config Release --parallel 4",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/build.log",
+      "log_sha256": "6ca62aac01201798b997e618af1a8bf04aa6f7058098aec4459797d28b53ba0a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run all Stage23 Release CTests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/ctest-final.log",
+      "log_sha256": "9d97a62ceab044e8a6a00421739ba1ff454874a039f11d9dbb927f6145d163ed",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run jobs_rpc.py on exact Stage23 Server",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/jobs-rpc-focused.log",
+      "log_sha256": "3d4a3445e86559d6aa18509c4eacf9de808bc8197491d31d5d18912196fbbc41",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Independent MSVC /W4 /WX real worker process test",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/worker-agent/test.log",
+      "log_sha256": "f9539bddce8c1531c04b665b95d3693fd1fd0f07c3467a9d38884ffe19660300",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Actual test parent kill, worker Job Object termination and orphan workspace cleanup",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/worker-agent/orphan/test.log",
+      "log_sha256": "083b5199abfcfb6102c59258e821918c2554558441f4b8ba6e195c125560d1e8",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Independent MSVC /W4 /WX Windows DST and interval calendar cases",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/schedule-agent/test.log",
+      "log_sha256": "c2b70364c9395bdf62826ab3e282c7909501613f0a7ec0322a5f04228ef0dad0",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Independent official Server .slnx x64 Release and --version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/msbuild.log",
+      "log_sha256": "74f2034de95323e22969612fd92e60cb2e78351b0069d32833002d5316cadef2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Native x64 SDK build",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/build-final.log",
+      "log_sha256": "4775e99d3fada5d6aef9e1db06bf3d624b76c84883cf8dcf6d4f308d16d80ae1",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Native CTest 2/2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/ctest.log",
+      "log_sha256": "253e903069aca08760bcb105ba34a857caee4e0419f786f48cbf5fd658046775",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Native Windows x64 ZIP package",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/cpack.log",
+      "log_sha256": "70424c33f91408c70b09327c7337e19f37975a6850a9387c5de364c4b101bca2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Official Native .slnx Release x64",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/msbuild.log",
+      "log_sha256": "654ad359664a84afd32c231d7e8570b5188828b409e1d4a4193ed326a455f17c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Compare previous ABI 1 exports and check sdp_job_command",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/exports.log",
+      "log_sha256": "1a5bb66a57c72c86b665fb4206f95cd125c96ba3eacd9b71034aa2dcbc34f6cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Stage23 Native package backwards compatibility with Stage22",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/integration-prior.log",
+      "log_sha256": "da5ee998e0c56b24ce0ad95becebd2954ccd4546b6f19c15da564dfcdadffd48",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Stage23 independent installed SDK real TLS full regression with --decision and --jobs",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/integration-final.log",
+      "log_sha256": "ab867132066bc38ce193aa4e8b2761ffae4bf39be7da546ebcdcff2c6c1e7cda",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Check sources of five out-of-scope repositories against checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m5/stage23/isolation.log",
+      "log_sha256": "82ae118696621845d3915687a8e964b25852621b9a28bad3833d2cea71abb38a",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S23-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İstemci kapandıktan sonra bağımsız worker hesaplamayı tamamladı. Başka gerçek TLS oturumu aynı stable job ID ve kalıcı attempt olaylarını okudu."
+    },
+    {
+      "id": "S23-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Test worker PID’si sonlandırıldı, gerçek SQL çalışmaya devam etti. Timeout, output cap, cancellation ve geçici dosya temizliği doğrulandı. Parent kill sonrasında Job Object child’ı kapattı."
+    },
+    {
+      "id": "S23-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Rollback job ve schedule başlatmadı. Commit schedule’i tek ID ile çalıştırdı, output limitli iş aynı ID’de backoff ile bir kez tekrarlandı. Restart tamamlanmış sonuçları yinelemedi ve kesilen attempt’i interrupted olarak ayırdı. Windows DST gap/fold kanıtı."
+    },
+    {
+      "id": "S23-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Başka actor’a ait status, watch/log, cancel ve schedule erişimi reddedildi. Aynı token, aynı config ve aynı owner ile önceki job id döndü."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage23/build/Release/StarDataParadiseServer.exe",
+      "sha256": "b95dc2a8876c2fd30f7f22db586d8b3023a6060ea6789666dbb341becb6a8043"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage23/vs/bin/StarDataParadiseServer.exe",
+      "sha256": "92fd9c7ca51123fbd191cbb533ccc3b3f2a3a18008d53ea7b53e042c1f91331e"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m5/stage23/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m5/stage23/package/StarDataParadiseDLLler-0.2.0-win-x64.zip",
+      "sha256": "a7514dbc2c0fbf926d8d72dbf4ba95aae1004c842ff9f96e205208d568316f48"
+    }
+  ],
+  "remaining_issues": [
+    "Etap 23 aktif iş türü kontrollü compute. Diğer iş türlerinin hazırlığı capability tablosunda ayrı gösterilir.",
+    "128 iş, 32 schedule ve tek Windows worker sınırı var. CPU oranı Windows uygulayabildiğinde raporlanır; iş bellek/duvar saati ve aktarım sınırları ayrı uygulanır.",
+    "Duraklatma ve gerçek checkpoint resume daha sonraki etaba bağlıdır."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 24
+}

@@ -1,4 +1,5 @@
 #include "catalog.hpp"
+#include "decision.hpp"
 
 #include <algorithm>
 #include <limits>
@@ -54,7 +55,8 @@ void check_name(const Name& name)
 
 bool auxiliary(ObjectKind kind)
 {
-    return kind == ObjectKind::index || kind == ObjectKind::view || kind == ObjectKind::routine || kind == ObjectKind::sequence;
+    return kind == ObjectKind::index || kind == ObjectKind::view || kind == ObjectKind::routine ||
+        kind == ObjectKind::sequence || kind == ObjectKind::decision || kind == ObjectKind::model;
 }
 
 Object decode_object(disk::RowId row_id, const disk::Row& row)
@@ -67,7 +69,7 @@ Object decode_object(disk::RowId row_id, const disk::Row& row)
     const auto& name = field<std::string>(row, 2);
     const auto version = field<int64_t>(row, 3);
     const auto& definition = field<std::string>(row, 4);
-    if (kind < static_cast<int64_t>(ObjectKind::database) || kind > static_cast<int64_t>(ObjectKind::sequence) ||
+    if (kind < static_cast<int64_t>(ObjectKind::database) || kind > static_cast<int64_t>(ObjectKind::model) ||
         parent < 0 || !valid_name(name) || version < 1 || version > std::numeric_limits<uint32_t>::max() ||
         definition.size() > max_definition || !valid_utf8(definition))
         corrupt();
@@ -347,6 +349,7 @@ void Catalog::remove(const Object& object)
     const auto current = decode_object(static_cast<disk::RowId>(object.id),
         transaction_->get(owner_, static_cast<disk::RowId>(object.id)));
     if (current.kind != object.kind) corrupt();
+    check_decision_drop(list(), current);
     transaction_->erase(owner_, static_cast<disk::RowId>(object.id), disk::ChangeKind::catalog);
 }
 
@@ -415,11 +418,15 @@ Object Catalog::validate(const Statement& statement) const
 Object Catalog::apply(const Statement& statement)
 {
     if (!transaction_) throw Error(Code::unsupported, statement.source, "Metadata view is read-only");
-    auto [edit, object] = plan(list(), statement);
+    const auto snapshot = list();
+    auto [edit, object] = plan(snapshot, statement);
     if (edit == Edit::insert)
         object.id = static_cast<ObjectId>(transaction_->insert(owner_, encode_object(object), disk::ChangeKind::catalog));
     else if (edit == Edit::erase)
+    {
+        check_decision_drop(snapshot, object);
         transaction_->erase(owner_, static_cast<disk::RowId>(object.id), disk::ChangeKind::catalog);
+    }
     else
         transaction_->update(owner_, static_cast<disk::RowId>(object.id), encode_object(object), disk::ChangeKind::catalog);
     return object;

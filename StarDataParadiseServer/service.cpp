@@ -1,7 +1,10 @@
 #include "server.hpp"
 #include "storage_admin.hpp"
+#include "operations.hpp"
+#include "../backup/archive.hpp"
 #include "../sql/session.hpp"
 #include "../sql/debugger.hpp"
+#include "../jobs/manager.hpp"
 
 #include <asio.hpp>
 #include <asio/ssl.hpp>
@@ -130,14 +133,16 @@ public:
     using Control = std::function<Json(Session&, std::string_view, const Json&)>;
 
     Session(tcp::socket socket, asio::ssl::context& context, const Config& config, const Admin& admin,
-        disk::Engine* database, disk::Owner owner, sql::Security* security, asio::thread_pool& workers, Control control)
+        disk::Engine* database, disk::Owner owner, sql::Security* security, jobs::Manager* jobs,
+        asio::thread_pool& workers, Operations* operations, Control control)
         : stream_(std::move(socket), context), config_(config), admin_(admin), database_(database), owner_(owner),
-          security_(security), workers_(workers), control_(std::move(control)) {}
+          security_(security), jobs_(jobs), workers_(workers), operations_(operations), control_(std::move(control)) {}
 
     const std::string& id() const noexcept { return id_; }
     const std::optional<sql::Principal>& principal() const noexcept { return principal_; }
     std::string correlation_id() const { return correlation(); }
     uint32_t request_number() const noexcept { return current_id_; }
+    uint64_t slow_queries() const noexcept { return slow_queries_; }
     bool idle() const noexcept { return !busy_.has_value() && sql_.has_value(); }
     void attach_debugger(std::shared_ptr<sql::Debugger> debugger)
     {
@@ -221,7 +226,8 @@ private:
     auto token(asio::error_code& error) const
         -> decltype(asio::cancel_after(1ms, asio::redirect_error(asio::use_awaitable, error)))
     {
-        return asio::cancel_after(config_.timeout, asio::redirect_error(asio::use_awaitable, error));
+        return asio::cancel_after(operations_ ? operations_->timeout() : config_.timeout,
+            asio::redirect_error(asio::use_awaitable, error));
     }
 
     asio::awaitable<void> send(Json reply)
@@ -277,11 +283,12 @@ private:
             OPENSSL_cleanse(password.data(), password.size());
             auth_failed_ = !authenticated_;
             log_event(config_, true, authenticated_ ? "authentication_passed" : "authentication_failed", correlation());
+            log_diagnostic(config_, "audit", authenticated_ ? "authentication_passed" : "authentication_failed", 0, id_);
             if (authenticated_)
             {
                 if (database_)
-                    sql_.emplace(*database_, owner_, principal_->name, config_.timeout,
-                        std::function<int64_t()>{}, config_.temp, security_, *principal_, config_.routine_test_instance);
+                    sql_.emplace(*database_, owner_, principal_->name, operations_ ? operations_->timeout() : config_.timeout,
+                        std::function<int64_t()>{}, config_.temp, security_, *principal_, config_.routine_test_instance, jobs_);
                 co_return wire::success(current_id_, {{"authenticated", true}});
             }
             co_return wire::failure(current_id_, Code::auth_failed, correlation());
@@ -297,14 +304,30 @@ private:
             features["plsql_debug_v1"] = security_ != nullptr;
             features["history_v1"] = security_ != nullptr;
             features["history_restore_v1"] = security_ != nullptr;
+            features["decision_v1"] = security_ != nullptr && config_.decision_enabled;
+            features["decision_explain_v1"] = security_ != nullptr && config_.decision_enabled;
+            features["jobs_v1"] = jobs_ != nullptr;
+            features["dataset_v1"] = jobs_ != nullptr;
+            features["supervised_ml_v1"] = jobs_ != nullptr;
+            features["unsupervised_ml_v1"] = jobs_ != nullptr;
+            features["mlp_cpu_v1"] = jobs_ != nullptr && jobs_->mlp_enabled();
+            features["model_checkpoints_v1"] = jobs_ != nullptr && jobs_->mlp_enabled();
+            features["model_lifecycle_v1"] = jobs_ != nullptr;
+            features["ml_gpu_v1"] = false;
+            features["backup_v1"] = jobs_ != nullptr && jobs_->backup_enabled();
+            features["pitr_v1"] = false;
+            features["admin_v1"] = operations_ != nullptr;
+            features["health_center_v1"] = operations_ != nullptr;
             co_return wire::success(current_id_, {{"features", std::move(features)}});
         }
         if (operation == "health")
             co_return wire::success(current_id_, {{"status", "ready"}, {"product_version", product_version}});
         if (sql_)
         {
+            if (operation.starts_with("admin_") && !principal_->administrator)
+                co_return wire::failure(current_id_, Code::permission_denied, correlation());
             if (operation == "session_list" || operation == "session_terminate" || operation == "query_cancel" ||
-                operation.starts_with("debug_"))
+                operation == "admin_status" || operation.starts_with("debug_"))
             {
                 try { co_return control_(*this, operation, body); }
                 catch (const wire::Error& error) { co_return wire::failure(current_id_, error.code(), correlation()); }
@@ -325,7 +348,33 @@ private:
                     });
             }
             const auto stop = busy_->source.get_token();
-            co_return co_await on_worker(workers_, [&] { return sql_->dispatch(current_id_, operation, body, correlation(), stop); });
+            const auto started = std::chrono::steady_clock::now();
+            auto answer = co_await on_worker(workers_, [&] {
+                if (!operation.starts_with("admin_") || operation == "admin_maintenance_submit")
+                    return sql_->dispatch(current_id_, operation, body, correlation(), stop);
+                if (!operations_) return wire::failure(current_id_, Code::unsupported, correlation());
+                try { return wire::success(current_id_, operations_->request(operation, body, stop)); }
+                catch (const wire::Error& error) { return wire::failure(current_id_, error.code(), correlation()); }
+            });
+            const auto elapsed = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - started).count());
+            const bool ok = answer.value("ok", false);
+            const auto code = ok ? 0u : answer.at("error").value("code", 0u);
+            if (operation == "execute" || operation == "fetch")
+            {
+                if (elapsed >= 250) ++slow_queries_;
+                log_diagnostic(config_, "query", ok ? "query_completed" : "query_failed", code, id_, elapsed);
+            }
+            else if (operation.starts_with("history_"))
+                log_diagnostic(config_, "history", ok ? "request_completed" : "request_failed", code, id_, elapsed);
+            else if (operation.starts_with("model_") || operation.starts_with("dataset_"))
+                log_diagnostic(config_, "ml", ok ? "request_completed" : "request_failed", code, id_, elapsed);
+            else if (operation.starts_with("decision_"))
+                log_diagnostic(config_, "decision", ok ? "decision_evaluated" : "decision_denied", code, id_, elapsed);
+            else if (operation.starts_with("admin_") || operation.starts_with("backup_"))
+                log_diagnostic(config_, "audit", ok ? "request_completed" : "request_failed", code, id_, elapsed);
+            if (!ok) log_diagnostic(config_, "error", "request_failed", code, id_, elapsed);
+            co_return answer;
         }
         co_return wire::failure(current_id_, Code::unsupported, correlation());
     }
@@ -346,7 +395,10 @@ private:
     disk::Engine* database_;
     disk::Owner owner_;
     sql::Security* security_;
+    jobs::Manager* jobs_;
     asio::thread_pool& workers_;
+    Operations* operations_;
+    uint64_t slow_queries_{};
     Control control_;
     std::optional<sql::Principal> principal_;
     std::optional<Busy> busy_;
@@ -361,8 +413,9 @@ class Service
 {
 public:
     Service(const Config& config, const Admin& admin, asio::ssl::context tls,
-        disk::Engine* database, sql::Security* security)
-        : config_(config), admin_(admin), database_(database), security_(security),
+        disk::Engine* database, sql::Security* security, jobs::Manager* jobs)
+        : config_(config), admin_(admin), database_(database), security_(security), jobs_(jobs),
+          operations_(database && jobs ? std::make_unique<Operations>(config, *database, *jobs) : nullptr),
           tls_(std::move(tls)), signals_(io_, SIGINT, SIGTERM)
     {
         const tcp::endpoint endpoint(asio::ip::make_address(config.bind), config.port);
@@ -381,16 +434,21 @@ public:
         if (error) throw StartupError("Bind/listen failed. Check port availability");
     }
 
-    int run()
+    int run(std::stop_token token, const std::function<void()>& ready)
     {
+        if (token.stop_requested()) return 0;
         signals_.async_wait([this](const asio::error_code& error, int) {
             if (!error) stop();
         });
         accept();
         std::cout << "LISTENING " << config_.bind << ' ' << acceptor_.local_endpoint().port() << std::endl;
         log_event(config_, false, "listening");
+        log_diagnostic(config_, "operational", "listening");
+        if (ready) ready();
+        if (token.stop_possible()) watch_stop(token);
         io_.run();
         log_event(config_, false, "stopped");
+        log_diagnostic(config_, "operational", "stopped");
         return failed_ ? 1 : 0;
     }
 
@@ -477,6 +535,30 @@ private:
     {
         const auto& actor = *caller.principal();
         if (op.starts_with("debug_")) return debug_operation(caller, op, body);
+        if (op == "admin_status")
+        {
+            if (!actor.administrator || !operations_) throw wire::Error(Code::permission_denied);
+            if (!body.empty()) throw wire::Error(Code::invalid_argument);
+            auto authenticated = Json::array();
+            size_t transactions{}, waiting{};
+            uint64_t slow{};
+            for (const auto& [key, session] : sessions_)
+            {
+                if (!session->principal()) continue;
+                auto info = session->summary();
+                transactions += info.at("transaction_active").get<bool>() ? 1u : 0u;
+                waiting += info.at("lock_wait_ms").get<uint64_t>() ? 1u : 0u;
+                slow += session->slow_queries();
+                authenticated.push_back(std::move(info));
+            }
+            const auto hdr = database_->current();
+            return wire::success(caller.request_number(), {{"instance_name", config_.instance_name},
+                {"instance_id", operations_->instance_id()}, {"port", acceptor_.local_endpoint().port()},
+                {"sessions", std::move(authenticated)}, {"active_transactions", transactions}, {"waiting_sessions", waiting},
+                {"slow_queries", slow}, {"disk", {{"pages", hdr.pages}, {"bytes", uint64_t{hdr.pages} * disk::page_size},
+                    {"lsn", hdr.lsn}}}, {"limits", {{"connections", config_.max_connections}, {"timeout_ms", operations_->timeout().count()},
+                    {"job_workers", 1}, {"sql_workers", 4}}}, {"deadlock_graph_available", false}});
+        }
         auto found = sessions_.end();
         if (op == "session_list")
         {
@@ -524,7 +606,7 @@ private:
             {
                 const auto key = ++next_session_;
                 auto session = std::make_shared<Session>(std::move(socket), tls_, config_, admin_, database_, key,
-                    security_, workers_, [this](Session& caller, std::string_view op, const Json& body) {
+                    security_, jobs_, workers_, operations_.get(), [this](Session& caller, std::string_view op, const Json& body) {
                         return control(caller, op, body);
                     });
                 sessions_.emplace(key, session);
@@ -538,8 +620,23 @@ private:
         });
     }
 
+    void watch_stop(std::stop_token token)
+    {
+        if (stopping_) return;
+        if (token.stop_requested())
+        {
+            stop();
+            return;
+        }
+        stop_poll_.expires_after(100ms);
+        stop_poll_.async_wait([this, token](const asio::error_code& error) {
+            if (!error) watch_stop(token);
+        });
+    }
+
     void stop()
     {
+        if (stopping_) return;
         stopping_ = true;
         asio::error_code ignored;
         acceptor_.close(ignored);
@@ -551,10 +648,13 @@ private:
     const Admin& admin_;
     disk::Engine* database_;
     sql::Security* security_;
+    jobs::Manager* jobs_;
+    std::unique_ptr<Operations> operations_;
     asio::io_context io_{1};
     asio::thread_pool workers_{4};
     asio::ssl::context tls_;
     tcp::acceptor acceptor_{io_};
+    asio::steady_timer stop_poll_{io_};
     asio::signal_set signals_;
     std::map<uint64_t, std::shared_ptr<Session>> sessions_;
     std::map<std::string, DebugBinding, std::less<>> debuggers_;
@@ -564,16 +664,22 @@ private:
 };
 }
 
-int run(const Config& config)
+int run(const Config& config, std::stop_token stop, const std::function<void()>& ready)
 {
     asio::ssl::context tls(asio::ssl::context::tls_server);
     configure_tls(tls, config);
     const DataLock lock(config);
-    check_storage_on_start(config);
+    try { check_storage_on_start(config); }
+    catch (...)
+    {
+        log_diagnostic(config, "recovery", "recovery_failed");
+        throw;
+    }
+    log_diagnostic(config, "recovery", "recovery_completed");
     const auto admin = load_admin(config);
     const auto path = config.data / store_name;
     std::unique_ptr<disk::Engine> database;
-    if (std::filesystem::exists(path)) database = std::make_unique<disk::Engine>(path);
+    if (std::filesystem::exists(path)) database = std::make_unique<disk::Engine>(path, disk::Hooks{}, config.decision_enabled);
     std::unique_ptr<sql::Security> security;
     if (database)
     {
@@ -582,7 +688,11 @@ int run(const Config& config)
         auto session = database->begin(UINT64_MAX, std::chrono::milliseconds{0});
         security->publish(security->snapshot(*session, UINT64_MAX), lsn);
     }
-    Service service(config, admin, std::move(tls), database.get(), security.get());
-    return service.run();
+    const auto archives = database && !config.backup.empty() ?
+        std::make_unique<backup::Archive>(*database, config.backup, config.temp) : nullptr;
+    const auto scheduler = database ?
+        std::make_unique<jobs::Manager>(*database, config.temp, config.mlp_cpu_enabled, archives.get()) : nullptr;
+    Service service(config, admin, std::move(tls), database.get(), security.get(), scheduler.get());
+    return service.run(stop, ready);
 }
 }
