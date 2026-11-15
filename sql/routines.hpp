@@ -30,6 +30,8 @@ RoutineResults run_routine(const RoutineSelection& plan, disk::Transaction& tran
     disk::Owner owner, const ParameterValues& parameters, const InvokerCheck& invoker, const WorkCheck& check,
     const pl::Instrumentation* instrumentation = nullptr);
 bool routine_writes(const RoutineSelection& plan);
+wire::Json routine_export_snapshot(Catalog& catalog, const Name& name, bool standalone,
+    const std::function<void(const Object&, std::string_view)>& check_access, const WorkCheck& check);
 std::vector<ObjectId> routine_dependencies(const Object& object);
 bool has_trigger_dependency(Catalog& catalog, ObjectId table);
 void fire_triggers(disk::Transaction& transaction, disk::Owner owner, const Object& table,

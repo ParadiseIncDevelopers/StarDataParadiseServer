@@ -256,6 +256,10 @@ Generated_Code/
 # because we have git ;-)
 _UpgradeReport_Files/
 Backup*/
+# The Server backup implementation is source.
+!/backup/
+!/backup/archive.cpp
+!/backup/archive.hpp
 UpgradeLog*.XML
 UpgradeLog*.htm
 ServiceFabricBackup/

@@ -1,0 +1,279 @@
+{
+  "stage_id": 35,
+  "status": "PASSED",
+  "started_at": "2026-11-15T19:25:28.2467176+03:00",
+  "finished_at": "2026-11-15T19:56:43.2630427+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 18,
+      "file": "STAGES/18.json",
+      "sha256": "6b51b4c50667a32f86d1f93024c255c6a2d6efea6a023d2f8277015afa52cf59"
+    },
+    {
+      "stage_id": 34,
+      "file": "STAGES/34.json",
+      "sha256": "5b4e655e4e949d965dcb5cb8bcc39812e900aeaa93f178502978725016d4e8e4"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "server_version": "0.4.0",
+    "ir_version": 1,
+    "wire_version": 1,
+    "cmake": "4.2.2",
+    "msvc": "v145",
+    "jdk": "17.0.12",
+    "gradle": "9.3.1",
+    "jdbc_version": "0.2.0"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "7668e3093121dba873bb449560ccc2905cf452a8",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        ".gitignore",
+        "backup/archive.cpp",
+        "backup/archive.hpp",
+        "CMakeLists.txt",
+        "JAVA_EXPORT.md",
+        "sql/routines.cpp",
+        "sql/routines.hpp",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "StarDataParadiseServer/server.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "tests/routine_export/CheckConnected.java",
+        "tests/routine_export/server_oracle.py",
+        "tests/routine_export/standalone_differential.py",
+        "tests/routine_export/test_connected.py",
+        "tests/routine_export/vectors.json",
+        "tools/routine_export/build.gradle.in",
+        "tools/routine_export/ConnectedRoutine.java.in",
+        "tools/routine_export/emit_connected.py",
+        "tools/routine_export/emit_java.py",
+        "tools/routine_export/RoutineRuntime.java",
+        "tools/routine_export/snapshot.py"
+      ],
+      "source_manifest": "out/sdp-m7/stage35/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "517f176cc9a5f9baefa690ffc11c587cd3967f8f9f94ae7a97a81c0e7ae63951"
+    }
+  ],
+  "checkpoint": {
+    "repo": "StarDataParadiseServer",
+    "archive_path": "out/sdp-m7/stage35/workspace-before.zip",
+    "archive_sha256": "76040b338f713fa5c434ab5742eeece252c1cb6c153cf4d651b5b948dcb5069f",
+    "manifest": "out/sdp-m7/stage35/workspace-before.json"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Checkpoint original seven repositories before Stage35",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/checkpoint.log",
+      "log_sha256": "5a26206d3e02f3cbb763f1c2fc8731178d10ede6cffbf0b183fb43f47f613385",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify all original repositories outside Server are unchanged during Stage35",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure clean Server 0.4.0 CMake Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/configure.log",
+      "log_sha256": "0baef1ee6ed9d5e054000cc158b4085623c4a68014c99bf5029986368f942202",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build all CMake Server Release targets",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/build.log",
+      "log_sha256": "4d7db65603138ba2405e689f342167a1c1d501158a3d900fb4032e0d3cf10683",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run exact Server version command",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/version.log",
+      "log_sha256": "52bb0763bf95be82a3f771ecc25940b53b82bce7884f1d7ee3a2b66b1ee4df84",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run all 47 previous Server CTest tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/ctest.log",
+      "log_sha256": "bbcaf5e7a93f2a9253710dbb1147df875f1346284f36721eaad6e666217d1ebe",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run live TLS IR oracles, stop Server, compile and run standalone Java with Gradle and JDK 17",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/export-standalone.log",
+      "log_sha256": "8a4e3031b99c84abf81cb57ca60458d304e0a154d51b41df21a095421ac3cfea",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Compile connected sample, use exact JDBC 0.2.0, verify authorization and reject stale schema versions",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/export-connected.log",
+      "log_sha256": "8dad6d6b20d85f0b4bda9e237e4180c8ff125c750f37d826260d86f7fd4c91ee",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Retest installed modern NuGet package against exact Server 0.4.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/sdk-net10.log",
+      "log_sha256": "aca74484fc3901f73d50024b45634446592bacb9a707f4ba7c281236b721a1c6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Retest installed Framework NuGet package against exact Server 0.4.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/sdk-net48.log",
+      "log_sha256": "aca74484fc3901f73d50024b45634446592bacb9a707f4ba7c281236b721a1c6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Retest installed JDBC artifact and lost commit against exact Server 0.4.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/sdk-java.log",
+      "log_sha256": "aca74484fc3901f73d50024b45634446592bacb9a707f4ba7c281236b721a1c6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Reinstall Stage34 locked wheel in the independent Python environment",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/sdk-python-install.log",
+      "log_sha256": "221bff36abcedd1ec499c3def66fda1dfee5f5f56aae26c57a4550660eb09efb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Retest exact installed Python 0.2.0 with version assertion matched to exact Server candidate",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/sdk-python.log",
+      "log_sha256": "ca3c68b0634acf99465f1c76de1fea6eaadb11143c683f5bd24df55811d6f01f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Compile and run installed Native 0.4.0 C and C++ consumer with extended TLS tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/sdk-native.log",
+      "log_sha256": "58a730766e82c34bdb5d1db983e5ee2f665c648f9136f2abdad02353c392535e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Retest installed published Node 0.1.0 against exact Server 0.4.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/sdk-node.log",
+      "log_sha256": "aaf0921d7493f1aa4fb154ed7b886702786004943c4ecd1d0af70fe6478b305a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Archive verified Server and generated Java source with SHA-256",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/package.log",
+      "log_sha256": "c58dc06b8eefa16ca63783bfb97be3f189065d7a9dba8641364f6b190a639572",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run unchanged Workbench window and real two-instance TLS tests with exact Native SDK 0.4.0 and Server 0.4.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage35/workbench.log",
+      "log_sha256": "2e26aeefdf9024b69f69ee1e978c595ab54b2c79bbd8f8681787be2bef2db228",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S35-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek TLS Server’dan alınan değişmez IR, bağımsız Java kaynak ve test projesi üretti. Server durduktan sonra JDK 17 ve çevrimdışı Gradle derleme ve smoke çalıştırdı."
+    },
+    {
+      "id": "S35-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Bağlı fonksiyon ve cursor örnekleri sabit JDBC JAR ile çalıştı. Metadata ve version kontrolü tek transaction içinde. Yetkisiz erişim ve değişen sürüm reddedildi. Hosted node satır ve sütun ile reddedildi."
+    },
+    {
+      "id": "S35-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "21 saf karşılaştırma, decimal, NULL, taşma, exception/rethrow, RECORD/COLLECTION, işlem ve sınırlı satranç puanlama örnekleri."
+    },
+    {
+      "id": "S35-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "47 Server CTest. Native 0.4.0, iki NuGet sürümü, JDBC, Python wheel ve Node tarball kurulu tüketicileri gerçek 0.4.0 Server ile doğrulandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage35/release/StarDataParadiseServer-0.4.0-win-x64.exe",
+      "sha256": "14626931425aeaf57eab3aa4831bb4b22e88be8987bf1d2158f50c9a7ebb7896"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage35/release/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage35/release/StarDataParadise-Java-Export-0.4.0-examples.zip",
+      "sha256": "4b4fd9d1a41a17a7a0b9922adaf5b8de1ea34713f588c72bbac993a2527605da"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage35/release/SHA256SUMS.txt",
+      "sha256": "c58dc06b8eefa16ca63783bfb97be3f189065d7a9dba8641364f6b190a639572"
+    }
+  ],
+  "remaining_issues": [
+    "Standalone kapsamı saf, tipli IR. Hosted SQL ve cursor işlemleri bağlı modda Server’da kalır. Satranç örneği sınırlı puanlama ve arama sağlar.",
+    "Python Stage34 kabulündeki sabit 0.3.0 sürüm beklentisi bu regresyonun yalıtılmış test kopyasında 0.4.0 adayına uyarlandı.",
+    "Eclipse GUI çalıştırılmadı. JDK ve Gradle derleme ve yürütmeleri yapıldı."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 36
+}

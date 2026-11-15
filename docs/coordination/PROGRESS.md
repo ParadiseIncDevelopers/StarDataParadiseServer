@@ -32,5 +32,12 @@
 | 28 CPU checkpoint ve model yaşam döngüsü | PASSED | [Yeniden başlatmadan sonra birebir CPU resume, History pin ve Native ABI 1](STAGES/28.json) |
 | 29 Doğrulanmış yedek ve geri yükleme | PASSED | [Tutarlı fiziksel ve logical yedek, bağımsız restore, zamanlama ve Native API](STAGES/29.json) |
 | 30 Instance yönetimi, Health Center ve M6 | PASSED | [Gerçek Windows hizmet izolasyonu, sağlık ölçümleri ve yedi proje](STAGES/30.json) |
+| 31 Native SDK tamamlama ve paketleme | PASSED | [C ABI uyumu, temiz C++ tüketici, ASan ve mevcut istemciler](STAGES/31.json) |
+| 32 .NET SDK ve iki NuGet paketi | PASSED | [Temiz .NET 10 ve .NET Framework 4.8 kurulumları, TLS ve oturum testleri](STAGES/32.json) |
+| 33 Java SDK ve JDBC | PASSED | [JDK 17, Gradle, temiz JAR, typed JDBC, iptal ve commit sonucu](STAGES/33.json) |
+| 34 Python DB-API ve dağıtım paketleri | PASSED | [Temiz wheel ve sdist, gerçek TLS, dokuz sözleşme testi](STAGES/34.json) |
+| 34 sonrası Node.js SDK | PASSED | [Temiz npm kurulumlu bağımsız paket 0.1.0](https://github.com/ParadiseIncDevelopers/StarDataParadise.SDK.Node/releases/tag/v0.1.0) |
+| 35 Tipli PL/SQL Java export | PASSED | [21 saf Java karşılaştırması, bağlı JDBC, 47 Server testi ve kurulu SDK paketleri](STAGES/35.json) |
+| 36 CLI SQL, PL/SQL ve otomasyon | PASSED | [7 CLI testi, makine çıktısı, canlı yönetim, kayıp commit ve iş iptali](STAGES/36.json) |
 
 [M1 temel altyapı raporu](M1_REPORT.md) · [M2 istemci ve depolama raporu](M2_REPORT.md) · [M3 SQL ve güvenlik raporu](M3_REPORT.md) · [Sıradaki etap](NEXT_TASK.md)

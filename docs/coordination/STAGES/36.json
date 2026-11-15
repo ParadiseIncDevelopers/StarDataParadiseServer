@@ -1,0 +1,197 @@
+{
+  "stage_id": 36,
+  "status": "PASSED",
+  "started_at": "2026-11-15T19:56:43.6845692+03:00",
+  "finished_at": "2026-11-15T20:08:00.8282501+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 35,
+      "file": "STAGES/35.json",
+      "sha256": "ded3fb00caec6470c505fb18c181b3a784c27ef1acc4b101d3eea1bbc8d5f3ed"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cli_version": "0.2.0",
+    "server_version": "0.4.0",
+    "native_version": "0.4.0",
+    "native_abi": 1,
+    "native_zip_sha256": "4ee15b8fa50c94c5ee012245d8ed8e3c16259df64fc154ca15fb286cb6a8ad25",
+    "cmake": "4.2.2",
+    "msvc": "v145"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseCli",
+      "head": "4cc5b794382697f4eac689c6b9f8448722a32db5",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "automation/sql_script.cpp",
+        "automation/sql_script.hpp",
+        "BUILD.md",
+        "CLI.md",
+        "cmake/NativeSdk.cmake",
+        "CMakeLists.txt",
+        "StarDataParadiseCli/automation.cpp",
+        "StarDataParadiseCli/automation.hpp",
+        "StarDataParadiseCli/connection.cpp",
+        "StarDataParadiseCli/connection.hpp",
+        "StarDataParadiseCli/output.cpp",
+        "StarDataParadiseCli/StarDataParadiseCli.cpp",
+        "StarDataParadiseCli/StarDataParadiseCli.vcxproj",
+        "StarDataParadiseCli/StarDataParadiseCli.vcxproj.filters",
+        "StarDataParadiseCli/terminal.cpp",
+        "StarDataParadiseCli/terminal.hpp",
+        "tests/cli_json_contract.py",
+        "tests/cli_management.py",
+        "tests/cli_smoke.py",
+        "tests/sql_script.cpp"
+      ],
+      "source_manifest": "out/sdp-m7/stage36/StarDataParadiseCli.changed.sha256",
+      "source_manifest_sha256": "bf2f71ac022762301b4b74c75a0e9e6dd9c08958f855c165c1ead56b4bd4e127"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m7/stage36/workspace-before.json",
+    "archive_path": "out/sdp-m7/stage36/workspace-before.zip",
+    "repo": "StarDataParadiseServer",
+    "archive_sha256": "9b03f5af68ec529af6e9c64407a7ea7ca33525561114397a1d98789317d7a67e"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Take eight-repository source checkpoint after Stage35",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage36/checkpoint.log",
+      "log_sha256": "354463f5fb46e77960e59e5bde926fe928111b16b9ccd902d05ea78722e72214",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify all seven projects outside the CLI sources against Stage36 checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage36/isolation.log",
+      "log_sha256": "8c3bcab7231c57a409a71f32e82b15c1beda123a857ae08b8ab9705e70c59ac6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure a clean CMake x64 solution with exact Native SDK 0.4.0 archive",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage36/configure.log",
+      "log_sha256": "2ec852314167604811bd115f5390c7c6ec32cc54c30f81ae184b25001a66dab9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build actual CLI and script lexer tests in Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage36/build.log",
+      "log_sha256": "e92842190a9e223177d3e2e7b7676bef3e951f22fb7b3235d2745d1e9fc45741",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run all seven actual CLI CTests with frozen Server 0.4.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage36/ctest.log",
+      "log_sha256": "d6c49cd437ce914e09465c9d563f37672bceb5d1f237d497d2b15056d2e9cc87",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build official actual CLI Visual Studio solution independently",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage36/msbuild.log",
+      "log_sha256": "4c07a329aed4be6de5e038381f50dd3f84527232956d7ff536b316aff2b7f767",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run independent CLI JSON, authenticated cancel and upstream lost-COMMIT receipt witness",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage36/independent-t02.log",
+      "log_sha256": "4eb0b9db1ba228553e88093a59a21fe034096f7081bdcbfa0fb6ea5dae44d304",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify exact tested CLI and Native DLL in packaged Windows x64 ZIP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage36/release-audit.log",
+      "log_sha256": "e1640c33daab1908b55fd767bb608ec69ad3d073a0f5de5e427769d091dadbf6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run actual product CLI in dedicated native console for Tab, Up, Down and Ctrl+R using live TLS",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/cli-draft/management-evidence/cli02-console-product.log",
+      "log_sha256": "29f096f152a2a3c2893bbcd1b332ec2f791f6b17caa6227406cf5b74ab9ed327",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Extract the published ZIP into a clean folder and invoke --version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage36/installed-version.log",
+      "log_sha256": "3eee3c3f54a899ea846d8c452235aaf5b6a87db866d01394ad8eb05f798bed7d",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S36-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Çoklu SQL ve PL/SQL blokları, çift quote, metin içi noktalı virgül ve yorumlar ayrıldı. CTest lexer ve gerçek script doğrulaması."
+    },
+    {
+      "id": "S36-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Kesin JSON ve çıkış kodları SQL 5, auth 3, aktif Ctrl+Break iptali 6, yanıtı kaybolan commit 7. Yeni oturumda token sorgusu ve bağımsız dayanıklı tek satır doğrulandı."
+    },
+    {
+      "id": "S36-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek CLI ve Server ile CRUD, routine, History restore, Decision ret, model train/activate/predict ve doğrulanmış backup."
+    },
+    {
+      "id": "S36-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "CLI sonlandıktan sonra kuyruktaki iş devam etti. Ayrı oturumda iptal ve kaynak temizliği veritabanına tekrar bağlanılarak doğrulandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage36/release/StarDataParadiseCLI-0.2.0-win-x64.zip",
+      "sha256": "803568a32c546fda24b6af938f34a2112d2378fcaa2dae9f2dd2b7a717ec3922"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage36/release/SHA256SUMS.txt",
+      "sha256": "5b58b1ab46e67f27b4f389712910ab761449459d49bc2d4f1e22e9d19dc12675"
+    }
+  ],
+  "remaining_issues": [
+    "Terminal komut geçmişi oturum belleğindeki güvenli komutlarla sınırlı. Yerel Windows servis komutları işletim sistemi izinlerine tabidir.",
+    "Windows x64 üzerinde doğrulandı."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 37
+}

@@ -1,0 +1,244 @@
+{
+  "stage_id": 31,
+  "status": "PASSED",
+  "started_at": "2026-11-15T18:25:23.2972950+03:00",
+  "finished_at": "2026-11-15T18:38:03.6637181+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 30,
+      "file": "STAGES/30.json",
+      "sha256": "342eecc7f7f8d417d18895c486885f223fc5bfb6df29321c8f625e8ba310d241"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "native_version": "0.4.0",
+    "native_abi": 1,
+    "wire_version": 1,
+    "server_version": "0.3.0"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "852fd5faeec021e4d5cf9acd96433873102d1060",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "cmake/InstallPackage.cmake",
+        "CMakeLists.txt",
+        "COMPATIBILITY.md",
+        "examples/cpp/CMakeLists.txt",
+        "examples/cpp/main.cpp",
+        "include/StarDataParadiseDLLler.h",
+        "include/StarDataParadiseDLLler.hpp",
+        "StarDataParadiseDLLler/api.cpp",
+        "StarDataParadiseDLLler/StarDataParadiseDLLler.vcxproj",
+        "StarDataParadiseDLLler/transport.cpp",
+        "StarDataParadiseDLLler/transport.hpp",
+        "StarDataParadiseDLLler/version.cpp",
+        "tests/consumer/CMakeLists.txt",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py",
+        "tests/version_smoke.c"
+      ],
+      "source_manifest": "out/sdp-m7/stage31/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "9c904aa441884470e0a523c4923e706decb91b3c2bb8b3aab26da0e0a0111b93"
+    }
+  ],
+  "checkpoint": {
+    "archive_sha256": "72bc959c23445803cec4e73bb05ae6faaf896b372f7ac94364dec2bdcff26074",
+    "manifest": "out/sdp-m7/stage31/workspace-before.json",
+    "repo": "StarDataParadiseServer",
+    "archive_path": "out/sdp-m7/stage31/workspace-before.zip"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Checkpoint all seven repositories before Stage31",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/checkpoint.log",
+      "log_sha256": "935f11b4e39fd0f791713bcb00d596da797f255906206670c559e80d2f4426f4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify six nonparticipating sources and existing user changes against snapshot",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Configure native Release CMake x64",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/release/configure.log",
+      "log_sha256": "e3268e0d6a2b0b9b85352a233e6d401152d7dee5e0c7ac43a4ff738d374567dc",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Build native Release package DLL",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/release/build.log",
+      "log_sha256": "ffa3c88ea1e074641b0d382dcee5a454651e72e243d4077180888b75eca4b4ef",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run CTest on native Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/release/ctest.log",
+      "log_sha256": "376c72c2a01107dbd7b3236e1c4592014cdecf44e351292d02f260af68a5fc7b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Create exact Windows x64 SDK archive",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/release/cpack.log",
+      "log_sha256": "ee36d672c5cc0f239e21fc446b5dabc460ab19e7fcc8fc4affe42ccbf07dd893",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Build and run installed SDK consumer and standalone sample against exact Server 0.3.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/release/integration.log",
+      "log_sha256": "4ef6955e937da017e6824d15821ca72e05f4af07a384a65cbb9d25c960156f4c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Configure Windows MSVC AddressSanitizer build",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/asan/configure.log",
+      "log_sha256": "e219906e2136b87e68e8f9653ff651e4732677f7250f4dfedb817afd1246df02",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Build MSVC ASan native SDK",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/asan/build.log",
+      "log_sha256": "4df76c55c8d2ca835ccbe7d3999a69ab7b5ee5be6774b47e736da0f4d710441c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run Native CTest under MSVC ASan",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/asan/ctest.log",
+      "log_sha256": "e7c235d9b2c7969e5d65cefc63736dc8c53eb230a7d909ce85e07ea95d1ceb34",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Run targeted installed consumer and C++ example under ASan",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/asan/integration.log",
+      "log_sha256": "05bb9dc3af6e41d79b6d6937c95f870b703b51df60d6f995879c09fcc133ebf5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Build official Native .slnx Windows x64 Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/msbuild.log",
+      "log_sha256": "ff1b52aeec28f61a28347cd5d6276478d4b538c1db5c27c850b3e3161cb840a9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Compare old and current CMake/Visual Studio Native ABI exports",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/exports.log",
+      "log_sha256": "9442e8d89fe328e18114954c77786f8cf9bd860105ce64f860c4d55c2628daf4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Workbench unmodified binary on baseline Native 0.3.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/client-regression/baseline/workbench/ctest.log",
+      "log_sha256": "97bec8a2d96d54d7c98409455b520ab11413a8e188c4f219c72caf78ba8fc076",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CLI unmodified binary on baseline Native 0.3.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/client-regression/baseline/cli/ctest.log",
+      "log_sha256": "8a60e42e7e41c1754a11120f25e8cfaf8b914da87b38a846307f39c56fbbef0a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Same Workbench with exact Native 0.4.0 package",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/client-regression/candidate/workbench/ctest.log",
+      "log_sha256": "b1a87a78c5a4bcd35eef8bb9dfc0a4a0cd380609818726d49b6d11f5a8a3a373",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Same CLI with exact Native 0.4.0 package",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage31/client-regression/candidate/cli/ctest.log",
+      "log_sha256": "980a24173a91db93ca433f2b47ed5e99204cef947b961c0d9e19e02c9e359355",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S31-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Kurulu paketin bağımsız örneği ve tüketici, gerçek TLS ile CRUD, routine OUT, History restore ve model tahmini yaptı. Native API doğrulanmış Server yeteneklerini kullandı."
+    },
+    {
+      "id": "S31-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "MSVC ASan, sahibi belirli RAII nesneleri, paralel oturum kimlikleri, kapanış, güvenli hata ve yanıtı kaybolan commit sonrası ledger doğrulaması geçti."
+    },
+    {
+      "id": "S31-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Mevcut Workbench 2/2 ve CLI 4/4 testlerini 0.3.0 ve 0.4.0 DLL ile geçti. İki tüketicinin kaynakları ve inceleme pencereleri korundu."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m7/stage31/release/package/StarDataParadiseDLLler-0.4.0-win-x64.zip",
+      "sha256": "4ee15b8fa50c94c5ee012245d8ed8e3c16259df64fc154ca15fb286cb6a8ad25"
+    }
+  ],
+  "remaining_issues": [
+    "Native havuz ve otomatik yeniden deneme sağlamaz. Yazma sonucu belirsizse mevcut token ile outcome sorgulanır.",
+    "Windows x64 Release paketi doğrulandı. ASan geliştirme testi ayrı çıktı olarak tutuldu."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 32
+}

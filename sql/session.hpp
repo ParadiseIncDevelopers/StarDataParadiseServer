@@ -82,6 +82,7 @@ private:
     std::vector<Requirement> authorize(Catalog& catalog, const Statement& statement);
     wire::Json password(wire::Json& body);
     wire::Json test_routine(const wire::Json& body);
+    wire::Json export_routine(const wire::Json& body);
     std::optional<Outcome> outcome(disk::Transaction& tx, std::string_view token);
     uint64_t commit(disk::Transaction& tx, std::string_view token);
     void check_deadline() const;

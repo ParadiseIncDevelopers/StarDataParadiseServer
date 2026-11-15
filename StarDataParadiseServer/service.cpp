@@ -300,6 +300,7 @@ private:
             features["sql_crud_v1"] = sql_.has_value();
             features["sql_security_v1"] = security_ != nullptr;
             features["plsql_ir_v1"] = sql_.has_value();
+            features["routine_export_v1"] = security_ != nullptr && sql_.has_value();
             features["plsql_results_v1"] = sql_.has_value();
             features["plsql_debug_v1"] = security_ != nullptr;
             features["history_v1"] = security_ != nullptr;

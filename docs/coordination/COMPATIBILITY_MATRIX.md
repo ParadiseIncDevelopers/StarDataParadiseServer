@@ -7,7 +7,10 @@
 | CLI | C++20. Native ABI 1 ile TLS, DNS, profiller, terminal ve JSON durum çıktısı doğrulandı. |
 | Server | TLS 1.2+, bootstrap, auth, hello, health, capabilities, süreç ve dizin kilidi. Adres varsayılanı loopback. |
 | Native DLL | Ürün 0.3.0, C ABI 1, wire v1. Kurulu paket tüketicisi bağlanıp gerçek tipli CRUD çalıştırdı. |
-| .NET, Java, Python SDK | Yerel paket 0.1.0 ve paket smoke testleri. Ağ istemcileri sonraki SDK etaplarında. |
+| .NET SDK 2.0.0-preview.1 | StarDataParadiseDrive .NET 10, StarDataParadiseNetFramework .NET Framework 4.8. Temiz NuGet kurulumları ve canlı TLS doğrulandı. |
+| JDBC 0.2.0 | JDK 17 ve Gradle 9.3.1. Kurulu Maven JAR üzerinden canlı TLS, typed sonuçlar ve transaction doğrulandı. |
+| Python DB-API 0.2.0 | Python 3.12. Temiz wheel ve sdist, canlı TLS ve belirsiz commit doğrulandı. |
+| Node.js SDK 0.1.0 | Node.js 22. Bağımsız npm arşivi, temiz kurulum, canlı TLS, tipli SQL, işlem iptali ve commit sonucu doğrulandı. |
 | Yerel SQL ve katalog | DDL transaction, typed logical plan ve salt okunur Server denetleyicileri. [SQL uyumluluğu](../../SQL_COMPATIBILITY.md) |
 | SQL CRUD ve transaction RPC | sql_crud_v1 ile hazırlanmış tipli sorgu, metadata, bounded fetch, savepoint ve kalıcı outcome ledger. [Wire eki](../../contracts/sql/SQL_RPC_V1.md) |
 | İlişkisel bütünlük | Kalıcı B+Tree equality/range, PK/UNIQUE/FK/CHECK, DEFAULT/identity, salt okunur view ve reversible DDL journal. [SQL uyumluluğu](../../SQL_COMPATIBILITY.md) |
@@ -31,6 +34,7 @@
 | CPU MLP v1 | Tanh, ReLU veya sigmoid MLP, SGD veya Adam, BCE ve validation early stopping. MLP’siz ayrı minimal Release ile SQL, History ve Decision doğrulandı. [MLP](../../ml/DEEP_LEARNING.md) |
 | CPU model checkpoint ve lifecycle | Atomik epoch checkpoint, restart sonrası birebir CPU devam, sürüm rollback/deactivate/delete, History pin güvenliği. Native C ABI 1 typed model ve dataset. GPU eğitim backend’i unavailable. [Modeller](../../MODELS.md) |
 | Backup v1 | Quiesced fiziksel ve tipli logical yedek, SHA-256 manifest, doğrulanmış ayrı restore, Server job ve interval/daily schedule, Native ABI 1. PITR unavailable. [Yedek](../../BACKUP.md) |
+| Native SDK 0.4.0 | ABI 1, 45 önceki export ve ek oturum bilgisi, C++ RAII, gerçek yedek/bakım işi ve bağımsız örnek. Windows x64 Release ve ASan doğrulandı. |
 | Linux, macOS ve diğer Windows mimarileri | NOT_RUN. |
 
 Wire v1 kaynakları [contracts/v1](../../contracts/v1/PROTOCOL.md) altında. Etap kanıtları [M1](M1_REPORT.md) , [M2](M2_REPORT.md), [M3](M3_REPORT.md) , [M4](M4_REPORT.md) ve [M5](M5_REPORT.md) raporlarında.

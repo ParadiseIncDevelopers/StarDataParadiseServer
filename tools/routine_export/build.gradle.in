@@ -1,0 +1,16 @@
+import java.security.MessageDigest
+plugins { id 'java' }
+java { toolchain { languageVersion = JavaLanguageVersion.of(17) } }
+def verifiedJar = { String property, String expected ->
+    def value = providers.gradleProperty(property).orNull
+    if (value == null) throw new GradleException("Supply -P" + property + "=<verified jar>")
+    File artifact = file(value)
+    def sha = MessageDigest.getInstance('SHA-256').digest(artifact.bytes).encodeHex().toString()
+    if (sha != expected) throw new GradleException("SHA-256 mismatch for " + property)
+    artifact
+}
+dependencies {
+    implementation files(verifiedJar('sdpSdkJar', '@SDK@'))
+    implementation files(verifiedJar('sdpGsonJar', 'dd0ce1b55a3ed2080cb70f9c655850cda86c206862310009dcb5e5c95265a5e0'))
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }

@@ -1,0 +1,121 @@
+{
+  "stage_id": 34,
+  "status": "PASSED",
+  "started_at": "2026-11-15T19:18:55.6664069+03:00",
+  "finished_at": "2026-11-15T19:25:27.5874525+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 33,
+      "file": "STAGES/33.json",
+      "sha256": "4ed28ffa5262405d8cca26d2e5bfe2b79dd648283583a190d09dec16b625d01f"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "python": "3.12",
+    "pytest": "8.4.2",
+    "setuptools": "80.9.0",
+    "package_version": "0.2.0",
+    "wire_version": 1,
+    "server_version": "0.3.0"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise.SDK.Python",
+      "head": "ee1623c5bbdc5110c8527af694c17910aac3073f",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "BUILD.md",
+        "ci.ps1",
+        "pyproject.toml",
+        "src/stardataparadise_sdk/__init__.py",
+        "src/stardataparadise_sdk/_dbapi.py",
+        "src/stardataparadise_sdk/_errors.py",
+        "src/stardataparadise_sdk/_types.py",
+        "src/stardataparadise_sdk/_wire.py",
+        "src/stardataparadise_sdk/contracts/sdp-contract-v1.zip",
+        "tests/acceptance.py",
+        "tests/package_scan.py",
+        "tests/requirements-build.txt",
+        "tests/smoke.py",
+        "tests/test_contract.py"
+      ],
+      "source_manifest": "out/sdp-m7/stage34/StarDataParadise.SDK.Python.changed.sha256",
+      "source_manifest_sha256": "ac3264581443407ea9aa32c864556865065f6ad748e4e7289e1f703c2020f97a"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m7/stage34/workspace-before.zip",
+    "archive_sha256": "7f256885e6d66113a076ffb3ec96e1bc8b9c29d02ecabf5ae9c3bc5b86383ff5",
+    "repo": "StarDataParadiseServer",
+    "manifest": "out/sdp-m7/stage34/workspace-before.json"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Checkpoint all seven repositories before Stage34",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage34/checkpoint.log",
+      "log_sha256": "f292aeb79504ea9d5959b2fa3948ceca041e743e3cdbecbeb42538f6fec7d41e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify unchanged non-Python project sources",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage34/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run isolated wheel and sdist build, archive scans, installed pytest cases and fault-injected TLS fixture against Server 0.3.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage34/acceptance.log",
+      "log_sha256": "11e21645807ab7022260b1d075c604641580980e91e365f0ad24bf89a6efe639",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S34-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Ayrı Python 3.12 ortamında wheel kurulumu, gerçek TLS CRUD, OUT, birden çok sonuç seti, rollback, model ve yönetim çağrıları."
+    },
+    {
+      "id": "S34-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Dokuz kurulu pytest vakasında golden decimal/zaman, NULL/binary/Unicode, ayrı bind ve 313 satırlık fetchmany sınırları."
+    },
+    {
+      "id": "S34-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Yanıtı düşürülen COMMIT UNKNOWN ve ayrı ledger doğrulaması, güvenli okuma reconnect, iki pakette arşiv taraması ve bağımsız sdist testi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise.SDK.Python",
+      "file": "out/packages/stardataparadise_sdk-0.2.0.tar.gz",
+      "sha256": "6f5330b4107e18f8f46c65dd3ee7e6ae7dfdfb0da87e193f98b027a7a3075315"
+    },
+    {
+      "repo": "StarDataParadise.SDK.Python",
+      "file": "out/packages/stardataparadise_sdk-0.2.0-py3-none-any.whl",
+      "sha256": "b48ec6e5ed8e52e5fa2b04186f9c7229628dbffe3d6a5693f48c5a154e160940"
+    }
+  ],
+  "remaining_issues": [
+    "Python API eşzamanlı DB-API 2.0 arayüzünü sunar. Genel bağlantı havuzu ve async katmanı eklenmedi.",
+    "PyPI yayını kapsam dışı. Wheel ve sdist yerel olarak üretildi."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 35
+}

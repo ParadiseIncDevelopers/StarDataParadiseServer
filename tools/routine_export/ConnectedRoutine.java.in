@@ -1,0 +1,87 @@
+package stardataparadise.exported;
+
+import com.stardataparadise.sdk.SdpConnection;
+import java.nio.charset.StandardCharsets;
+import java.sql.*;
+import java.util.*;
+
+public final class ConnectedRoutine {
+    private static final String SQL = utf8("@SQL@");
+    private static final boolean FUNCTION = @FUNCTION@;
+    private static final Map<String, Long> REVISIONS = Map.ofEntries(
+@REVISIONS@
+    );
+    private static final List<Parameter> INPUT = List.of(
+@INPUT@
+    );
+
+    private ConnectedRoutine() {}
+
+    private record Parameter(int index, int type, Integer scale) {}
+
+    public record ResultSetData(List<String> columns, List<List<Object>> rows) {
+        public ResultSetData {
+            columns = List.copyOf(columns);
+            rows = List.copyOf(rows);
+        }
+    }
+
+    public static List<ResultSetData> invoke(SdpConnection connection, Object... args) throws SQLException {
+        if (connection.getAutoCommit()) throw new SQLException("Begin a caller-owned transaction", "25000");
+        if (args.length != INPUT.size()) throw new SQLException("Wrong routine input count", "07001");
+        Savepoint gate = connection.setSavepoint();
+        try {
+            var present = new HashMap<String, Long>();
+            for (var object : connection.catalogObjects()) present.put(object.id(), object.schemaVersion());
+            for (var required : REVISIONS.entrySet())
+                if (!required.getValue().equals(present.get(required.getKey())))
+                    throw new SQLException("Exported routine dependency is unavailable or has changed", "55000");
+            List<ResultSetData> results;
+            try (PreparedStatement statement = FUNCTION ? connection.prepareStatement(SQL) : connection.prepareCall(SQL)) {
+                for (int i = 0; i < args.length; i++) {
+                    var parameter = INPUT.get(i);
+                    if (parameter.scale() == null) statement.setObject(parameter.index(), args[i], parameter.type());
+                    else statement.setObject(parameter.index(), args[i], parameter.type(), parameter.scale());
+                }
+                results = collect(statement);
+            }
+            connection.releaseSavepoint(gate);
+            return results;
+        } catch (SQLException | RuntimeException failure) {
+            try {
+                connection.rollback(gate);
+                connection.releaseSavepoint(gate);
+            } catch (SQLException rollback) {
+                failure.addSuppressed(rollback);
+            }
+            throw failure;
+        }
+    }
+
+    private static List<ResultSetData> collect(PreparedStatement statement) throws SQLException {
+        List<ResultSetData> sets = new ArrayList<>();
+        boolean hasRows = statement.execute();
+        while (hasRows || statement.getUpdateCount() != -1) {
+            if (hasRows) {
+                var cursor = statement.getResultSet();
+                var meta = cursor.getMetaData();
+                int width = meta.getColumnCount();
+                List<String> columns = new ArrayList<>();
+                List<List<Object>> rows = new ArrayList<>();
+                for (int i = 1; i <= width; i++) columns.add(meta.getColumnLabel(i));
+                while (cursor.next()) {
+                    List<Object> row = new ArrayList<>();
+                    for (int i = 1; i <= width; i++) row.add(cursor.getObject(i));
+                    rows.add(Collections.unmodifiableList(row));
+                }
+                sets.add(new ResultSetData(columns, rows));
+            }
+            hasRows = statement.getMoreResults();
+        }
+        return List.copyOf(sets);
+    }
+
+    private static String utf8(String encoded) {
+        return new String(Base64.getDecoder().decode(encoded), StandardCharsets.UTF_8);
+    }
+}

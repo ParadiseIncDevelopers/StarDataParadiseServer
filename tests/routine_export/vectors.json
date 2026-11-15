@@ -1,0 +1,967 @@
+{
+  "format": 1,
+  "fixtures": [
+    {
+      "name": "export_material",
+      "sql": "CREATE FUNCTION export_material(piece IN BIGINT) RETURN BIGINT AS\nBEGIN\n    IF piece IS NULL THEN RETURN NULL; END IF;\n    CASE\n        WHEN piece = 1 THEN RETURN 100;\n        WHEN piece = 2 THEN RETURN 320;\n        WHEN piece = 3 THEN RETURN 330;\n        WHEN piece = 4 THEN RETURN 500;\n        WHEN piece = 5 THEN RETURN 900;\n        ELSE RETURN 0;\n    END CASE;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_position",
+      "sql": "CREATE FUNCTION export_position(white_piece IN BIGINT, black_piece IN BIGINT, square_bonus IN BIGINT) RETURN BIGINT AS\nBEGIN\n    RETURN export_material(white_piece) - export_material(black_piece) + square_bonus;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_search",
+      "sql": "CREATE FUNCTION export_search(search_depth IN BIGINT, left_score IN BIGINT, right_score IN BIGINT) RETURN BIGINT AS\n    left_result BIGINT;\n    right_result BIGINT;\nBEGIN\n    IF search_depth <= 0 THEN\n        IF left_score >= right_score THEN RETURN left_score; END IF;\n        RETURN right_score;\n    END IF;\n    left_result := left_score - export_search(search_depth - 1, right_score - 1, left_score - 1);\n    right_result := right_score - export_search(search_depth - 1, left_score - 2, right_score - 2);\n    IF left_result >= right_result THEN RETURN left_result; END IF;\n    RETURN right_result;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_sum",
+      "sql": "CREATE FUNCTION export_sum(limit_n IN BIGINT) RETURN BIGINT AS\n    total BIGINT := 0;\n    steps BIGINT := 0;\nBEGIN\n    FOR i IN 1..limit_n LOOP\n        CONTINUE WHEN i = 2;\n        EXIT WHEN i > 5;\n        total := total + i;\n    END LOOP;\n    WHILE steps < 2 LOOP\n        steps := steps + 1;\n        total := total + 10;\n    END LOOP;\n    LOOP\n        total := total + 100;\n        EXIT;\n    END LOOP;\n    RETURN total;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_round",
+      "sql": "CREATE FUNCTION export_round(p IN DECIMAL(12,4)) RETURN DECIMAL(12,2) AS\nBEGIN\n    RETURN -p;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_precision",
+      "sql": "CREATE FUNCTION export_precision(p IN DECIMAL(12,4)) RETURN DECIMAL(3,2) AS\nBEGIN\n    RETURN p;\nEXCEPTION WHEN OTHERS THEN\n    RETURN -0.01;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_compare",
+      "sql": "CREATE FUNCTION export_compare(p IN DECIMAL(12,4)) RETURN BIGINT AS\nBEGIN\n    IF p = 1 THEN RETURN 1; END IF;\n    IF p > 1 THEN RETURN 2; END IF;\n    RETURN 0;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_nullable",
+      "sql": "CREATE FUNCTION export_nullable(p IN BIGINT) RETURN BIGINT AS\nBEGIN\n    IF p IS NULL OR (10 / p > 1) THEN RETURN 1; END IF;\n    RETURN 0;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_guarded",
+      "sql": "CREATE FUNCTION export_guarded(p IN BIGINT) RETURN BIGINT AS\nBEGIN\n    RETURN p + 1;\nEXCEPTION WHEN OTHERS THEN\n    RETURN -5;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_negate",
+      "sql": "CREATE FUNCTION export_negate(p IN BIGINT) RETURN BIGINT AS\nBEGIN\n    RETURN -p;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_reraise",
+      "sql": "CREATE FUNCTION export_reraise() RETURN BIGINT AS\nBEGIN\n    BEGIN\n        RAISE fixture_error;\n    EXCEPTION WHEN OTHERS THEN\n        RAISE;\n    END;\n    RETURN 0;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_composite",
+      "sql": "CREATE PROCEDURE export_composite(rec_in IN RECORD, items_in IN COLLECTION, rec_out OUT RECORD, items_out OUT COLLECTION) AS\nBEGIN\n    rec_out := rec_in;\n    items_out := items_in;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_text_compare",
+      "sql": "CREATE FUNCTION export_text_compare(l IN TEXT, r IN TEXT) RETURN BOOLEAN AS\nBEGIN\n    RETURN l > r;\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_stock_table",
+      "sql": "CREATE TABLE export_stock (id BIGINT PRIMARY KEY, qty BIGINT)",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_stock_row",
+      "sql": "INSERT INTO export_stock VALUES (1,7)",
+      "affected_rows": 1
+    },
+    {
+      "name": "export_stock_for",
+      "sql": "CREATE FUNCTION export_stock_for(p IN BIGINT) RETURN BIGINT AS\nBEGIN\n    RETURN (SELECT s.qty FROM export_stock AS s WHERE s.id = :p);\nEND;",
+      "affected_rows": 0
+    },
+    {
+      "name": "export_stock_cursor",
+      "sql": "CREATE PROCEDURE export_stock_cursor(p IN BIGINT, result_out OUT REFCURSOR) AS\nBEGIN\n    OPEN result_out FOR SELECT s.qty FROM export_stock AS s WHERE s.id = :p;\nEND;",
+      "affected_rows": 0
+    }
+  ],
+  "vectors": [
+    {
+      "id": "material-closure",
+      "routine": "export_position",
+      "sql": "SELECT export_position(:arg_0,:arg_1,:arg_2)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        },
+        "arg_1": {
+          "type": "BIGINT"
+        },
+        "arg_2": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "5"
+        },
+        "arg_1": {
+          "t": "i64",
+          "v": "2"
+        },
+        "arg_2": {
+          "t": "i64",
+          "v": "10"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "590"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "material-null",
+      "routine": "export_position",
+      "sql": "SELECT export_position(:arg_0,:arg_1,:arg_2)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        },
+        "arg_1": {
+          "type": "BIGINT"
+        },
+        "arg_2": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "null"
+        },
+        "arg_1": {
+          "t": "i64",
+          "v": "2"
+        },
+        "arg_2": {
+          "t": "i64",
+          "v": "10"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "null"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "search-leaf",
+      "routine": "export_search",
+      "sql": "SELECT export_search(:arg_0,:arg_1,:arg_2)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        },
+        "arg_1": {
+          "type": "BIGINT"
+        },
+        "arg_2": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "0"
+        },
+        "arg_1": {
+          "t": "i64",
+          "v": "5"
+        },
+        "arg_2": {
+          "t": "i64",
+          "v": "2"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "5"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "search-depth-two",
+      "routine": "export_search",
+      "sql": "SELECT export_search(:arg_0,:arg_1,:arg_2)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        },
+        "arg_1": {
+          "type": "BIGINT"
+        },
+        "arg_2": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "2"
+        },
+        "arg_1": {
+          "t": "i64",
+          "v": "5"
+        },
+        "arg_2": {
+          "t": "i64",
+          "v": "2"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "3"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "loop-control",
+      "routine": "export_sum",
+      "sql": "SELECT export_sum(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "9"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "133"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "empty-range",
+      "routine": "export_sum",
+      "sql": "SELECT export_sum(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "0"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "120"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "positive-half",
+      "routine": "export_round",
+      "sql": "SELECT export_round(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "DECIMAL",
+          "precision": 12,
+          "scale": 4
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "decimal",
+          "unscaled": "12350",
+          "scale": 4
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "decimal",
+              "unscaled": "-124",
+              "scale": 2
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "negative-half",
+      "routine": "export_round",
+      "sql": "SELECT export_round(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "DECIMAL",
+          "precision": 12,
+          "scale": 4
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "decimal",
+          "unscaled": "-912350",
+          "scale": 4
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "decimal",
+              "unscaled": "9124",
+              "scale": 2
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "no-negative-zero",
+      "routine": "export_round",
+      "sql": "SELECT export_round(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "DECIMAL",
+          "precision": 12,
+          "scale": 4
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "decimal",
+          "unscaled": "-49",
+          "scale": 4
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "decimal",
+              "unscaled": "0",
+              "scale": 2
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "decimal-null",
+      "routine": "export_round",
+      "sql": "SELECT export_round(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "DECIMAL",
+          "precision": 12,
+          "scale": 4
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "null"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "null"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "scale-overflow-handler",
+      "routine": "export_precision",
+      "sql": "SELECT export_precision(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "DECIMAL",
+          "precision": 12,
+          "scale": 4
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "decimal",
+          "unscaled": "99950",
+          "scale": 4
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "decimal",
+              "unscaled": "-1",
+              "scale": 2
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "scale-without-overflow",
+      "routine": "export_precision",
+      "sql": "SELECT export_precision(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "DECIMAL",
+          "precision": 12,
+          "scale": 4
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "decimal",
+          "unscaled": "99450",
+          "scale": 4
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "decimal",
+              "unscaled": "995",
+              "scale": 2
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "numeric-equal-cross-scale",
+      "routine": "export_compare",
+      "sql": "SELECT export_compare(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "DECIMAL",
+          "precision": 12,
+          "scale": 4
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "decimal",
+          "unscaled": "10000",
+          "scale": 4
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "1"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "numeric-unknown",
+      "routine": "export_compare",
+      "sql": "SELECT export_compare(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "DECIMAL",
+          "precision": 12,
+          "scale": 4
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "null"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "0"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "short-circuit-null",
+      "routine": "export_nullable",
+      "sql": "SELECT export_nullable(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "null"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "1"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "zero-divide",
+      "routine": "export_nullable",
+      "sql": "SELECT export_nullable(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "0"
+        }
+      },
+      "expected": {
+        "pl_exception": "zero_divide"
+      }
+    },
+    {
+      "id": "largest-int-handler",
+      "routine": "export_guarded",
+      "sql": "SELECT export_guarded(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "9223372036854775807"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "-5"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "min-int-failure",
+      "routine": "export_negate",
+      "sql": "SELECT export_negate(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "-9223372036854775808"
+        }
+      },
+      "expected": {
+        "pl_exception": "value_error"
+      }
+    },
+    {
+      "id": "rethrow-source",
+      "routine": "export_reraise",
+      "sql": "SELECT export_reraise()",
+      "parameter_types": {},
+      "parameters": {},
+      "expected": {
+        "pl_exception": "fixture_error"
+      }
+    },
+    {
+      "id": "unicode-byte-order",
+      "routine": "export_text_compare",
+      "sql": "SELECT export_text_compare(:arg_0,:arg_1)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "TEXT"
+        },
+        "arg_1": {
+          "type": "TEXT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "text",
+          "v": "𐀀"
+        },
+        "arg_1": {
+          "t": "text",
+          "v": ""
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "bool",
+              "v": true
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "record-collection-out",
+      "routine": "export_composite",
+      "sql": "CALL export_composite(:arg_0,:arg_1)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "RECORD"
+        },
+        "arg_1": {
+          "type": "COLLECTION"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "record",
+          "fields": [
+            {
+              "name": "İzmir",
+              "value": {
+                "t": "decimal",
+                "unscaled": "123400",
+                "scale": 4
+              }
+            },
+            {
+              "name": "blob",
+              "value": {
+                "t": "binary",
+                "hex": "00ff"
+              }
+            },
+            {
+              "name": "missing",
+              "value": {
+                "t": "null"
+              }
+            }
+          ]
+        },
+        "arg_1": {
+          "t": "collection",
+          "items": [
+            {
+              "t": "record",
+              "fields": [
+                {
+                  "name": "İzmir",
+                  "value": {
+                    "t": "decimal",
+                    "unscaled": "123400",
+                    "scale": 4
+                  }
+                },
+                {
+                  "name": "blob",
+                  "value": {
+                    "t": "binary",
+                    "hex": "00ff"
+                  }
+                },
+                {
+                  "name": "missing",
+                  "value": {
+                    "t": "null"
+                  }
+                }
+              ]
+            },
+            {
+              "t": "i64",
+              "v": "-9223372036854775808"
+            },
+            {
+              "t": "null"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "record",
+              "fields": [
+                {
+                  "name": "İzmir",
+                  "value": {
+                    "t": "decimal",
+                    "unscaled": "123400",
+                    "scale": 4
+                  }
+                },
+                {
+                  "name": "blob",
+                  "value": {
+                    "t": "binary",
+                    "hex": "00ff"
+                  }
+                },
+                {
+                  "name": "missing",
+                  "value": {
+                    "t": "null"
+                  }
+                }
+              ]
+            },
+            {
+              "t": "collection",
+              "items": [
+                {
+                  "t": "record",
+                  "fields": [
+                    {
+                      "name": "İzmir",
+                      "value": {
+                        "t": "decimal",
+                        "unscaled": "123400",
+                        "scale": 4
+                      }
+                    },
+                    {
+                      "name": "blob",
+                      "value": {
+                        "t": "binary",
+                        "hex": "00ff"
+                      }
+                    },
+                    {
+                      "name": "missing",
+                      "value": {
+                        "t": "null"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "t": "i64",
+                  "v": "-9223372036854775808"
+                },
+                {
+                  "t": "null"
+                }
+              ]
+            }
+          ]
+        ],
+        "set_name": "out",
+        "columns": [
+          {
+            "name": "rec_out",
+            "type": "RECORD"
+          },
+          {
+            "name": "items_out",
+            "type": "COLLECTION"
+          }
+        ]
+      }
+    },
+    {
+      "id": "connected-read",
+      "routine": "export_stock_for",
+      "sql": "SELECT export_stock_for(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "1"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "i64",
+              "v": "7"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "connected-empty",
+      "routine": "export_stock_for",
+      "sql": "SELECT export_stock_for(:arg_0)",
+      "parameter_types": {
+        "arg_0": {
+          "type": "BIGINT"
+        }
+      },
+      "parameters": {
+        "arg_0": {
+          "t": "i64",
+          "v": "2"
+        }
+      },
+      "expected": {
+        "rows": [
+          [
+            {
+              "t": "null"
+            }
+          ]
+        ]
+      }
+    }
+  ],
+  "planned_export_cases": [
+    {
+      "id": "root-closure",
+      "target": [
+        "main",
+        "public",
+        "export_position"
+      ],
+      "revision": "1",
+      "mode": "standalone",
+      "expect": "One export_material method. Server-independent execution."
+    },
+    {
+      "id": "self-cycle",
+      "target": [
+        "main",
+        "public",
+        "export_search"
+      ],
+      "revision": "1",
+      "mode": "standalone",
+      "expect": "One self edge, bounded recursion."
+    },
+    {
+      "id": "hosted-select",
+      "target": [
+        "main",
+        "public",
+        "export_stock_for"
+      ],
+      "revision": "1",
+      "mode": "standalone",
+      "expect": "Ineligible SQL subquery at line 3. No output sources."
+    },
+    {
+      "id": "hosted-cursor",
+      "target": [
+        "main",
+        "public",
+        "export_stock_cursor"
+      ],
+      "revision": "1",
+      "mode": "standalone",
+      "expect": "Ineligible OPEN cursor at line 3. No output sources."
+    },
+    {
+      "id": "connected-host",
+      "target": [
+        "main",
+        "public",
+        "export_stock_for"
+      ],
+      "revision": "1",
+      "mode": "connected",
+      "expect": "Exact Stage33 JAR; manifest says routine and SELECT still execute on the Server."
+    },
+    {
+      "id": "hosted-drift",
+      "target": [
+        "main",
+        "public",
+        "export_stock_for"
+      ],
+      "revision": "1",
+      "mode": "connected",
+      "expect": "Add export_stock.description column. Stale closure fails with explicit source/revision diagnostic."
+    },
+    {
+      "id": "malicious-path",
+      "target": [
+        "main",
+        "public",
+        "export_position"
+      ],
+      "revision": "1",
+      "mode": "standalone",
+      "expect": "Unknown path input denied. Response outputs use only controlled names."
+    },
+    {
+      "id": "unprivileged",
+      "target": [
+        "main",
+        "public",
+        "export_position"
+      ],
+      "revision": "1",
+      "mode": "standalone",
+      "expect": "Identical request from no-execute account denied without artifact or routine source."
+    }
+  ]
+}

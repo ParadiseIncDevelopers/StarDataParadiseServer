@@ -1,7 +1,7 @@
 # Sıradaki etap
 
-**31 Native SDK tamamlama ve paketleme**
+**37 Workbench SQL editörü ve explorer**
 
-Native API ve ABI uyumunu tamamla. Son kabul edilen Server 0.3.0 ile kurulu paket ve mevcut istemcileri test et.
+Workbench ile SQL düzenleme, çalıştırma ve nesne gezgini. Resmi Etap 37 kapsamı ve kabul ölçütleriyle ilerle.
 
-[Etap 30 kabul kanıtı](STAGES/30.json)
+[Etap 36 kabul kanıtı](STAGES/36.json)

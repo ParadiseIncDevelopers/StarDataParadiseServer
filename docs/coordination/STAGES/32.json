@@ -1,0 +1,183 @@
+{
+  "stage_id": 32,
+  "status": "PASSED",
+  "started_at": "2026-11-15T18:38:29.8082165+03:00",
+  "finished_at": "2026-11-15T19:01:28.4602028+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 31,
+      "file": "STAGES/31.json",
+      "sha256": "63a7c44a6df9980a213e380882d7e2c9bcec0e2d745bead635f46788794b6feb"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "dotnet_sdk": "10.0.402",
+    "targets": [
+      "net10.0",
+      "net48"
+    ],
+    "sdk_package_version": "2.0.0-preview.1",
+    "server_version": "0.3.0",
+    "wire_version": 1,
+    "contract_sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise.SDK.NET",
+      "head": "b6a2eef8233873a4562015172af075bf2f43de4e",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "BUILD.md",
+        "ci.ps1",
+        "contracts/sdp-contract-v1.zip",
+        "framework/BUILD.md",
+        "framework/StarDataParadiseNetFramework.csproj",
+        "smoke/App.config",
+        "smoke/Program.cs",
+        "smoke/Smoke.csproj",
+        "src/SdpCommand.cs",
+        "src/SdpCompatibility.cs",
+        "src/SdpConnection.cs",
+        "src/SdpDataReader.cs",
+        "src/SdpException.cs",
+        "src/SdpFactory.cs",
+        "src/SdpParameter.cs",
+        "src/SdpTransaction.cs",
+        "src/SdpValues.cs",
+        "src/SdpWire.cs",
+        "src/StarDataParadise.SDK.NET.csproj"
+      ],
+      "source_manifest": "out/sdp-m7/stage32/StarDataParadise.SDK.NET.changed.sha256",
+      "source_manifest_sha256": "61625a928da7140f765ed6db3ae5990b20519608faf38f76a4474bb0c7642531"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m7/stage32/workspace-before.json",
+    "archive_path": "out/sdp-m7/stage32/workspace-before.zip",
+    "archive_sha256": "bde2ef0ced9eea274483756df64f47335dc0b29638f616d18d27425bf7382d8e",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Checkpoint all seven repositories before Stage32",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage32/checkpoint.log",
+      "log_sha256": "a2df844eb27c5af8e433ba70ce1dca6e6a5da4f9526febb462e7d82e15869864",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify source isolation against Stage32 checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage32/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify package IDs, frameworks, ZIP contents, and locked contract archive digest",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage32/audit.log",
+      "log_sha256": "389ccb6ba7cb816e6990f52293b1f68c6c7b0f7641b0a49ad0dd74c68b99f469",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "Run ci.ps1 for net10.0, install exact modern NuGet candidate and run managed fixture against tested Server 0.3.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage32/modern.log",
+      "log_sha256": "ebb56fc4badc86ebcc0291ae6d471c7781415114ee42411acc012a8dc06d0765",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "Restore Framework project from NuGet.org",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage32/framework-restore.log",
+      "log_sha256": "d3c6b0ab51c042e589a127e171e3a46259efc072e453b25ce9f23fc4eb17c85e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "Build and pack the net48 provider",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage32/framework-pack.log",
+      "log_sha256": "34b151f2c640a3e737bda4fb19e5da4881661e59c6ab93dac3e16cf247030666",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "Install exact Framework candidate from local mapped source using fresh NuGet cache",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage32/framework-install.log",
+      "log_sha256": "3506ac20bbede76df9d74c73d89d261b0adcee9cd84476441d90520845fccb03",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "Build real net48 consumer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage32/framework-consumer.log",
+      "log_sha256": "2ae73360a5c7dd6601eb2d4908398e0c8e9c72df48014dc2fee1bdab0c986030",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "Run the installed net48 executable against real TLS Server with commit response loss",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage32/framework-test.log",
+      "log_sha256": "aca74484fc3901f73d50024b45634446592bacb9a707f4ba7c281236b721a1c6",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S32-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İki temiz NuGet tüketicisi gerçek TLS ile parametreli CRUD, OUT ve çoklu sonuç, rollback ve savepoint çalıştırdı."
+    },
+    {
+      "id": "S32-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Ortak tip ve golden veri sözleşmesi, 313 satırlık akış, parametre ayırımı, havuz sıfırlama ve yeni oturum ayırımı iki çalışma zamanında geçti."
+    },
+    {
+      "id": "S32-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İptal, yanlış TLS adı, misafir History/model reddi, yanıtı kaybolan commit'in token ile doğrulanması iki kurulu pakette geçti."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "file": "out/packages/StarDataParadiseDrive.2.0.0-preview.1.nupkg",
+      "sha256": "bdfca7e3e2c117916095eb4289cb06dc3fb85e537b27ed8a6f2185f533ac5063"
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "file": "out/packages/StarDataParadiseNetFramework.2.0.0-preview.1.nupkg",
+      "sha256": "606c612fc4d3cbc8acfff6437cd7c6350cd8b8aaa9f723d880e2f363196cab48"
+    }
+  ],
+  "remaining_issues": [
+    "NuGet.org yayımlaması yerel kabul testlerinden ayrı işlem. Tarayıcı erişimi kurulamadı ve yetkili API anahtarı bu çalıştırmada mevcut değildi.",
+    "2.0.0-preview.1 yeni ADO.NET API ve framework hedefleri sunar. Eski 1.x node API kullanan uygulamalar geçişte mevcut sürümü sabitleyebilir."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 33
+}

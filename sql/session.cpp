@@ -1576,6 +1576,42 @@ Json Session::test_routine(const Json& body)
     return response;
 }
 
+Json Session::export_routine(const Json& body)
+{
+    if (!security_) reject(W::unsupported);
+    if (result_) reject(W::invalid_state);
+    if (body.size() != 2) reject(W::invalid_argument);
+    const auto& mode = wire::string_field(body, "mode");
+    if (mode != "standalone" && mode != "connected") reject(W::invalid_argument);
+    const auto name = parse_history_target(wire::string_field(body, "routine"));
+    std::unique_ptr<disk::Transaction> local;
+    const WorkCheck check = [this] { check_deadline(); };
+    Catalog catalog(use(local), owner_, check);
+    const auto objects = catalog.list();
+    Json response;
+    const auto check_access = [&](const Object& object, std::string_view verb) {
+        if (verb == "metadata")
+        {
+            for (const auto candidate : {"usage", "select", "insert", "update", "delete", "ddl", "execute", "history"})
+            {
+                const auto target = object_access(objects, object, candidate);
+                if (security_->allowed(principal_, target.verb, target.target, target.schema, target.database)) return;
+            }
+            reject(W::permission_denied);
+        }
+        const auto target = object_access(objects, object, verb);
+        enforce(*security_, principal_, {&target, 1});
+    };
+    try { response = routine_export_snapshot(catalog, name, mode == "standalone", check_access, check); }
+    catch (const Error& error)
+    {
+        if (error.code() == Code::name && !principal_.administrator) reject(W::permission_denied);
+        throw;
+    }
+    ensure_rows_in_frame(response);
+    return response;
+}
+
 Json Session::request(std::string_view op, Json& body)
 {
     if (op == "session_reset")
@@ -1589,6 +1625,7 @@ Json Session::request(std::string_view op, Json& body)
     if (op == "password_set") return password(body);
     if (op == "profile_last") return {{"samples", last_profile_}};
     if (op == "routine_test") return test_routine(body);
+    if (op == "routine_export") return export_routine(body);
     if (op.starts_with("decision_")) return decision(op, body);
     if (op.starts_with("job_")) return job_request(op, body);
     if (op.starts_with("dataset_")) return dataset_request(op, body);

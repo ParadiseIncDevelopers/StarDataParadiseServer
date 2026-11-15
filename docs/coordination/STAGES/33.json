@@ -1,0 +1,168 @@
+{
+  "stage_id": 33,
+  "status": "PASSED",
+  "started_at": "2026-11-15T19:01:28.9243919+03:00",
+  "finished_at": "2026-11-15T19:18:54.5460411+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 32,
+      "file": "STAGES/32.json",
+      "sha256": "7ae21ca63784baad66523722817f6ae589deb814d929718d82a54cbc20fb7b9b"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "jdk": "17.0.12",
+    "gradle": "9.3.1",
+    "gson": "2.13.2",
+    "sdk_version": "0.2.0",
+    "coordinate": "com.stardataparadise:stardataparadise-jdbc:0.2.0",
+    "wire_version": 1,
+    "contract_sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise.SDK.Java",
+      "head": "a50422f87d2d5185127b04c7b7cfc48d1522a6e4",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "build.gradle",
+        "BUILD.md",
+        "ci.ps1",
+        "gradle/wrapper/gradle-wrapper.jar",
+        "gradle/wrapper/gradle-wrapper.properties",
+        "gradlew",
+        "gradlew.bat",
+        "src/installed/java/com/stardataparadise/sdk/installed/Acceptance.java",
+        "src/main/java/com/stardataparadise/sdk/JdbcColumn.java",
+        "src/main/java/com/stardataparadise/sdk/JdbcMetadata.java",
+        "src/main/java/com/stardataparadise/sdk/JdbcProxy.java",
+        "src/main/java/com/stardataparadise/sdk/JdbcRows.java",
+        "src/main/java/com/stardataparadise/sdk/JdbcSession.java",
+        "src/main/java/com/stardataparadise/sdk/JdbcStatement.java",
+        "src/main/java/com/stardataparadise/sdk/SdkVersion.java",
+        "src/main/java/com/stardataparadise/sdk/SdpConnection.java",
+        "src/main/java/com/stardataparadise/sdk/SdpException.java",
+        "src/main/java/com/stardataparadise/sdk/SdpValues.java",
+        "src/main/java/com/stardataparadise/sdk/ServerRows.java",
+        "src/main/java/com/stardataparadise/sdk/SqlText.java",
+        "src/main/java/com/stardataparadise/sdk/StarDataParadiseDriver.java",
+        "src/main/java/com/stardataparadise/sdk/ValueCodec.java",
+        "src/main/java/com/stardataparadise/sdk/Wire.java",
+        "src/main/resources/META-INF/services/java.sql.Driver",
+        "src/main/resources/META-INF/stardataparadise-wire.properties",
+        "src/smoke/java/com/stardataparadise/sdk/smoke/Smoke.java",
+        "src/test/java/com/stardataparadise/sdk/ContractTest.java"
+      ],
+      "source_manifest": "out/sdp-m7/stage33/StarDataParadise.SDK.Java.changed.sha256",
+      "source_manifest_sha256": "45ab016cfaae886ce282a5a8f3d2c8e9ef2e595c41c676532cfb235bfb911a53"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m7/stage33/workspace-before.json",
+    "archive_path": "out/sdp-m7/stage33/workspace-before.zip",
+    "repo": "StarDataParadiseServer",
+    "archive_sha256": "9ce848c461f277a1ff8dfcfa331046f7bb3306d3ccca13f0ea2c12383dc202ae"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Checkpoint all seven repositories before Stage33",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage33/checkpoint.log",
+      "log_sha256": "ceff54679b0ee7c330dbe674c2308ff0a8d9a24c7cecedda0e1c4ea57c7f6151",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify sources outside Java repository against Stage33 checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage33/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run real Java repository ci.ps1 with JDK 17, Gradle 9.3.1 and local Maven publication",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage33/gradle.log",
+      "log_sha256": "d8e095e3e0d71ee8cd7d3f02a2d2137529ece1b2b8c076008794e87def68718a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Execute clean installed JAR against exact Server 0.3.0 with real TLS and a lost commit response",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage33/installed.log",
+      "log_sha256": "aca74484fc3901f73d50024b45634446592bacb9a707f4ba7c281236b721a1c6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify packaged JAR digest and immutable Maven package metadata",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m7/stage33/package-audit.log",
+      "log_sha256": "2c14965b7db4973052e09451dac52a0300972b15d88841d7087fbf7dd44045b7",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S33-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "JDK 17 ve Gradle 9.3.1, dört JUnit testi, yerel Maven paketi ve ayrı Java sürecinde kurulu JAR."
+    },
+    {
+      "id": "S33-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek TLS, JDBC metadata, 313 satır akışı, tam decimal ve nanosaniye, NULL/Unicode/binary, OUT/REF CURSOR ve RECORD/COLLECTION."
+    },
+    {
+      "id": "S33-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Permission ve sertifika reddi, iptal, manuel transaction/savepoint/reset, History/Decision/model çağrıları, bağımsız commit ledger doğrulaması."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage33/release/stardataparadise-jdbc-0.2.0.jar",
+      "sha256": "c40f92b8d725eefff235980f25b264fbfca056b13fa313aa5a00d2fa14c69298"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage33/release/stardataparadise-jdbc-0.2.0-sources.jar",
+      "sha256": "7baadd4e6102df4e24f0c2e5bed11e2ee119b0b35c77d4d219d925a657d59fa6"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage33/release/stardataparadise-jdbc-0.2.0-javadoc.jar",
+      "sha256": "4171f25e9195428f20b4558bf7f1872ffc63b05e47cd8208403dc4f897b83701"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage33/release/stardataparadise-jdbc-0.2.0.pom",
+      "sha256": "7e83aec8b429b856343923872bf23c36dfaf1ead7f22cb5986f2142bd2d49367"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m7/stage33/release/stardataparadise-jdbc-0.2.0.module",
+      "sha256": "d5a8a88bbc8e3d89fe302c8f17ca7c597c393d3cae04f79dd548f7f3772b0dd6"
+    }
+  ],
+  "remaining_issues": [
+    "Eclipse arayüzü çalıştırılmadı. JDBC uygulaması ve bağımsız tüketici JDK 17 ile komut satırında doğrulandı.",
+    "Harici Maven deposuna yayımlama yapılmadı. Yerel Maven artifact ve paketleri üretildi."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 34
+}

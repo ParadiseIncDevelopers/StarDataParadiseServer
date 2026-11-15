@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <map>
+#include <set>
 
 namespace sdp::sql
 {
@@ -635,6 +636,120 @@ void fire_triggers(disk::Transaction& transaction, disk::Owner owner, const Obje
         const auto result = Invocation(transaction, owner, invoker, check).run(program, arguments);
         if (!result.sets.empty()) throw Error(Code::unsupported, {}, "Triggers cannot return cursor results");
     }
+}
+
+namespace
+{
+struct ExportBlocker
+{
+    Source source;
+    std::string_view operation;
+};
+
+std::optional<ExportBlocker> export_blocker(const pl::TypedExpr& expr)
+{
+    if (expr.op == Op::exists || expr.op == Op::subquery)
+        return ExportBlocker{expr.source, expr.op == Op::exists ? "exists" : "subquery"};
+    for (const auto& arg : expr.args)
+        if (const auto blocked = export_blocker(arg)) return blocked;
+    return {};
+}
+
+std::optional<ExportBlocker> export_blocker(const std::vector<pl::Instruction>& instructions)
+{
+    using Kind = pl::Node::Kind;
+    for (const auto& instruction : instructions)
+    {
+        std::string_view hosted;
+        switch (instruction.kind)
+        {
+        case Kind::select_into: hosted = "select_into"; break;
+        case Kind::open_cursor: hosted = "open_cursor"; break;
+        case Kind::fetch_cursor: hosted = "fetch_cursor"; break;
+        case Kind::close_cursor: hosted = "close_cursor"; break;
+        case Kind::emit_cursor: hosted = "emit_cursor"; break;
+        case Kind::sql_mutation: hosted = "sql_mutation"; break;
+        default: break;
+        }
+        if (!hosted.empty()) return ExportBlocker{instruction.source, hosted};
+        if (instruction.first)
+            if (const auto blocked = export_blocker(*instruction.first)) return blocked;
+        if (instruction.second)
+            if (const auto blocked = export_blocker(*instruction.second)) return blocked;
+        for (const auto* branch : {&instruction.body, &instruction.alternate, &instruction.handlers})
+            if (const auto blocked = export_blocker(*branch)) return blocked;
+    }
+    return {};
+}
+
+std::optional<ExportBlocker> export_blocker(const pl::Program& program)
+{
+    if (const auto blocked = export_blocker(program.body)) return blocked;
+    if (const auto blocked = export_blocker(program.handlers)) return blocked;
+    if (!program.out_cursors.empty()) return ExportBlocker{program.name.source, "out_cursor"};
+    return {};
+}
+
+Json export_dependency(const Object& object, std::span<const Object> snapshot)
+{
+    return {{"id", std::to_string(object.id)}, {"qualified_name", Catalog::qualified(object, snapshot).parts},
+        {"schema_version", object.version}, {"kind", object.kind == ObjectKind::routine ? "routine" : "catalog"}};
+}
+}
+
+Json routine_export_snapshot(Catalog& catalog, const Name& name, bool standalone,
+    const std::function<void(const Object&, std::string_view)>& check_access, const WorkCheck& check)
+{
+    const auto entry = catalog.resolve(ObjectKind::routine, name);
+    const auto snapshot = catalog.list();
+    std::set<ObjectId> visited;
+    auto routines = Json::array();
+    bool writes = false;
+    bool uses_sql = false;
+    std::optional<ExportBlocker> blocker;
+    const auto visit = [&](const auto& recur, const Object& object) -> void
+    {
+        check();
+        if (!visited.insert(object.id).second) return;
+        if (visited.size() > 64) throw Error(Code::limit, name.source, "Routine export exceeds closure limit");
+        check_access(object, "execute");
+        if (standalone) check_access(object, "ddl");
+        const auto program = load_program(catalog, object);
+        writes |= program.writes_sql;
+        uses_sql |= program.uses_sql;
+        if (!blocker) blocker = export_blocker(program);
+        if (standalone && blocker)
+            throw Error(Code::unsupported, blocker->source, "Standalone export cannot run hosted PL/SQL");
+        auto exported = export_dependency(object, snapshot);
+        auto ir = Json::parse(pl::serialize(program));
+        auto dependencies = Json::array();
+        for (const auto& [id, version] : revisions(record(object)))
+        {
+            const auto found = std::ranges::find(snapshot, id, &Object::id);
+            if (found == snapshot.end() || found->version != version) damaged();
+            if (found->kind == ObjectKind::routine) recur(recur, *found);
+            else check_access(*found, "metadata");
+            dependencies.push_back(export_dependency(*found, snapshot));
+        }
+        exported["dependencies"] = std::move(dependencies);
+        if (standalone) exported["ir"] = std::move(ir);
+        else
+        {
+            auto slots = std::move(ir.at("slots"));
+            slots.erase(slots.begin() + static_cast<Json::difference_type>(program.parameters), slots.end());
+            exported["parameters"] = std::move(slots);
+            exported["returns"] = std::move(ir.at("returns"));
+        }
+        routines.push_back(std::move(exported));
+    };
+    visit(visit, entry);
+    Json reply{{"format", 1}, {"mode", standalone ? "standalone" : "connected"},
+        {"entries", Json::array({std::to_string(entry.id)})}, {"routines", std::move(routines)},
+        {"uses_sql", uses_sql}, {"writes_sql", writes}, {"standalone_eligible", !blocker}};
+    if (blocker)
+        reply["standalone_blocker"] = {{"op", blocker->operation},
+            {"line", blocker->source.line}, {"column", blocker->source.column}};
+    return reply;
 }
 
 std::vector<ObjectId> routine_dependencies(const Object& object)
