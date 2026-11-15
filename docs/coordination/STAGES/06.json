@@ -1,0 +1,155 @@
+{
+  "stage_id": 6,
+  "status": "PASSED",
+  "started_at": "2026-11-15T10:04:40.7204812+03:00",
+  "finished_at": "2026-11-15T10:14:43.0862283+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 5,
+      "file": "STAGES/05.json",
+      "sha256": "ac8220b551ec6e2ee61a06bcb697ef5720e2dcc55148c771d0b77efebabaf445"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "native": "0.1.0 (ABI 1)",
+    "json": "3.12.0",
+    "python": "3.12.4"
+  },
+  "repositories": [
+    {
+      "source_manifest_sha256": "08f0958136b3b89b1a4c0c321303f23fdf10f57b6eb22e442afb2f07befd4746",
+      "dirty_before": true,
+      "head": "792a803f6521c749d1b668a80fde81062cff1afb",
+      "name": "StarDataParadiseCli",
+      "source_manifest": "out/sdp-m2/stage06/changed.sha256",
+      "changed_files": [
+        "BUILD.md",
+        "ci.ps1",
+        "CLI.md",
+        "cmake/NativeSdk.cmake",
+        "CMakeLists.txt",
+        "StarDataParadiseCli/connection.cpp",
+        "StarDataParadiseCli/connection.hpp",
+        "StarDataParadiseCli/StarDataParadiseCli.cpp",
+        "StarDataParadiseCli/StarDataParadiseCli.vcxproj",
+        "StarDataParadiseCli/StarDataParadiseCli.vcxproj.filters",
+        "StarDataParadiseCli/terminal.cpp",
+        "StarDataParadiseCli/terminal.hpp",
+        "tests/cli_smoke.py"
+      ],
+      "branch": "master"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m2/stage06/workspace-before.zip",
+    "manifest": "out/sdp-m2/stage06/workspace-before.json",
+    "archive_sha256": "f84350311d0417eadfcdbad9220162956aa5c80a862308e659c1c4a1a2c5fb09",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. <stage-manifest> --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage06/checkpoint.log",
+      "log_sha256": "933cc8070cc37e6ec413898d006d2a2b15d5a838f0cc936e4bb503bad3badcf2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "command": "ctest --preset windows-x64",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage06/baseline.log",
+      "log_sha256": "aca1076e63b5932b6921f5edf589f1b1f0272b4e3c02f70572e9787e8a6944e3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "command": "cmake --preset windows-x64 -B <stage-build> <pinned dependencies> <integration inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage06/configure.log",
+      "log_sha256": "fca316378ec29a981a7538a978ba322323e71a171bc94b455be469c6c57f7757",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "command": "cmake --build <stage-build> --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage06/build-final.log",
+      "log_sha256": "43f33ec8b8149324fc6a73cb0be6278e33fcefef93fca89fcca661b0ab72c5fe",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "command": "ctest --test-dir out/sdp-m2/stage06/build -C Release -V --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage06/ctest.log",
+      "log_sha256": "e36d0a4753147982e0bc415bae5b07e9aa9fbf9a546c6eaead900710e115412b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "command": "MSBuild.exe <existing solution> /t:Build /p:Configuration=Release /p:Platform=x64 <isolated output>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage06/msbuild.log",
+      "log_sha256": "5ff26429d93b392cd5bd3cf39a6d97e03c71b44a175a8fd6497681ba8d2aa2db",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. <stage-manifest> --check --allow StarDataParadiseCli",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage06/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S06-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Sadece CLI EXE ve pinli DLL bulunan dizinden ayrı Server’a DNS, TLS ve doğrulama ile bağlanıldı."
+    },
+    {
+      "id": "S06-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "JSON stdlib parser ile okundu, stdout tek nesne içerdi. ANSI ve stderr çıktısı temiz, renk ve pipe davranışı kontrol edildi."
+    },
+    {
+      "id": "S06-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Auth 3, TLS/name ve bağlantı kaybı 4, SQL unavailable 5, Ctrl+C 6. EOF ve terminal temizlendi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseCli",
+      "file": "out/sdp-m2/stage06/build/Release/StarDataParadiseCLI.exe",
+      "sha256": "6e931b0584de560ac53a9655be19ae0a87375f143dbb808bcb077beb59aa9b43"
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "file": "out/sdp-m2/stage06/build/Release/StarDataParadiseDLLler.dll",
+      "sha256": "b42c68d072e5b4262e31ddd419331a329a0d569baf67ed145aeb9c2712856c25"
+    }
+  ],
+  "remaining_issues": [
+    "SQL yürütme ve script işleme sonraki etap kapsamı.",
+    "Native bağlantı açma Ctrl+C sonrasında mevcut timeout sınırı içinde tamamlanıp kapatılır."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 7
+}

@@ -1,0 +1,218 @@
+{
+  "stage_id": 1,
+  "status": "PASSED",
+  "started_at": "2026-11-14",
+  "finished_at": "2026-11-15T00:02:10.1961320+03:00",
+  "repositories": [
+    {
+      "name": "StarDataParadise",
+      "baseline_state": "PRESENT",
+      "head_before": "769721228600dd21429cfb2ec41fa5d9b119641d",
+      "head_after": "769721228600dd21429cfb2ec41fa5d9b119641d",
+      "dirty_before": false,
+      "checkpoint_manifest": "out/sdp-m1/baseline/checkpoint.json",
+      "checkpoint_verified_files": 14,
+      "commands": [
+        {
+          "command": "MSBuild.exe",
+          "arguments": [
+            "StarDataParadise.slnx",
+            "/nologo",
+            "/t:Build",
+            "/verbosity:minimal",
+            "/p:Configuration=Release",
+            "/p:Platform=x64",
+            "/p:IntDir=out/sdp-m1/baseline/build/obj/",
+            "/p:OutDir=out/sdp-m1/baseline/build/bin/"
+          ],
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/baseline/msbuild.log",
+          "log_sha256": "f6e678bf9c29ca7a98bc6f7799f89b07529bd4229661626eb2e0b354d8067a89",
+          "actually_executed": true
+        }
+      ],
+      "changed_files": [
+        "AGENTS.md"
+      ]
+    },
+    {
+      "name": "StarDataParadiseServer",
+      "baseline_state": "PRESENT",
+      "head_before": "bec2e0c4ada12d1db49a73f7e1229a9ce08e4d26",
+      "head_after": "bec2e0c4ada12d1db49a73f7e1229a9ce08e4d26",
+      "dirty_before": false,
+      "checkpoint_manifest": "out/sdp-m1/baseline/checkpoint.json",
+      "checkpoint_verified_files": 6,
+      "commands": [
+        {
+          "command": "MSBuild.exe",
+          "arguments": [
+            "StarDataParadiseServer.slnx",
+            "/nologo",
+            "/t:Build",
+            "/verbosity:minimal",
+            "/p:Configuration=Release",
+            "/p:Platform=x64",
+            "/p:IntDir=out/sdp-m1/baseline/build/obj/",
+            "/p:OutDir=out/sdp-m1/baseline/build/bin/"
+          ],
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/baseline/msbuild.log",
+          "log_sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+          "actually_executed": true
+        },
+        {
+          "command": "python -c \"import pathlib,sys; p=pathlib.Path(sys.argv[1]); print(p.name, p.is_file()); sys.exit(0 if p.is_file() else 1)\" out/sdp-m1/baseline/build/bin/StarDataParadiseServer.exe",
+          "arguments": [],
+          "exit_code": 1,
+          "log_path": "out/sdp-m1/baseline/server-artifact.log",
+          "log_sha256": "21af29cffeeabd643703378ccf449313cf7e4e1081ef8f541df98950976033a8",
+          "actually_executed": true
+        }
+      ],
+      "changed_files": [
+        "AGENTS.md",
+        "docs/coordination/WORKSPACE_BASELINE.md",
+        "docs/coordination/ORTAK_KURALLAR.txt",
+        "docs/coordination/REQUIREMENTS.md",
+        "docs/coordination/COMPATIBILITY_MATRIX.md",
+        "docs/coordination/PROGRESS.md",
+        "docs/coordination/NEXT_TASK.md",
+        "docs/coordination/STAGES/01.json"
+      ]
+    },
+    {
+      "name": "StarDataParadiseCLI",
+      "baseline_state": "PRESENT",
+      "head_before": "792a803f6521c749d1b668a80fde81062cff1afb",
+      "head_after": "792a803f6521c749d1b668a80fde81062cff1afb",
+      "dirty_before": false,
+      "checkpoint_manifest": "out/sdp-m1/baseline/checkpoint.json",
+      "checkpoint_verified_files": 7,
+      "commands": [
+        {
+          "command": "MSBuild.exe",
+          "arguments": [
+            "StarDataParadiseCli.slnx",
+            "/nologo",
+            "/t:Build",
+            "/verbosity:minimal",
+            "/p:Configuration=Release",
+            "/p:Platform=x64",
+            "/p:IntDir=out/sdp-m1/baseline/build/obj/",
+            "/p:OutDir=out/sdp-m1/baseline/build/bin/"
+          ],
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/baseline/msbuild.log",
+          "log_sha256": "66e2b958c9c62b97de9849189d33d6e36cff093830807525f005064eb5947aed",
+          "actually_executed": true
+        },
+        {
+          "command": "out/sdp-m1/baseline/build/bin/StarDataParadiseCli.exe",
+          "arguments": [],
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/baseline/cli-start.log",
+          "log_sha256": "cfce4e2952591e79a0dea1654a92dba4f099d348ab7c176bcd052d69b8929770",
+          "actually_executed": true
+        }
+      ],
+      "changed_files": [
+        "AGENTS.md"
+      ]
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "baseline_state": "PRESENT",
+      "head_before": "c1bb628f62036bd418bbe8905e4b30ed48200ad0",
+      "head_after": "c1bb628f62036bd418bbe8905e4b30ed48200ad0",
+      "dirty_before": false,
+      "checkpoint_manifest": "out/sdp-m1/baseline/checkpoint.json",
+      "checkpoint_verified_files": 10,
+      "commands": [
+        {
+          "command": "MSBuild.exe",
+          "arguments": [
+            "StarDataParadiseDLLler.slnx",
+            "/nologo",
+            "/t:Build",
+            "/verbosity:minimal",
+            "/p:Configuration=Release",
+            "/p:Platform=x64",
+            "/p:IntDir=out/sdp-m1/baseline/build/obj/",
+            "/p:OutDir=out/sdp-m1/baseline/build/bin/"
+          ],
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/baseline/msbuild.log",
+          "log_sha256": "66b9adf4813da8b97892d5313be1a356d6db97d1db1f7d73c53fb5dc184d13e0",
+          "actually_executed": true
+        },
+        {
+          "command": "python",
+          "arguments": [
+            "ctypes.WinDLL",
+            "_ctypes.FreeLibrary",
+            "out/sdp-m1/baseline/build/bin/StarDataParadiseDLLler.dll"
+          ],
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/baseline/dll-load.log",
+          "log_sha256": "0b9d6d63a00d396fa01d4a9987bb9339a37b93d82ee5e70819041a21360e6ad3",
+          "actually_executed": true
+        }
+      ],
+      "changed_files": [
+        "AGENTS.md"
+      ]
+    },
+    {
+      "name": "StarDataParadise.SDK.NET",
+      "baseline_state": "MISSING"
+    },
+    {
+      "name": "StarDataParadise.SDK.Java",
+      "baseline_state": "MISSING"
+    },
+    {
+      "name": "StarDataParadise.SDK.Python",
+      "baseline_state": "MISSING"
+    }
+  ],
+  "toolchain": {
+    "os_name": "Windows 10 Home",
+    "os_display_version": "26H2",
+    "os_build": "26300.9974",
+    "architecture": "X64",
+    "msbuild": "18.11.1.51303",
+    "msvc": "14.51.36260.0",
+    "windows_sdk": "10.0.26100.0",
+    "dotnet": "10.0.402",
+    "java": "17.0.12",
+    "python": "3.12.4"
+  },
+  "tests": [
+    {
+      "id": "S01-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "workspace-map.json: 4 PRESENT, 3 MISSING"
+    },
+    {
+      "id": "S01-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Dört checkpoint manifesti ve 37 SHA-256 kaynak/kopya karşılaştırması"
+    },
+    {
+      "id": "S01-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Dört çözümün MSBuild logları ve başlangıç artifact kontrolleri. Server eksik EXE başlangıç bulgusu."
+    }
+  ],
+  "baseline_issues": [
+    "Server .vcxproj kaynak içermiyor, EXE üretilmedi.",
+    "Üç bağımsız dil SDK klasörü başlangıçta eksik.",
+    "C++ başlangıç projelerinde tanımlı otomatik test takımı bulunmuyor."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 2
+}

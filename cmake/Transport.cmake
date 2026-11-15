@@ -1,0 +1,28 @@
+set(SDP_ASIO_SHA256 "9f2648fa483e58a6bf848d970ee0ea650ca19ed7769dfa520ed4f7b8d27af1db")
+set(SDP_ASIO_ARCHIVE "" CACHE FILEPATH "Local copy of the Asio 1.38.2 source archive")
+if(NOT SDP_ASIO_ARCHIVE)
+    set(SDP_ASIO_ARCHIVE "${CMAKE_CURRENT_BINARY_DIR}/_deps/asio-1.38.2.tar.gz")
+    if(NOT EXISTS "${SDP_ASIO_ARCHIVE}")
+        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/_deps")
+        file(DOWNLOAD "https://github.com/chriskohlhoff/asio/archive/refs/tags/asio-1-38-2.tar.gz"
+            "${SDP_ASIO_ARCHIVE}" EXPECTED_HASH "SHA256=${SDP_ASIO_SHA256}" TLS_VERIFY ON)
+    endif()
+endif()
+file(SHA256 "${SDP_ASIO_ARCHIVE}" asio_hash)
+if(NOT asio_hash STREQUAL SDP_ASIO_SHA256)
+    message(FATAL_ERROR "Asio 1.38.2 archive differs from the pinned SHA-256.")
+endif()
+
+set(asio_unpack "${CMAKE_CURRENT_BINARY_DIR}/_deps/asio")
+set(asio_root "${asio_unpack}/asio-asio-1-38-2")
+if(NOT EXISTS "${asio_root}/include/asio.hpp")
+    file(ARCHIVE_EXTRACT INPUT "${SDP_ASIO_ARCHIVE}" DESTINATION "${asio_unpack}"
+        PATTERNS "asio-asio-1-38-2/include/*" "asio-asio-1-38-2/LICENSE_1_0.txt")
+endif()
+
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL 3.5.9 EXACT REQUIRED COMPONENTS SSL Crypto)
+add_library(sdp_tls INTERFACE)
+target_include_directories(sdp_tls SYSTEM INTERFACE "${asio_root}/include")
+target_compile_definitions(sdp_tls INTERFACE ASIO_STANDALONE _WIN32_WINNT=0x0A00 WIN32_LEAN_AND_MEAN NOMINMAX)
+target_link_libraries(sdp_tls INTERFACE OpenSSL::SSL OpenSSL::Crypto ws2_32 mswsock crypt32 advapi32)

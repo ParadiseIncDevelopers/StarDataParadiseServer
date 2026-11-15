@@ -61,3 +61,6 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+# Stage evidence records contain SHA-256 references to the original bytes.
+docs/coordination/STAGES/*.json -text diff whitespace=cr-at-eol

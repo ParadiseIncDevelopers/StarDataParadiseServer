@@ -143,7 +143,34 @@
     </Manifest>
   </ItemDefinitionGroup>
 
-  <ItemGroup></ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StarDataParadiseServer.cpp" />
+    <ClCompile Include="config.cpp" />
+    <ClCompile Include="service.cpp" />
+    <ClCompile Include="storage_admin.cpp" />
+    <ClCompile Include="..\storage\disk.cpp" />
+    <ClCompile Include="..\storage\heap.cpp" />
+    <ClCompile Include="..\storage\wal.cpp" />
+    <ClCompile Include="..\storage\transactions.cpp" />
+    <ClCompile Include="..\storage\recovery.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="server.hpp" />
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\contracts\v1\cpp;$(SDP_JSON_ROOT)\include;$(SDP_ASIO_ROOT)\include;$(OPENSSL_ROOT_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ASIO_STANDALONE;_WIN32_WINNT=0x0A00;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(OPENSSL_ROOT_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libssl.lib;libcrypto.lib;ws2_32.lib;mswsock.lib;crypt32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Target Name="RequireTransportDependencies" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(Platform)'!='x64'" Text="Use the x64 configuration with the Windows x64 OpenSSL SDK." />
+    <Error Condition="!Exists('$(SDP_JSON_ROOT)\include\nlohmann\json.hpp') Or !Exists('$(SDP_ASIO_ROOT)\include\asio.hpp') Or !Exists('$(OPENSSL_ROOT_DIR)\lib\libssl.lib')" Text="Set SDP_JSON_ROOT, SDP_ASIO_ROOT and OPENSSL_ROOT_DIR as documented in BUILD.md." />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,0 +1,155 @@
+{
+  "stage_id": 7,
+  "status": "PASSED",
+  "started_at": "2026-11-15T10:15:43.2131287+03:00",
+  "finished_at": "2026-11-15T10:24:56.7833754+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 5,
+      "file": "STAGES/05.json",
+      "sha256": "ac8220b551ec6e2ee61a06bcb697ef5720e2dcc55148c771d0b77efebabaf445"
+    },
+    {
+      "stage_id": 6,
+      "file": "STAGES/06.json",
+      "sha256": "f19ab2b605034ad3ac2682e933576b225ab0f2a4d1974b1b0d612ae10cc4daa6"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "qt": "6.11.3",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "native": "0.1.0 (ABI 1)",
+    "python": "3.12.4"
+  },
+  "repositories": [
+    {
+      "head": "769721228600dd21429cfb2ec41fa5d9b119641d",
+      "source_manifest_sha256": "bfdd58a8327dc4aeb7b7e5460c57d703003c927621eac23f13022c26359e69c4",
+      "changed_files": [
+        "BUILD.md",
+        "ci.ps1",
+        "cmake/NativeSdk.cmake",
+        "CMakeLists.txt",
+        "CONNECTIONS.md",
+        "StarDataParadise/profiles.cpp",
+        "StarDataParadise/profiles.hpp",
+        "StarDataParadise/StarDataParadise.cpp",
+        "StarDataParadise/StarDataParadise.vcxproj",
+        "StarDataParadise/StarDataParadise.vcxproj.filters",
+        "StarDataParadise/workbench.cpp",
+        "StarDataParadise/workbench.hpp",
+        "tests/connection_smoke.cpp",
+        "tests/workbench_smoke.py"
+      ],
+      "dirty_before": true,
+      "name": "StarDataParadise",
+      "branch": "master",
+      "source_manifest": "out/sdp-m2/stage07/changed.sha256"
+    }
+  ],
+  "checkpoint": {
+    "repo": "StarDataParadiseServer",
+    "manifest": "out/sdp-m2/stage07/workspace-before.json",
+    "archive_path": "out/sdp-m2/stage07/workspace-before.zip",
+    "archive_sha256": "fa49f6a561109dfe801ef7b580aeb5ab437f75fbf8d9b4cf4bf983800cf3a8b0"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. <stage-manifest> --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage07/checkpoint.log",
+      "log_sha256": "76d6c1c1bb434f483c3e5f88f4d5ee66fdfa2e973a60782318effd72a746b18c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --preset windows-x64",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage07/baseline.log",
+      "log_sha256": "1d219625f4dbdcf963c8c407011b79e876663383c7f73998262230910ffad62d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --preset windows-x64 -B <stage-build> <pinned dependencies> <integration inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage07/configure.log",
+      "log_sha256": "a16f79db335581c4283c4895d6335497d4f3b020640d1ed81353a4614eb6c9a7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --build <stage-build> --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage07/build-final.log",
+      "log_sha256": "b898e5bbe6e3ba3c5118ddda1e2b1ce5a58ee7e2a345a7afaed722756c24e7fe",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --test-dir out/sdp-m2/stage07/build -C Release -V --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage07/ctest.log",
+      "log_sha256": "38a5e1ab0c7a1894dc736047a168e44d5bff8ba4e63954fd4aff5c15b22e59e9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "MSBuild.exe <existing solution> /t:Build /p:Configuration=Release /p:Platform=x64 <isolated output>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage07/msbuild.log",
+      "log_sha256": "7b38bd81a42503181f050547626675b600d1345814c50adb2c08139191adf10a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. <stage-manifest> --check --allow StarDataParadise",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage07/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S07-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Bağlantısız Qt EXE açıldı. İki geçici TLS Server’a paket DLL ile DNS ve sayısal IP üzerinden bağlanıldı."
+    },
+    {
+      "id": "S07-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İki sekme kendi host ve portunu gösterdi. Biri kapanınca diğerinde gerçek health geçti."
+    },
+    {
+      "id": "S07-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Bağlantılar sırasında GUI sayacı ilerledi. Test credential Windows Credential Manager’dan okundu ve temizlendi. Dışa aktarma ve iş panelinde parola bulunmadı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m2/stage07/build/Release/StarDataParadise.exe",
+      "sha256": "0374f3f053988abb73ceb5c2ba04b1665b19e56487c0e30eb38aa4123be6c46b"
+    }
+  ],
+  "remaining_issues": [
+    "Veritabanı seçimi ve read-only ayarı profil tercihleridir. SQL ve örnek veri yükleme sonraki etap kapsamı."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 8
+}

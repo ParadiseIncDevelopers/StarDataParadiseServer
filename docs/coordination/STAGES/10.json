@@ -1,0 +1,351 @@
+{
+  "stage_id": 10,
+  "status": "PASSED",
+  "started_at": "2026-11-15T10:45:15.4040883+03:00",
+  "finished_at": "2026-11-15T11:06:17.4037339+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 9,
+      "file": "STAGES/09.json",
+      "sha256": "1a470e2d9b27c9d2ac6773588f6a73bda39d0f5c26def59c6796715f4f314557"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "storage_format": 1,
+    "wal_format": 1,
+    "checkpoint_format": 1,
+    "diagnostics": "MSVC AddressSanitizer x64"
+  },
+  "repositories": [
+    {
+      "source_manifest_sha256": "7ff286cefaf09891aa63d728b424e2b09cec6e3052fd39f58d387e60c89185cd",
+      "changed_files": [
+        "CMakeLists.txt",
+        "RECOVERY.md",
+        "RUN.md",
+        "StarDataParadiseServer/StarDataParadiseServer.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "StarDataParadiseServer/storage_admin.cpp",
+        "StarDataParadiseServer/storage_admin.hpp",
+        "storage/heap.cpp",
+        "storage/recovery.cpp",
+        "storage/recovery.hpp",
+        "storage/storage.hpp",
+        "storage/transactions.cpp",
+        "storage/transactions.hpp",
+        "storage/wal.cpp",
+        "storage/wal.hpp",
+        "tests/crash_matrix.py",
+        "tests/recovery_driver.cpp"
+      ],
+      "branch": "master",
+      "name": "StarDataParadiseServer",
+      "source_manifest": "out/sdp-m2/stage10/changed.sha256",
+      "dirty_before": true,
+      "head": "bec2e0c4ada12d1db49a73f7e1229a9ce08e4d26"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m2/stage10/workspace-before.zip",
+    "manifest": "out/sdp-m2/stage10/workspace-before.json",
+    "archive_sha256": "99c4e58c9de56568fa6a7419026690646730107388b39ff74dbb9b82fc4cff16",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. <stage-manifest> --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/checkpoint.log",
+      "log_sha256": "4324da1945a003d6547ffb0e42326b748dd874f543dc0dbee19e8abab7bdd837",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m2/stage09/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/baseline.log",
+      "log_sha256": "74ec89373b6c2fd9910a264c7a78097795c03fa7692ab58c13255df1469774b0",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --preset windows-x64 -B <stage-build> <pinned dependencies> <integration inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/configure.log",
+      "log_sha256": "e5e061d70a36c4af98e53c933a1a25e821156f83fbae0a494d20f7bd40c1ae24",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build <stage-build> --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/build-final.log",
+      "log_sha256": "45ff3450b7d23f917ddd334b69ad2ae1548e3a5b3fd0a4f92276fd06ed12748d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m2/stage10/build -C Release -V --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/ctest.log",
+      "log_sha256": "182f443d9cce6f57216ef13ecd6dc95097462711830af95d848337db287c1e13",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild.exe <existing solution> /t:Build /p:Configuration=Release /p:Platform=x64 <isolated output>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/msbuild.log",
+      "log_sha256": "7b81dc096513747352dc0682853b2d4efc6e6b9388d453626f4c384f66f38c51",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. <stage-manifest> --check --allow StarDataParadiseServer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --preset windows-x64 -B out/sdp-m2/regression/build <pinned SDK and build inputs> -DSDP_TEST_SERVER=<stage10-server>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/configure.log",
+      "log_sha256": "6c44f271bf68dcb8a2875ee5bf1376da34784e7654435dfb53ddc15503643954",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --build out/sdp-m2/regression/build --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/build.log",
+      "log_sha256": "c1d3d715db23745dc9e983b70b1d2d0fa4ab0da3a6c5de92c39e5087531286a3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --test-dir out/sdp-m2/regression/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/ctest-final.log",
+      "log_sha256": "04d120ae5c4b83ca87966d32be74861ecc8c60e9123866a67c407dc58bf464b9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "command": "cmake --preset windows-x64 -B out/sdp-m2/regression/build <pinned SDK and build inputs> -DSDP_TEST_SERVER=<stage10-server>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/configure.log",
+      "log_sha256": "03c657148fee481f3dfd6e583baeb0749235b9686917c1980ac31e53cce9366f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "command": "cmake --build out/sdp-m2/regression/build --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/build.log",
+      "log_sha256": "0c340329c28cc2d528cef6206aefde301ecade4e81aba7e6ae14937fe3d197e6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "command": "ctest --test-dir out/sdp-m2/regression/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/ctest-final.log",
+      "log_sha256": "a237143fdce8c956970ab83f981590f6e6c3612cc21d39489f7f27aee6f62c5d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "ctest --test-dir out/sdp-m1/stage05/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/ctest.log",
+      "log_sha256": "ad140219c86a20e94e91d4cc35b43c9008684d11e4d76a984634109844d3d23f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "python tests/package_integration.py --package <pinned-release-zip> --server <stage10-server> --openssl <test-tool> --scratch out/sdp-m2/regression/it-final",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/integration-final.log",
+      "log_sha256": "8162177d0171f39f6d7602487b0bf3c84ca12c130404e4ab278efdc90f100a05",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "python tests/package_integration.py --asan --package <instrumented-zip> --server <stage10-server> --openssl <test-tool> --scratch out/sdp-m2/regression/asan-it-final",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/asan-final.log",
+      "log_sha256": "8162177d0171f39f6d7602487b0bf3c84ca12c130404e4ab278efdc90f100a05",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "command": "pwsh -NoProfile -File ci.ps1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/test.log",
+      "log_sha256": "c6c4eb97096a589b7b8dbe3f7cd80b330640b5b32c21b7efe55c768320828918",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.Java",
+      "command": "pwsh -NoProfile -File ci.ps1 -Gradle <Gradle-9.3.1>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/test.log",
+      "log_sha256": "69c2be3241b35fb416369eb138b659ee418943051a0cb8b4851d70fde5486137",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise.SDK.Python",
+      "command": "pwsh -NoProfile -File ci.ps1 -Wheelhouse <local-wheelhouse>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/regression/test.log",
+      "log_sha256": "bfdbdb3e18e1d1e2e4c1f48ba5c404bd437aa78e1482ee95f16cc6d9b9f64b4c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --preset windows-x64 -B out/sdp-m2/stage10/asan-final/build -DSDP_STORAGE_ASAN=ON <locked-dependencies-and-fixtures>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/asan-final/configure.log",
+      "log_sha256": "cff80d138f236ab3a63bcbbc148997dae96d3714af9f479f7058ade17c4a63cc",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m2/stage10/asan-final/build --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/asan-final/build-final.log",
+      "log_sha256": "ecfb1b5d52511024191258da92822ededad20c9303f194b5e50bdd4c99865b91",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m2/stage10/asan-final/build -C Release -V --output-on-failure --no-tests=error -R 'storage|transaction_wal|crash_recovery'",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/asan-final/ctest.log",
+      "log_sha256": "c056aa99d4872b583dc8c6f31b08824ad11852d803c3abb0d2f156922365079e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify acceptance records, source checks, pinned package and legacy fixture hashes",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage10/milestone-evidence.log",
+      "log_sha256": "0835c3a988991875da416d6a1255ec0152a97fa0ff23c940397a2d291bbb7678",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S10-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "WAL gövdesi yazıldıktan sonra commit işareti yazılmadan süreç kesildiğinde önceki commit korundu. WAL flush sonrasında kesilen işlemin satırları ve History kaydı kurtarıldı."
+    },
+    {
+      "id": "S10-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İkinci replay ilgili fixture data, WAL ve checkpoint SHA-256 değerlerini değiştirmedi. Checkpoint sonrasında LSN 3 commit'i okundu."
+    },
+    {
+      "id": "S10-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Kesik son kuyruk trim edildi, torn header ve sayfa full-page imajla onarıldı. Kayıp marker, eksik WAL, geçerli CRC’ye rağmen çelişkili journal ve yeni bilinmeyen disk sürümünde özgün dosyalar korundu."
+    },
+    {
+      "id": "S10-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "01–09 kanıtları, yedi repo regresyonu, CLI/Workbench/native bağlantıları ve Server ASan suite doğrulandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m2/stage10/build/Release/StarDataParadiseServer.exe",
+      "sha256": "7ce2f87457ba97646165be0c6c14e3b22b33969e9a37a032c6864d2a84999294"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m2/stage10/build/recovery-evidence/crash-matrix.json",
+      "sha256": "e3fbe12c08c8f369bd52abac2826d9cccc83650b81f2ca41725773b2e72a482c"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m2/stage10/asan-final/build/recovery-evidence/crash-matrix.json",
+      "sha256": "e9ed9ba3a35ad4b54f4e6a7e2c8ca9da8dd52ebadfb82e6c67a260f52a3e6a3c"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m2/stage10/build/contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m2/regression/build/Release/StarDataParadise.exe",
+      "sha256": "e8c5aa42555d166182731ce7376a6c5c6d19d330cbbcd530dd6d22149dc1b053"
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "file": "out/sdp-m2/regression/build/Release/StarDataParadiseCLI.exe",
+      "sha256": "daf2463f5cc3f5641b2b3364f8872a78c73a69703bf91888f03620c0a30eead6"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m1/stage05/package/StarDataParadiseDLLler-0.1.0-win-x64.zip",
+      "sha256": "9a9e7409c3670e38c1a54bca1bcdc2b9cf9e3f68c87286500c745bdbea1cfd4c"
+    },
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "file": "out/packages/StarDataParadise.SDK.NET.0.1.0.nupkg",
+      "sha256": "292dad15059bcfb946c4389fc28a2e608348ce5506e4e0407025136541ea9fb2"
+    },
+    {
+      "repo": "StarDataParadise.SDK.Java",
+      "file": "out/build/libs/StarDataParadise.SDK.Java-0.1.0.jar",
+      "sha256": "755293c4b5ddb18b73ad89f94ebac2508838e625e8663c91064acdac00986cd5"
+    },
+    {
+      "repo": "StarDataParadise.SDK.Python",
+      "file": "out/packages/stardataparadise_sdk-0.1.0-py3-none-any.whl",
+      "sha256": "2b1c90ca455f91ac41808eebe06d7d65e89b5f3907f7d5e2496d1ec9abf8deba"
+    }
+  ],
+  "remaining_issues": [
+    "Kurtarma Windows süreç kesintisi ve izole dosya fixture’larıyla doğrulandı. Fiziksel güç kaybı doğrulanmadı.",
+    "M2 History tam WAL geçmişini pinler ve segmentleri korur. Ağ üzerinden SQL/transaction henüz unavailable."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 11
+}

@@ -1,0 +1,66 @@
+{
+  "v": 1,
+  "id": 1,
+  "ok": true,
+  "body": {
+    "values": [
+      {
+        "t": "decimal",
+        "unscaled": "-123456789012345678901234567890123400",
+        "scale": 4
+      },
+      {
+        "t": "null"
+      },
+      {
+        "t": "text",
+        "v": ""
+      },
+      {
+        "t": "text",
+        "v": "İstanbul, Iğdır, çığ, şüphe, ölü, ı"
+      },
+      {
+        "t": "binary",
+        "hex": "00017f80feff"
+      },
+      {
+        "t": "i64",
+        "v": "-9223372036854775808"
+      },
+      {
+        "t": "i64",
+        "v": "9223372036854775807"
+      },
+      {
+        "t": "text",
+        "v": "a\u0000b"
+      },
+      {
+        "t": "timestamp",
+        "seconds": "-1",
+        "nanos": 999999999,
+        "offset_minutes": 180,
+        "zone": "Europe/Istanbul"
+      },
+      {
+        "t": "record",
+        "fields": [
+          {
+            "name": "null",
+            "value": {
+              "t": "null"
+            }
+          },
+          {
+            "name": "empty",
+            "value": {
+              "t": "text",
+              "v": ""
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

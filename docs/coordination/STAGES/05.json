@@ -1,0 +1,343 @@
+{
+  "stage_id": 5,
+  "status": "PASSED",
+  "started_at": "2026-11-15",
+  "finished_at": "2026-11-15T01:11:29.1964878+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 1,
+      "file": "STAGES/01.json",
+      "sha256": "93c675ddce6bf16930a8d6386943c2f042129e3e94df3e88ab25cae8757b2184"
+    },
+    {
+      "stage_id": 2,
+      "file": "STAGES/02.json",
+      "sha256": "41e2510d205abbf94d9a647a521d4cb16b1033fd250900a962ae11826d733164"
+    },
+    {
+      "stage_id": 3,
+      "file": "STAGES/03.json",
+      "sha256": "5d2b7bcf5b0cfa20e595f7bd2f27131e73251c7d812fa34027180b80396ac0c8"
+    },
+    {
+      "stage_id": 4,
+      "file": "STAGES/04.json",
+      "sha256": "7780a331326971aedd7994d476a7d90a1c8c7bcae6c3844cb20a74dd61ff219f"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "openssl": "3.5.9",
+    "asio": "1.38.2",
+    "abi": 1,
+    "sanitizer": "MSVC AddressSanitizer x64"
+  },
+  "repositories": [
+    {
+      "source_manifest": "out/sdp-m1/stage05/source.sha256",
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "CMakeLists.txt",
+        "StarDataParadiseDLLler/StarDataParadiseDLLler.vcxproj",
+        "StarDataParadiseDLLler/StarDataParadiseDLLler.vcxproj.filters",
+        "StarDataParadiseDLLler/api.cpp",
+        "StarDataParadiseDLLler/framework.h",
+        "StarDataParadiseDLLler/transport.cpp",
+        "StarDataParadiseDLLler/transport.hpp",
+        "ci.ps1",
+        "cmake/InstallPackage.cmake",
+        "cmake/StarDataParadiseDLLlerConfig.cmake.in",
+        "cmake/Transport.cmake",
+        "include/StarDataParadiseDLLler.h",
+        "licenses/OpenSSL.txt",
+        "tests/consumer/CMakeLists.txt",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py"
+      ],
+      "name": "StarDataParadiseDLLler",
+      "source_manifest_sha256": "0557d8d3a4279100d6f593fd0a7a10a602f0fff2cccf5bc58ccb0dbbe9b8068d",
+      "head": "c1bb628f62036bd418bbe8905e4b30ed48200ad0"
+    }
+  ],
+  "commands": [
+    {
+      "command": "cmake --preset windows-x64 -B out/sdp-m1/stage05/build -DSDP_JSON_ARCHIVE=<verified-json> -DSDP_ASIO_ARCHIVE=<verified-asio> -DOPENSSL_ROOT_DIR=<local-x64-sdk>",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/configure.log",
+      "log_sha256": "f5b4a7176f88b178af06c577eb1aa93388d1b2ae19e80f21d56e7c73e6106299",
+      "actually_executed": true
+    },
+    {
+      "command": "cmake --build out/sdp-m1/stage05/build --config Release",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/build-final.log",
+      "log_sha256": "16a05f634c98601d1883780aa54bf664bca4c500ddf79dca2c868ddab8111745",
+      "actually_executed": true
+    },
+    {
+      "command": "ctest --test-dir out/sdp-m1/stage05/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/ctest-final.log",
+      "log_sha256": "f1250db227fb26f05849a6adb124647608a5fda433fc15ee6fa0802fdd412086",
+      "actually_executed": true
+    },
+    {
+      "command": "cpack --config out/sdp-m1/stage05/build/CPackConfig.cmake -C Release -B out/sdp-m1/stage05/package",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/cpack-final.log",
+      "log_sha256": "94dca35d048e946f4008802e9f6b2176bf0adb3e02b5953435ea0b15f062529d",
+      "actually_executed": true
+    },
+    {
+      "command": "python tests/package_integration.py --cmake cmake --package <release-zip> --server <stage04-server> --openssl <openssl-tool> --scratch out/sdp-m1/stage05/it-final",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/integration-confirmed.log",
+      "log_sha256": "8162177d0171f39f6d7602487b0bf3c84ca12c130404e4ab278efdc90f100a05",
+      "actually_executed": true
+    },
+    {
+      "command": "cmake --preset windows-x64 -B out/sdp-m1/stage05/asan -DSDP_JSON_ARCHIVE=<verified-json> -DSDP_ASIO_ARCHIVE=<verified-asio> -DOPENSSL_ROOT_DIR=<local-x64-sdk> -DSDP_ADDRESS_SANITIZER=ON",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/asan-configure.log",
+      "log_sha256": "2f8100c67dcfd0cef97cffdc9f5cb7b1cb24105c28f4376e18430b3f4f99bf00",
+      "actually_executed": true
+    },
+    {
+      "command": "cmake --build out/sdp-m1/stage05/asan --config Release",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/asan-build-final.log",
+      "log_sha256": "27120189d27a1360cb2b85ff3b1b780c17dc7e5a902d9069faa63ce2f00deb97",
+      "actually_executed": true
+    },
+    {
+      "command": "ctest --test-dir out/sdp-m1/stage05/asan -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/asan-ctest-final.log",
+      "log_sha256": "4181af7e5c09e9ccd29a73c84c1e603994f103e29684c2ad52ea0ff24eca5fea",
+      "actually_executed": true
+    },
+    {
+      "command": "cpack --config out/sdp-m1/stage05/asan/CPackConfig.cmake -C Release -B out/sdp-m1/stage05/asan-package",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/asan-cpack-final.log",
+      "log_sha256": "87c7594b17d0f5bdbd288f3f42181d71575a48082cf34c806fc631dc06fc3042",
+      "actually_executed": true
+    },
+    {
+      "command": "python tests/package_integration.py --asan --cmake cmake --package <asan-zip> --server <stage04-server> --openssl <openssl-tool> --scratch out/sdp-m1/stage05/asan-it-final",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/asan-integration-confirmed.log",
+      "log_sha256": "8162177d0171f39f6d7602487b0bf3c84ca12c130404e4ab278efdc90f100a05",
+      "actually_executed": true
+    },
+    {
+      "command": "dumpbin /dependents out/sdp-m1/stage05/asan/Release/StarDataParadiseDLLler.dll",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/asan-dependencies.log",
+      "log_sha256": "dce709495f4c2e5f3d72e8a90b505e040a011d82fd39e854d76d853e933bbdb6",
+      "actually_executed": true
+    },
+    {
+      "command": "python out/sdp-m1/stage05/check_exports.py out/sdp-m1/stage05/build/Release/StarDataParadiseDLLler.dll",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/abi-exports.log",
+      "log_sha256": "90945fb8a009f570fc34493dcdd90ef0a95cc1df534e78efce9dcfec71807190",
+      "actually_executed": true
+    },
+    {
+      "command": "dumpbin /dependents out/sdp-m1/stage05/build/Release/StarDataParadiseDLLler.dll",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/dll-dependencies.log",
+      "log_sha256": "ffdf2acc72f66bca848dd3921297d1b70a38290d7c6732c4f625bbafdf85cfe3",
+      "actually_executed": true
+    },
+    {
+      "command": "MSBuild.exe StarDataParadiseDLLler.slnx /nologo /t:Build /verbosity:minimal /p:Configuration=Release /p:Platform=x64 /p:IntDir=out/sdp-m1/stage05/vs/obj/ /p:OutDir=out/sdp-m1/stage05/vs/bin/",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage05/msbuild-final.log",
+      "log_sha256": "567f067388621a260fdc792469526b1f435a45b0efeab072321746e1a34c4e3c",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "evidence": "Temiz CMake tüketicisi kurulan ZIP paketini kullanarak gerçek Server ile TLS, hello, auth ve capabilities adımlarını tamamladı. SQL isteği 1004 döndü.",
+      "result": "PASS",
+      "mandatory": true,
+      "id": "S05-T01"
+    },
+    {
+      "evidence": "11 native senaryo, yinelenen close, callback esnasında eşzamanlı kapanış, sertifika reddi, timeout, iptal, bağlantı kaybı ve DLL FreeLibrary kontrolü.",
+      "result": "PASS",
+      "mandatory": true,
+      "id": "S05-T02"
+    },
+    {
+      "evidence": "DLL, C smoke ve bağımsız tüketici MSVC AddressSanitizer ile çalıştı. ASan runtime importu ve 11 senaryonun çıkış kodları doğrulandı.",
+      "result": "PASS",
+      "mandatory": true,
+      "id": "S05-T03"
+    },
+    {
+      "evidence": "01–04 kayıtları, dört bağımsız C++ derlemesi, üç SDK paketi, son CTest ve paket regresyonları, 123 dosyanın build öncesi/sonrası hash eşitliği doğrulandı.",
+      "result": "PASS",
+      "mandatory": true,
+      "id": "S05-T04"
+    }
+  ],
+  "integration_cases": [
+    "real",
+    "callback_close",
+    "invalid_abi",
+    "auth_reject",
+    "tls_ip",
+    "tls_name",
+    "tls_untrusted",
+    "operation_timeout",
+    "cancel",
+    "connection_loss",
+    "handshake_timeout"
+  ],
+  "regression_consumers": [
+    {
+      "name": "StarDataParadise",
+      "tests": "PASS",
+      "command": {
+        "command": "ctest --preset windows-x64",
+        "exit_code": 0,
+        "log_path": "out/sdp-m1/stage05-regression/test.log",
+        "log_sha256": "c37066971585fada52dd9068d37bf4f26e5be91a49ad4fefe803a71665fe51c1",
+        "actually_executed": true
+      }
+    },
+    {
+      "name": "StarDataParadiseCli",
+      "tests": "PASS",
+      "command": {
+        "command": "ctest --preset windows-x64",
+        "exit_code": 0,
+        "log_path": "out/sdp-m1/stage05-regression/test.log",
+        "log_sha256": "86b61a45710e3ad08b0eff746a87514898e1565c549808fbe5db0638964bbf52",
+        "actually_executed": true
+      }
+    },
+    {
+      "name": "StarDataParadiseServer",
+      "tests": "PASS",
+      "command": {
+        "command": "ctest --test-dir out/sdp-m1/stage04/build -C Release --output-on-failure --no-tests=error",
+        "exit_code": 0,
+        "log_path": "out/sdp-m1/stage05-regression/test.log",
+        "log_sha256": "7509a5b31d4987acf0cb6336c026c53e105313e41a6ee87c3a2203e6df2788f0",
+        "actually_executed": true
+      }
+    },
+    {
+      "name": "StarDataParadise.SDK.NET",
+      "tests": "PASS",
+      "command": {
+        "command": "pwsh -NoProfile -File ci.ps1",
+        "exit_code": 0,
+        "log_path": "out/sdp-m1/stage05-regression/test.log",
+        "log_sha256": "c6c4eb97096a589b7b8dbe3f7cd80b330640b5b32c21b7efe55c768320828918",
+        "actually_executed": true
+      }
+    },
+    {
+      "name": "StarDataParadise.SDK.Java",
+      "tests": "PASS",
+      "command": {
+        "command": "pwsh -NoProfile -File ci.ps1 -Gradle <gradle-9.3.1>",
+        "exit_code": 0,
+        "log_path": "out/sdp-m1/stage05-regression/test.log",
+        "log_sha256": "17b6c002eac09be1046d4d60b84c2e3ac63ace1a72a1f30ff70fb3895b460c5f",
+        "actually_executed": true
+      }
+    },
+    {
+      "name": "StarDataParadise.SDK.Python",
+      "tests": "PASS",
+      "command": {
+        "command": "pwsh -NoProfile -File ci.ps1 -Wheelhouse <verified-wheelhouse>",
+        "exit_code": 0,
+        "log_path": "out/sdp-m1/stage05-regression/test.log",
+        "log_sha256": "1a72b26193dcb05df9929284437ae872a15c95e1d9d2c4a95f139b2cdd9b3c93",
+        "actually_executed": true
+      }
+    }
+  ],
+  "source_isolation": {
+    "command": "python out/sdp-m1/check_workspace.py .. out/sdp-m1/stage05-regression/workspace-sources.json --check",
+    "exit_code": 0,
+    "log_path": "out/sdp-m1/stage05-regression/source-isolation.log",
+    "log_sha256": "b0dad20c663272168299552ad36f515b4cf597cdfc03d4e436950015d09e9148",
+    "actually_executed": true
+  },
+  "workspace_manifest_sha256": "1430c44e9c1381d8f51e8ffb7bc5bda5c1a8fec9c017dd1d12f9127fbb22ceeb",
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m1/stage05/package/StarDataParadiseDLLler-0.1.0-win-x64.zip",
+      "sha256": "9a9e7409c3670e38c1a54bca1bcdc2b9cf9e3f68c87286500c745bdbea1cfd4c"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m1/stage05/build/Release/StarDataParadiseDLLler.dll",
+      "sha256": "b42c68d072e5b4262e31ddd419331a329a0d569baf67ed145aeb9c2712856c25"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m1/stage05/build/Release/StarDataParadiseDLLler.lib",
+      "sha256": "296afabb4788956527dc516644df3ac43a5cefff86bb792b5bfe83fa3a38556b"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "include/StarDataParadiseDLLler.h",
+      "sha256": "222a86ceb43bfc3a2b55ab5283a3bee726f6feb990adaa0fd9a3a552ab5ffc09"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "contracts/sdp-contract-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    }
+  ],
+  "unsupported_capabilities": [
+    "SQL",
+    "metadata",
+    "transactions",
+    "server-side cancel",
+    "jobs",
+    "admin RPC",
+    "History",
+    "Decision",
+    "ML"
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 6,
+  "sdk_regression_artifacts": [
+    {
+      "repo": "StarDataParadise.SDK.NET",
+      "file": "out/packages/StarDataParadise.SDK.NET.0.1.0.nupkg",
+      "sha256": "292dad15059bcfb946c4389fc28a2e608348ce5506e4e0407025136541ea9fb2",
+      "stage02_sha256": "292dad15059bcfb946c4389fc28a2e608348ce5506e4e0407025136541ea9fb2",
+      "regenerated": false
+    },
+    {
+      "repo": "StarDataParadise.SDK.Java",
+      "file": "out/build/libs/StarDataParadise.SDK.Java-0.1.0.jar",
+      "sha256": "755293c4b5ddb18b73ad89f94ebac2508838e625e8663c91064acdac00986cd5",
+      "stage02_sha256": "755293c4b5ddb18b73ad89f94ebac2508838e625e8663c91064acdac00986cd5",
+      "regenerated": false
+    },
+    {
+      "repo": "StarDataParadise.SDK.Python",
+      "file": "out/packages/stardataparadise_sdk-0.1.0-py3-none-any.whl",
+      "sha256": "57d56acd0a2943b3b576f82e3dfbb3a904080d03c09afc4a00fe88d75e2f0e5e",
+      "stage02_sha256": "0c391b2ccd67ec826afff47be64422e34aa4aac6a40c515d6f133ccf284cda39",
+      "regenerated": true
+    }
+  ]
+}

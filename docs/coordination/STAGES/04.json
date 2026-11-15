@@ -1,0 +1,103 @@
+{
+  "stage_id": 4,
+  "status": "PASSED",
+  "started_at": "2026-11-15",
+  "finished_at": "2026-11-15T00:53:33.9806068+03:00",
+  "prerequisite_evidence": [
+    "STAGES/03.json"
+  ],
+  "repositories": [
+    {
+      "source_manifest": "out/sdp-m1/stage04/source.sha256",
+      "name": "StarDataParadiseServer",
+      "source_manifest_sha256": "af5bfb766386ac69306241a61dc905892661119ebc7a059795fc139532633a21",
+      "head": "bec2e0c4ada12d1db49a73f7e1229a9ce08e4d26",
+      "changed_files": [
+        "BUILD.md",
+        "CMakeLists.txt",
+        "RUN.md",
+        "ci.ps1",
+        "cmake/Transport.cmake",
+        "StarDataParadiseServer/StarDataParadiseServer.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "StarDataParadiseServer/config.cpp",
+        "StarDataParadiseServer/server.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "tests/service_smoke.py"
+      ]
+    }
+  ],
+  "toolchain": {
+    "msvc": "19.51.36260",
+    "cmake": "4.2.2",
+    "asio": "1.38.2",
+    "openssl": "3.5.9",
+    "python": "3.12.4"
+  },
+  "commands": [
+    {
+      "command": "cmake --preset windows-x64 -B out/sdp-m1/stage04/build -DSDP_JSON_ARCHIVE=<verified-archive> -DSDP_ASIO_ARCHIVE=<verified-archive> -DOPENSSL_ROOT_DIR=<local-sdk>",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage04/configure.log",
+      "log_sha256": "317a53317d975fd6a0178b25b7b9933f0dca32e109f2314bc30cedb152113220",
+      "actually_executed": true
+    },
+    {
+      "command": "cmake --build out/sdp-m1/stage04/build --config Release",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage04/build-verified.log",
+      "log_sha256": "8d4da002b0d2c6258595e1d079a8405ffd744e339de6374bf8002d9dd3d58cbb",
+      "actually_executed": true
+    },
+    {
+      "command": "ctest --test-dir out/sdp-m1/stage04/build -C Release --output-on-failure --no-tests=error --repeat until-fail:2 -R server_tls_lifecycle",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage04/ctest-repeat.log",
+      "log_sha256": "6acf59a0b2c59e387db2a9208d6342a949b1a477caf525f9ed4d6c197606a5f9",
+      "actually_executed": true
+    },
+    {
+      "command": "ctest --test-dir out/sdp-m1/stage04/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage04/ctest.log",
+      "log_sha256": "4db998938e533007366473e80cff5bc734163615735ee199e255f135f4ec8652",
+      "actually_executed": true
+    },
+    {
+      "command": "MSBuild.exe StarDataParadiseServer.slnx /nologo /t:Build /verbosity:minimal /p:Configuration=Release /p:Platform=x64 /p:IntDir=out/sdp-m1/stage04/vs/obj/ /p:OutDir=out/sdp-m1/stage04/vs/bin/",
+      "exit_code": 0,
+      "log_path": "out/sdp-m1/stage04/msbuild-final.log",
+      "log_sha256": "bc9b0c36c54c2df9b0c6490239786fe593c4ee609c03399b14fb809adc6d1802",
+      "actually_executed": true
+    }
+  ],
+  "artifacts": [
+    {
+      "sha256": "09336c92b978e9b042d98379b8e3fd260eed5e082688cf38e6f6722b427a4979",
+      "file": "out/sdp-m1/stage04/build/Release/StarDataParadiseServer.exe"
+    }
+  ],
+  "tests": [
+    {
+      "mandatory": true,
+      "id": "S04-T01",
+      "result": "PASS",
+      "evidence": "Windows Ctrl+C işlemi, aktif TLS close_notify, aynı port ve çalışma dizininde yeniden başlatma."
+    },
+    {
+      "mandatory": true,
+      "id": "S04-T02",
+      "result": "PASS",
+      "evidence": "Yanlış parola, güvenilmeyen sertifika ve hostname uyuşmazlığı reddedildi. Operasyon ve auth loglarında test sırları bulunmadı."
+    },
+    {
+      "mandatory": true,
+      "id": "S04-T03",
+      "result": "PASS",
+      "evidence": "Veri dizini ve port sahipliği, hatalı config altında dosya SHA-256 değerleri, çalışan instance health kontrolü."
+    }
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 5
+}

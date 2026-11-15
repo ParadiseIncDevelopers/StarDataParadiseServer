@@ -1,0 +1,162 @@
+{
+  "stage_id": 3,
+  "status": "PASSED",
+  "started_at": "2026-11-15",
+  "finished_at": "2026-11-15T00:33:38.2107735+03:00",
+  "prerequisite_evidence": [
+    "STAGES/02.json"
+  ],
+  "toolchain": {
+    "python": "3.12.4",
+    "msvc": "19.51.36260",
+    "nlohmann_json": "3.12.0",
+    "cmake": "4.2.2"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "bec2e0c4ada12d1db49a73f7e1229a9ce08e4d26",
+      "changed_files": [
+        "CMakeLists.txt",
+        "cmake/ProtocolJson.cmake",
+        "contracts/tools/package_contract.py",
+        "contracts/v1/ERROR_CODES.md",
+        "contracts/v1/PROTOCOL.md",
+        "contracts/v1/TYPE_MAPPING.md",
+        "contracts/v1/capabilities.json",
+        "contracts/v1/cpp/sdp/wire.hpp",
+        "contracts/v1/golden/values.json",
+        "contracts/v1/tests/wire_smoke.cpp"
+      ],
+      "commands": [
+        {
+          "command": "cmake --preset windows-x64 -B out/sdp-m1/stage03/build -DSDP_JSON_ARCHIVE=<verified-archive>",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage03/configure.log",
+          "log_sha256": "f2f5f74fba1a15ba77e414e055c560e38b02c8424bc31aa3cadb92b2bbad8b54",
+          "actually_executed": true
+        },
+        {
+          "command": "cmake --build out/sdp-m1/stage03/build --config Release",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage03/build.log",
+          "log_sha256": "21a693ce80b52933d06ee0fd832f62088ef983101067acfa727f9315035e0e6a",
+          "actually_executed": true
+        },
+        {
+          "command": "ctest --test-dir out/sdp-m1/stage03/build -C Release --output-on-failure --no-tests=error",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage03/ctest.log",
+          "log_sha256": "2d065b5e044c6b9411562a8d48a7013abd4f05b9fadba7a6133c79e1b50e7ab0",
+          "actually_executed": true
+        }
+      ],
+      "source_manifest_sha256": "d706a277f40a0b64a27d89822104e703c03d271667e2345de48ef12ec815ac17"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "c1bb628f62036bd418bbe8905e4b30ed48200ad0",
+      "changed_files": [
+        "CMakeLists.txt",
+        "cmake/ProtocolContract.cmake",
+        "cmake/ProtocolJson.cmake",
+        "contracts/README.md",
+        "contracts/sdp-contract-v1.zip"
+      ],
+      "commands": [
+        {
+          "command": "cmake --preset windows-x64 -B out/sdp-m1/stage03/build -DSDP_JSON_ARCHIVE=<verified-archive>",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage03/configure.log",
+          "log_sha256": "0e1b2ab9ac2cf1793fa9f6f30c4e405f4a548587f8247ef62c5ff077e2b423b5",
+          "actually_executed": true
+        },
+        {
+          "command": "cmake --build out/sdp-m1/stage03/build --config Release",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage03/build.log",
+          "log_sha256": "b3ac64f0b9604a602a9f0c40b82cc09a3247f0d6b51c1dce644cf209d58ad9cc",
+          "actually_executed": true
+        },
+        {
+          "command": "ctest --test-dir out/sdp-m1/stage03/build -C Release --output-on-failure --no-tests=error",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage03/ctest.log",
+          "log_sha256": "c909859cd8a48866bb3eefb41ce20e9a7fbef2426e3a02185fcfbfab1385efc1",
+          "actually_executed": true
+        },
+        {
+          "command": "cmake --preset windows-x64 -B out/sdp-m1/stage03/pin-rejection -DSDP_CONTRACT_ARCHIVE=<corrupted-test-zip>",
+          "exit_code": 1,
+          "log_path": "out/sdp-m1/stage03/pin-rejection.log",
+          "log_sha256": "219bdc270fb6ed7cc6ab2b5bf9abb8080044aeb8701431319a2004bd1a514149",
+          "actually_executed": true
+        }
+      ],
+      "source_manifest_sha256": "644231946fb9760f98d09e5f94daf8a58d5ad40a3ace8c30548cbaf4acfac1d2"
+    },
+    {
+      "name": "StarDataParadise",
+      "head": "769721228600dd21429cfb2ec41fa5d9b119641d",
+      "changed_files": [],
+      "commands": [
+        {
+          "command": "ctest --preset windows-x64",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage03/ctest.log",
+          "log_sha256": "dfbce2ec637ccc15f3df27cdbd5ead43b594b2a12a0933a8e7655353ef279744",
+          "actually_executed": true
+        }
+      ],
+      "source_manifest_sha256": null
+    },
+    {
+      "name": "StarDataParadiseCli",
+      "head": "792a803f6521c749d1b668a80fde81062cff1afb",
+      "changed_files": [],
+      "commands": [
+        {
+          "command": "ctest --preset windows-x64",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage03/ctest.log",
+          "log_sha256": "1b5e70f41718824c9e233068ce50771ef4d88a89a9ae97e4bfe47bb5e990602e",
+          "actually_executed": true
+        }
+      ],
+      "source_manifest_sha256": null
+    }
+  ],
+  "artifacts": [
+    {
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab",
+      "file": "out/sdp-m1/stage03/build/contracts/sdp-contract-v1.zip"
+    }
+  ],
+  "tests": [
+    {
+      "mandatory": true,
+      "evidence": "Server wire_contract ve native pinned_wire_contract golden v1 değerlerini kayıpsız doğruladı.",
+      "id": "S03-T01",
+      "result": "PASS"
+    },
+    {
+      "mandatory": true,
+      "evidence": "Aşırı uzun, kesik, bozuk UTF-8, yinelenen JSON anahtarı ve desteklenmeyen major sürüm reddedildi.",
+      "id": "S03-T02",
+      "result": "PASS"
+    },
+    {
+      "mandatory": true,
+      "evidence": "package_contract/reproduce_contract aynı arşivi üretti. Tüm başlangıç capability değerleri false. Bozuk arşiv CMake yapılandırmasında reddedildi.",
+      "id": "S03-T03",
+      "result": "PASS"
+    }
+  ],
+  "regression_consumers": [
+    "Workbench disconnected_window",
+    "CLI help/version/invalid_option",
+    "Native version ABI"
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 4
+}

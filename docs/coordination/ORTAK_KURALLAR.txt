@@ -1,0 +1,75 @@
+# StarDataParadise — Bütün etaplar için bağlayıcı kurallar
+
+Bu belge 51. etap değildir. Bir kez projeye aktarılır; sonraki 50 görev her başlangıçta bu kuralları ve gerçek ilerleme kaydını okur. Paket geliştirme talimatıdır; uygulama kodu, kurulmuş program veya yapılmış test değildir.
+
+## 1. Kesin adlar ve ayrı projeler
+Yerel kök: `%USERPROFILE%\source\repos`. Kullanıcı adı tahmin edilmez, çalışma ortamından okunur.
+
+| İşlev | Klasör / bağımsız depo | Teknoloji |
+|---|---|---|
+| Workbench | StarDataParadise | C++20, Qt 6 Widgets |
+| Server | StarDataParadiseServer | C++20 |
+| CLI | StarDataParadiseCLI | C++20 |
+| Native istemci / C++ SDK | StarDataParadiseDLLler | C++20, DLL + import library + headers |
+| .NET SDK | StarDataParadise.SDK.NET | C# |
+| Java SDK | StarDataParadise.SDK.Java | Java, Gradle |
+| Python SDK | StarDataParadise.SDK.Python | Python, pyproject |
+
+Workbench adının sonuna `.Workbench` eklenmez. Server ve CLI adları noktasızdır. Native DLL ana çıktısı `StarDataParadiseDLLler.dll` olur. Aynı iş için ayrıca SDK.CPP reposu açılmaz. Her projenin kendi Git geçmişi, build, test ve paket sürümü vardır. Ortak üst solution veya monorepo yoktur. Mevcut solution/proje dosyaları korunur; CMake’in ürettikleri ayrı build dizinindedir.
+
+Server’ın storage/SQL/PLSQL/History/Decision/ML alt bileşenleri kendi deposunda kalır. İç worker/test/setup hedefleri yeni ana ürün veya repo değildir. Setup/koordinasyon dosyaları Server deposunda bulunabilir; bu durum diğer ürünlerin kaynaklarını Server deposuna taşıma izni değildir.
+
+## 2. Korunacak kapsam
+Sıfırdan ilişkisel SQL motoru; tanımlanmış PL/SQL alt kümesi; yerleşik ML, clustering, deep learning ve PL/SQL ile hesaplama geliştirme; deterministik Decision; transaction’a atomik Git benzeri History/log/diff/revert/restore; dört dilde istemci SDK; desteklenen PL/SQL algoritmalarından Java kaynak üretimi korunur.
+
+Workbench ve CLI ayrı istemcilerdir. Kendi engine kopyalarını gömmez, sürümlü native DLL kullanırlar. .NET/Java/Python SDK kendi dilinde aynı ağ sözleşmesini uygular. Protokolün asıl sürümü StarDataParadiseServer/contracts altında; istemciler checksum’ı sabit contract artifact tüketir. Komşu deponun mutlak kaynak yoluna veya son değişken HEAD’ine kör bağımlılık kurulmaz.
+
+Özel Graph/Document/Tree/Vector motorları, node/edge izinleri, özel replica/reverse-replica, cache-bulk, dağıtık Big Data, Custom Libraries, eklenti pazaryeri, MCP/LLM/chatbot eklenmez. Normal BLOB, foreign key, JSON dosya aktarımı, SQL çoklu insert ve ML tensor hesapları bu yasağa dahil değildir. Branch/merge ve PITR ilk teslimin zorunlu kapsamı değildir; uygulanmadıysa unavailable olarak kalır.
+
+Hazır SQL/storage/veritabanı motoru üretim veri yoluna gömülmez. Kendi disk/WAL/katalog/transaction/parser/planner/executor/PLSQL/History/Decision katmanları yazılır. Güvenilir TLS, parola türetme, Unicode, ağ, UI, serileştirme ve lineer cebir kütüphaneleri kullanılabilir; lisansları kaydedilir. Kendi kriptografi algoritması yazılmaz. Dış DB yalnız migration kaynağı veya etiketli test referansı olabilir.
+
+## 3. Etap yürütme sözleşmesi
+Her promptta yalnız listelenen depoların ürün koduna yaz. Diğer depolar okunabilir, ayrı ignored çıktı dizinlerinde derlenip test edilebilir; kaynakları değiştirilemez. İlerleme belgeleri için StarDataParadiseServer/docs/coordination ve değiştirilen deponun docs kayıtları izinli istisnadır. Gerekli düzeltme izinli kapsam dışındaysa kanıtla BLOCKED kaydet, sorumlu önceki etabı yeniden aç; sessiz toplu refactor yapma.
+
+Başlamadan mevcut AGENTS.md, PRODUCT_SCOPE, ilgili ARCHITECTURE/ADR, PROGRESS, NEXT_TASK, CAPABILITY_MATRIX, KNOWN_LIMITATIONS ve önceki etap kaydını oku. Sohbet hafızasının bunların yerine geçtiğini varsayma. İlgisiz kullanıcı kuralları silinmez; çelişki raporlanır.
+
+Önce başlangıç build/test sonuçlarını al. Önceden var olan hatayı ayrı kaydet. Kullanıcı değişikliklerini checkpoint ile koru; sadece Git patch, untracked/binary dosyaları korumaya yetmez. Secret taşıyan yedekler erişimi kısıtlı yerelde ve Git dışında tutulur. Yalnız kendi etap değişikliklerinin ters patch’iyle geri dönüş tasarla. Kod checkpoint’i database backup’ı değildir.
+
+`git reset --hard`, `git clean`, toplu stash, force push, sessiz branch değişimi, toplu `git add -A`, kullanıcı değişikliklerini kapsayan commit, depo silme/taşıma veya solution yeniden üretip üzerine yazma yapılmaz. Yeni eksik repo sadece kesin adıyla oluşturulur; kullanıcı onayı olmadan uzak GitHub/paket/bulut yayını, ücretli lisans satın alma yoktur.
+
+Aşamalar 01→50 sırasındadır. Sıra numarasına gelmek tamamlanmışlık değildir. Etap durumları NOT_STARTED, IN_PROGRESS, BLOCKED, FAILED, PASSED olabilir. Bir sonraki etabın önkoşulları PASSED değilse yeni feature’a geçme. Hataları aynı etap kapsamında giderip testi yeniden çalıştır; 51. özellik etabı açılmaz. Erişilemeyen test ortamında yapılan dosya üretimini çalıştırma kanıtı yerine kullanma.
+
+## 4. Her etapta uygulanacak geçiş kontrolü
+1. Başlangıç durumu, checkpoint, izinli dosyalar ve bağımlılık sürümleri kaydedilir.
+2. Yalnız hedef işlev gerçek kodla yapılır; dummy başarı, sabit örnek veri, çalışmayan düğme ve TODO implementation başarı sayılmaz. Mocks yalnız etiketli birim testlerinde bulunabilir.
+3. Değişen projeler temiz ayrı build dizininde derlenir; unit/contract/integration ve yeni negatif testler çalışır.
+4. Etkilenen tüketiciler test edilir. DLL/protokol değişimi en az mevcut Workbench/CLI; schema/engine değişimi mevcut SDK ve SQL smoke’larını kapsar. Her beş etapta bütün o ana kadarki zorunlu regression seti çalışır.
+5. Kullanıcı kaynakları ve izin dışı repo diff’leri kontrol edilir; paket/ABI/protokol/format uyumluluğu kanıtlanır.
+6. Gerçek komut, exit code, log yolu/hash, toolchain, platform ve test ID kaydedilir. RUN edilmemiş test PASS değildir. Açık kritik hata veya başarısız mandatory test varken etap PASSED olamaz.
+
+Windows ana doğrulama hedefidir. Linux/GPU/macOS gibi ek hedefler yalnız gerçekten test edilen ölçüde ilan edilir. Seçilmemiş opsiyonel GPU’nun donanım testi NOT_RUN olabilir; bu durum CPU sürümünün başarısıyla karıştırılmaz ve GPU validated etiketi verilmez. Zorunlu Windows/CPU/uyumluluk testi yoksa etap BLOCKED kalır. Gerekçe yazılmadan test atlama veya scope düşürerek yeşil elde etme yoktur.
+
+## 5. Veri, işlem ve güvenlik kuralları
+Başarılı yazma ve temel History kaydı aynı atomik commit’e bağlıdır. Autocommit de geçmiş üretir. History kotası dolunca sessiz kayıt atlama yoktur. Geri yükleme yeni revision yaratır, current constraint/Decision/yetki kontrolünü bypass etmez. Saklanmayan geçmiş kurtarılamaz; History bağımsız backup değildir.
+
+WAL-before-data, durable commit sınırı, recovery ve disk formatı testlidir. Flush/fsync hatasında sahte başarı yoktur. Bağlantı koptuğunda commit sonucu UNKNOWN olabilir; status ledger ve idempotency olmadan write retry yoktur. Salt exe geri dönüşü yeni disk formatını eskiye çevirmez.
+
+Sorgu, job ve GUI iptal istekleri gerçek cancellation tamamlanmasından ayrılır. Uzun eğitim açık OLTP transaction tutmaz; tutarlı dataset alır, izole worker kullanır, sonucu kısa atomik transaction ile yayımlar. Checkpoint gerçek optimizer/RNG/data konumu olmadan resume destekleniyor denmez.
+
+Yetkiler Server’da uygulanır. TLS/hostname doğrulaması sessiz kapatılmaz. Varsayılan ağ loopback; servis/firewall yönetimi OS yetkisi gerektirir. Parola/token/anahtar log’a, kaynak koda veya örneğe yazılmaz. Query history, Audit, WAL, data History ve operational log ayrı amaçlardır.
+
+C++ kaynak yaşam döngüsü RAII; dosya/soket/lock/transaction sahipliği açıktır. DLL sınırından belirsiz STL/exception/allocator geçirilmez. Ağ ve disk formatı native struct dump değildir. Qt yalnız Workbench’in UI bağımlılığıdır; Server/CLI/native SDK ona bağlanmaz. Desteklenen ortamda bellek/eşzamanlılık tanılamaları çalışır.
+
+## 6. Modüler kurulum ve güncelleme
+Zorunlu Server Core SQL/PLSQL, storage/transaction/recovery, standart güvenlik, temel History/backup’tır. Resmi ML CPU/DL/GPU/Decision ve uygun ileri istemci araçları seçilebilir. Kullanıcı plugin market’i değildir. Installed, available, enabled, authorized, compatible ayrı durumlar olsun.
+
+İstemci kurulumu yerel Server/GPU zorunlu kılmaz. Decision’a bağlı korumalı yazma, modül yokken serbest bırakılmaz. Modül kaldırma model/veri/geçmişi silmez. Workbench kaldırma Server/CLI/DLL sahipliğini bozmaz. Server uninstall data/history/model/backup’ı varsayılan korur; mevcut data dizinine repair sırasında initialize yapılmaz.
+
+Format değiştiren işlemler yalnız doğrulanmış yedek/kopya ve preflight sonrası yürütülür. Yanlış imza/format uyumsuzluğu güvenli reddedilir. Update sonrası yeni yazmalar varsa eski backup’a dönüş kaybı açıkça belirtilir. Chaos/kurulum/uninstall testleri gerçek kullanıcı ortamında değil izole test instance/VM’de yapılır.
+
+## 7. Etap sonunda teslim
+Kısa özet: değişen dosyalar, gerçek build/test komutları ve sonuçlar, üretilmiş artifact yolları/hash’leri, açık hata/riski ve sıradaki etap. Test tablosunda PASS/FAIL/NOT_RUN/NOT_APPLICABLE ayrımı bulunur. Özellik testi geçmedi diye silently kapsam dışı ilan edilmez.
+
+StarDataParadiseServer/docs/coordination altında STAGES/NN.json, PROGRESS.md, COMPATIBILITY_MATRIX.md, REQUIREMENTS.md ve NEXT_TASK.md güncellenir; yerel mutlak yollar/secret’lar commit edilmez. Her test evidence’ı depo/revision veya dirty patch hash’iyle eşleşir. Önceki PASS sonraki değişiklikle bozulursa ilgili test tekrar FAILED olarak görünür, tarihsel rapor değiştirilmez.
+
+Bu süreç hata riskini azaltır ve regresyonu yakalamayı hedefler; hatasızlık veya hiç veri kaybı olmayacağına dair koşulsuz garanti değildir. Etap 50 yalnız bütün zorunlu kapılar geçtiğinde doğrulanmış sürüm adayı teslim eder.

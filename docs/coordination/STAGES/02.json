@@ -1,0 +1,314 @@
+{
+  "stage_id": 2,
+  "status": "PASSED",
+  "started_at": "2026-11-15",
+  "finished_at": "2026-11-15T00:24:40.5943594+03:00",
+  "prerequisite_evidence": [
+    "STAGES/01.json"
+  ],
+  "toolchain": {
+    "cmake": "4.2.2",
+    "qt": "6.11.3",
+    "msvc": "19.51.36260",
+    "windows_sdk": "10.0.26100.0",
+    "dotnet": "10.0.402",
+    "gradle": "9.3.1",
+    "java": "17.0.12",
+    "python": "3.12.4",
+    "setuptools": "80.9.0"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise",
+      "folder": "StarDataParadise",
+      "head": "769721228600dd21429cfb2ec41fa5d9b119641d",
+      "new_local_repo": false,
+      "source_manifest": "out/sdp-m1/stage02/changed-sources.sha256",
+      "source_manifest_sha256": "066a3b1cb76923a1b9bdc1cd1d38dd5d36e830529e618ab8b03e6f93c3a32c9c",
+      "changed_files": [
+        "AGENTS.md",
+        "BUILD.md",
+        "ci.ps1",
+        "CMakeLists.txt",
+        "CMakePresets.json",
+        "StarDataParadise/StarDataParadise.cpp",
+        "StarDataParadise/StarDataParadise.vcxproj"
+      ],
+      "commands": [
+        {
+          "command": "pwsh -NoProfile -File ci.ps1",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/cmake-ci.log",
+          "log_sha256": "af2cfcfe9373e3eed0808e17c66c515c1b6765014a427b7da24511da67e633e5",
+          "actually_executed": true
+        },
+        {
+          "command": "MSBuild.exe StarDataParadise.slnx /nologo /t:Build /verbosity:minimal /p:Configuration=Release /p:Platform=x64 /p:IntDir=out/sdp-m1/stage02/vs-final/obj/ /p:OutDir=out/sdp-m1/stage02/vs-final/bin/",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/msbuild-final.log",
+          "log_sha256": "857bf76ab800ddbcee9872668180aad72bd903cf9361e986df0d79d4ff0a5bb4",
+          "actually_executed": true
+        }
+      ],
+      "artifacts": [
+        {
+          "file": "out/build/windows-x64/Release/StarDataParadise.exe",
+          "sha256": "dbc21ffa805a935433eb1184513487670ef994fc53d8ac6131b31b606569f290"
+        }
+      ]
+    },
+    {
+      "name": "StarDataParadiseServer",
+      "folder": "StarDataParadiseServer",
+      "head": "bec2e0c4ada12d1db49a73f7e1229a9ce08e4d26",
+      "new_local_repo": false,
+      "source_manifest": "out/sdp-m1/stage02/changed-sources.sha256",
+      "source_manifest_sha256": "44ed9fdba16bd1dafcc959fd183bc1e00f0879de0eba1ecb44ee9ed2e8824788",
+      "changed_files": [
+        "AGENTS.md",
+        "BUILD.md",
+        "ci.ps1",
+        "CMakeLists.txt",
+        "CMakePresets.json",
+        "StarDataParadiseServer/StarDataParadiseServer.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/invalid_option.cmake"
+      ],
+      "commands": [
+        {
+          "command": "pwsh -NoProfile -File ci.ps1",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/cmake-ci.log",
+          "log_sha256": "e4904595f207656ae8178c1f78133dd5b07fd4b7626683ed75f8f8a936ca1a2f",
+          "actually_executed": true
+        },
+        {
+          "command": "MSBuild.exe StarDataParadiseServer.slnx /nologo /t:Build /verbosity:minimal /p:Configuration=Release /p:Platform=x64 /p:IntDir=out/sdp-m1/stage02/vs/obj/ /p:OutDir=out/sdp-m1/stage02/vs/bin/",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/msbuild.log",
+          "log_sha256": "0b3b88a1681aa955d675657b8db5ad7f992136126ea25fd2ddeae6292492e7e3",
+          "actually_executed": true
+        }
+      ],
+      "artifacts": [
+        {
+          "file": "out/build/windows-x64/Release/StarDataParadiseServer.exe",
+          "sha256": "8882af8f571e072ae4a53bed9fd6141faa1260e57b086abc75d43c8e3647dd53"
+        }
+      ]
+    },
+    {
+      "name": "StarDataParadiseCLI",
+      "folder": "StarDataParadiseCli",
+      "head": "792a803f6521c749d1b668a80fde81062cff1afb",
+      "new_local_repo": false,
+      "source_manifest": "out/sdp-m1/stage02/changed-sources.sha256",
+      "source_manifest_sha256": "a06e7a224379d06b2ff2acfdadcec8ebea204ec840f53a2493cce552fc1836bb",
+      "changed_files": [
+        "AGENTS.md",
+        "BUILD.md",
+        "ci.ps1",
+        "CMakeLists.txt",
+        "CMakePresets.json",
+        "StarDataParadiseCli/StarDataParadiseCli.cpp",
+        "tests/invalid_option.cmake"
+      ],
+      "commands": [
+        {
+          "command": "pwsh -NoProfile -File ci.ps1",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/cmake-ci.log",
+          "log_sha256": "34b1f18ce3fb4c60ebff4fb404255bdfc645a61ebf4977ddb7ac842f7117d6b5",
+          "actually_executed": true
+        },
+        {
+          "command": "MSBuild.exe StarDataParadiseCli.slnx /nologo /t:Build /verbosity:minimal /p:Configuration=Release /p:Platform=x64 /p:IntDir=out/sdp-m1/stage02/vs/obj/ /p:OutDir=out/sdp-m1/stage02/vs/bin/",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/msbuild.log",
+          "log_sha256": "30d018bceec6e7e088df7e40774d17987984b30418369a32a382a307dca8595b",
+          "actually_executed": true
+        }
+      ],
+      "artifacts": [
+        {
+          "file": "out/build/windows-x64/Release/StarDataParadiseCLI.exe",
+          "sha256": "33c91ec1d71f647052e05835b95f9d0093b36dccd167735cc1edb97d7644e5ca"
+        }
+      ]
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "folder": "StarDataParadiseDLLler",
+      "head": "c1bb628f62036bd418bbe8905e4b30ed48200ad0",
+      "new_local_repo": false,
+      "source_manifest": "out/sdp-m1/stage02/changed-sources.sha256",
+      "source_manifest_sha256": "0514d256e11edea79a172d7fbcdc67663d0e5118d379b2fea62b7a0184aef7c2",
+      "changed_files": [
+        "AGENTS.md",
+        "BUILD.md",
+        "ci.ps1",
+        "CMakeLists.txt",
+        "CMakePresets.json",
+        "include/StarDataParadiseDLLler.h",
+        "StarDataParadiseDLLler/StarDataParadiseDLLler.vcxproj",
+        "StarDataParadiseDLLler/StarDataParadiseDLLler.vcxproj.filters",
+        "StarDataParadiseDLLler/version.cpp",
+        "tests/version_smoke.c"
+      ],
+      "commands": [
+        {
+          "command": "pwsh -NoProfile -File ci.ps1",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/cmake-ci.log",
+          "log_sha256": "8c7da5e1fc90d8fe4205ce2b0441983d856438dd2b95f7f4ed9f9336f5fc1a61",
+          "actually_executed": true
+        },
+        {
+          "command": "MSBuild.exe StarDataParadiseDLLler.slnx /nologo /t:Build /verbosity:minimal /p:Configuration=Release /p:Platform=x64 /p:IntDir=out/sdp-m1/stage02/vs/obj/ /p:OutDir=out/sdp-m1/stage02/vs/bin/",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/msbuild.log",
+          "log_sha256": "8b6cb7c035d62f90ee03fb63f2abd9a7e7aba10f33bd58ed7ba713ea54180300",
+          "actually_executed": true
+        }
+      ],
+      "artifacts": [
+        {
+          "file": "out/build/windows-x64/Release/StarDataParadiseDLLler.dll",
+          "sha256": "bfbbde6ebe06670173093097585135c104cb33218508f1e353aa4304f6239b3a"
+        },
+        {
+          "file": "out/build/windows-x64/Release/StarDataParadiseDLLler.lib",
+          "sha256": "8c335987a9fa684e7fd3926da2e35040a10813bc849051f750390f90726f3596"
+        },
+        {
+          "file": "include/StarDataParadiseDLLler.h",
+          "sha256": "4ed528ee33d1abcb0c3e8e695a20ef61493187a2203a1bc6454db84cadb988b0"
+        }
+      ]
+    },
+    {
+      "name": "StarDataParadise.SDK.NET",
+      "folder": "StarDataParadise.SDK.NET",
+      "head": null,
+      "new_local_repo": true,
+      "source_manifest": "out/sdp-m1/stage02/changed-sources.sha256",
+      "source_manifest_sha256": "b99c099e47da81b2310ebfd8ceeff91801af14fc202c622f543a970248aa2b63",
+      "changed_files": [
+        ".gitignore",
+        "AGENTS.md",
+        "BUILD.md",
+        "ci.ps1",
+        "global.json",
+        "NuGet.Config",
+        "smoke/Program.cs",
+        "smoke/Smoke.csproj",
+        "src/SdkVersion.cs",
+        "src/StarDataParadise.SDK.NET.csproj"
+      ],
+      "commands": [
+        {
+          "command": "pwsh -NoProfile -File ci.ps1",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/sdk-ci-retry.log",
+          "log_sha256": "9f962e23c48dcaa349ad2cbd21e1c0692317101af5a517f2fc9292469e203ef8",
+          "actually_executed": true
+        }
+      ],
+      "artifacts": [
+        {
+          "file": "out/packages/StarDataParadise.SDK.NET.0.1.0.nupkg",
+          "sha256": "292dad15059bcfb946c4389fc28a2e608348ce5506e4e0407025136541ea9fb2"
+        }
+      ]
+    },
+    {
+      "name": "StarDataParadise.SDK.Java",
+      "folder": "StarDataParadise.SDK.Java",
+      "head": null,
+      "new_local_repo": true,
+      "source_manifest": "out/sdp-m1/stage02/changed-sources.sha256",
+      "source_manifest_sha256": "fd1b274dd0c724a4c9a60b7578f118da04d84687df307927fe45d212d0e5e60b",
+      "changed_files": [
+        ".gitignore",
+        "AGENTS.md",
+        "build.gradle",
+        "BUILD.md",
+        "ci.ps1",
+        "gradle.properties",
+        "settings.gradle",
+        "src/main/java/com/stardataparadise/sdk/SdkVersion.java",
+        "src/smoke/java/com/stardataparadise/sdk/smoke/Smoke.java"
+      ],
+      "commands": [
+        {
+          "command": "pwsh -NoProfile -File ci.ps1 -Gradle <gradle-9.3.1/bin/gradle.bat>",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/sdk-ci-retry.log",
+          "log_sha256": "c265c8de3262887454d5d3857fd26386de2e11dcb05c87433597714718973b9c",
+          "actually_executed": true
+        }
+      ],
+      "artifacts": [
+        {
+          "file": "out/build/libs/StarDataParadise.SDK.Java-0.1.0.jar",
+          "sha256": "755293c4b5ddb18b73ad89f94ebac2508838e625e8663c91064acdac00986cd5"
+        }
+      ]
+    },
+    {
+      "name": "StarDataParadise.SDK.Python",
+      "folder": "StarDataParadise.SDK.Python",
+      "head": null,
+      "new_local_repo": true,
+      "source_manifest": "out/sdp-m1/stage02/changed-sources.sha256",
+      "source_manifest_sha256": "752229c8c77b203f8341137b8ee3f4d8be40cc89464366f207ee57a6daa97171",
+      "changed_files": [
+        ".gitignore",
+        "AGENTS.md",
+        "BUILD.md",
+        "ci.ps1",
+        "pyproject.toml",
+        "src/stardataparadise_sdk/__init__.py",
+        "tests/smoke.py"
+      ],
+      "commands": [
+        {
+          "command": "pwsh -NoProfile -File ci.ps1 -Wheelhouse <pinned-build-dependencies>",
+          "exit_code": 0,
+          "log_path": "out/sdp-m1/stage02/sdk-ci.log",
+          "log_sha256": "277c8c823fe72354dce853da4630f9184de8d2a4b2ef49313352d4945ebfc61a",
+          "actually_executed": true
+        }
+      ],
+      "artifacts": [
+        {
+          "file": "out/packages/stardataparadise_sdk-0.1.0-py3-none-any.whl",
+          "sha256": "0c391b2ccd67ec826afff47be64422e34aa4aac6a40c515d6f133ccf284cda39"
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "S02-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Yedi deponun dört CMake ve üç SDK CI çalıştırması 0 döndü."
+    },
+    {
+      "id": "S02-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Üç EXE, DLL ve import library. Workbench disconnected_window CTest ve mevcut .slnx smoke geçti."
+    },
+    {
+      "id": "S02-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Her proje kendi kökünden derlendi. Sekiz CTest, üç SDK paket smoke testi ve izinli dosya listesi dışındaki başlangıç SHA-256 kontrolleri geçti."
+    }
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 3
+}

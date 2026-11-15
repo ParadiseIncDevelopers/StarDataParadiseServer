@@ -1,0 +1,17 @@
+{
+  "protocol_version": 1,
+  "features": {
+    "tls": false,
+    "auth": false,
+    "health": false,
+    "metadata": false,
+    "sql": false,
+    "transactions": false,
+    "server_cancel": false,
+    "jobs": false,
+    "admin": false,
+    "history": false,
+    "decision": false,
+    "ml": false
+  }
+}

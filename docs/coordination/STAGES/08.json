@@ -1,0 +1,158 @@
+{
+  "stage_id": 8,
+  "status": "PASSED",
+  "started_at": "2026-11-15T10:25:24.3774984+03:00",
+  "finished_at": "2026-11-15T10:35:41.7033479+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 4,
+      "file": "STAGES/04.json",
+      "sha256": "7780a331326971aedd7994d476a7d90a1c8c7bcae6c3844cb20a74dd61ff219f"
+    },
+    {
+      "stage_id": 7,
+      "file": "STAGES/07.json",
+      "sha256": "46465875bcd5834443872e8f012cfa3ecb10640ba14f1d9656784a0402a19dec"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "19.51.36260",
+    "storage_format": 1,
+    "openssl": "3.5.9"
+  },
+  "repositories": [
+    {
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "DISK_FORMAT.md",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "StarDataParadiseServer/storage_admin.cpp",
+        "StarDataParadiseServer/storage_admin.hpp",
+        "storage/disk.cpp",
+        "storage/heap.cpp",
+        "storage/storage.hpp",
+        "tests/storage_ownership.py",
+        "tests/storage_smoke.cpp"
+      ],
+      "source_manifest_sha256": "ebb381cd377dbfe4ba5341805f6cb1487c649e223474a2370751873fc1d0eef7",
+      "branch": "master",
+      "source_manifest": "out/sdp-m2/stage08/changed.sha256",
+      "name": "StarDataParadiseServer",
+      "head": "bec2e0c4ada12d1db49a73f7e1229a9ce08e4d26"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m2/stage08/workspace-before.json",
+    "archive_path": "out/sdp-m2/stage08/workspace-before.zip",
+    "repo": "StarDataParadiseServer",
+    "archive_sha256": "90367f0ffe35ddf18d937f7c50ee86b255399d8f1d2606565e400b1fca643be3"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. <stage-manifest> --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage08/checkpoint.log",
+      "log_sha256": "be378679646b5632438b612ab7396fcf20566592b3c7c011cc90f15a33c283b4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m1/stage04/build -C Release --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage08/baseline.log",
+      "log_sha256": "7c1372a66689ad92ce1f5d2ebb4809838824f424eb5e31a1623a9e91fb232df3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --preset windows-x64 -B <stage-build> <pinned dependencies> <integration inputs>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage08/configure.log",
+      "log_sha256": "8d8541609aa2d429d3655edfe5cb8021395225eb0097a8334f9e57f49dc0023b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build <stage-build> --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage08/build-final.log",
+      "log_sha256": "5fc65dd20da20bdffd690ff7b7bb7ee4af69995fe28aa930191b0226db6c984b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m2/stage08/build -C Release -V --output-on-failure --no-tests=error",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage08/ctest.log",
+      "log_sha256": "5585a48a88e6b771141cfa2a9be7ae906cf20b1b584b59ba060fbb5f10b7b273",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "MSBuild.exe <existing solution> /t:Build /p:Configuration=Release /p:Platform=x64 <isolated output>",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage08/msbuild.log",
+      "log_sha256": "df9fe7f224bd26db93190e278df5778ef592c16edbebfbb9283fc517d7310cda",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m2/workspace.py .. <stage-manifest> --check --allow StarDataParadiseServer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m2/stage08/isolation.log",
+      "log_sha256": "f08834c7a934db1c976fcfa05126aae71de47ce2d080c5cdea95d4e86ee014cb",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S08-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "BLOB, binary, Türkçe UTF-8, exact decimal, NULL, boş text ve row ID yeniden açılan dosyada doğrulandı."
+    },
+    {
+      "id": "S08-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Bilinmeyen sürüm, hasarlı CRC, overflow döngüsü, slot offset ve kesik satır kontrollü reddedildi."
+    },
+    {
+      "id": "S08-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "1–2 sayfa cache, dirty budget rollback, OS erişim reddi, kısa read/write, dosya/dizin sahipliği ve yabancı dosyaların SHA-256 koruması doğrulandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m2/stage08/build/Release/StarDataParadiseServer.exe",
+      "sha256": "b9fd84d7ee662ee5018560ac917fd95b763711a29b6e47e79532dd322f1d30e3"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m2/stage08/storage-v1.sdp",
+      "sha256": "3a41a7e0de4c3ff3b68886b0cdf1cedb64e6621f224eda09d62674912b871ec3"
+    }
+  ],
+  "remaining_issues": [
+    "Storage 1 yerel/internel API’ye bağlı. SQL ve kalıcı recovery yolu henüz public değildir."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 9
+}
