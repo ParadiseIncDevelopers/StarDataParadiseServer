@@ -238,7 +238,8 @@ Json support_bundle(const Config& config, std::string_view operation, const Json
 
     const Json public_config{{"instance_name", config.instance_name}, {"bind", config.bind}, {"port", config.port},
         {"max_connections", config.max_connections}, {"timeout_ms", config.timeout.count()},
-        {"decision_enabled", config.decision_enabled}, {"mlp_cpu_enabled", config.mlp_cpu_enabled},
+        {"decision_enabled", config.decision_enabled}, {"ml_cpu_enabled", config.ml_cpu_enabled},
+        {"mlp_cpu_enabled", config.mlp_cpu_enabled},
         {"backup_enabled", !config.backup.empty()}};
     auto summary = Json{{"format", 1}, {"config", public_config}, {"log_counts", std::move(counts)},
         {"discarded_records", discarded}, {"secret_scan_passed", true}};

@@ -39,5 +39,14 @@
 | 34 sonrası Node.js SDK | PASSED | [Temiz npm kurulumlu bağımsız paket 0.1.0](https://github.com/ParadiseIncDevelopers/StarDataParadise.SDK.Node/releases/tag/v0.1.0) |
 | 35 Tipli PL/SQL Java export | PASSED | [21 saf Java karşılaştırması, bağlı JDBC, 47 Server testi ve kurulu SDK paketleri](STAGES/35.json) |
 | 36 CLI SQL, PL/SQL ve otomasyon | PASSED | [7 CLI testi, makine çıktısı, canlı yönetim, kayıp commit ve iş iptali](STAGES/36.json) |
+| 37 Workbench SQL editörü ve nesne gezgini | PASSED | [Qt offscreen, iki TLS sunucusu, SQL/PLSQL, rollback ve taslak kurtarma](STAGES/37.json) |
+| 38 Workbench grid, tablo tasarımı ve aktarım | PASSED | [7 Workbench ve 48 Server testi](STAGES/38.json) |
+| 39 Workbench PL/SQL Studio, debugger ve SDK/Java export | PASSED | [9 Workbench testi, canlı debugger, çevrimdışı Java](STAGES/39.json) |
+| 40 Workbench History ve Decision Studio, M8 | PASSED | [11 Workbench, 7 CLI, 48 Server testi ve kurulu SDK tüketicileri](STAGES/40.json) |
+| 41 Workbench ML, Dataset ve Job Studio | PASSED | [12 Workbench testi, gerçek CPU eğitim ve iki süreçli MLP devam](STAGES/41.json) |
+| 42 Workbench DBA, Health, Backup ve zamanlama | PASSED | [Server, Workbench ve Native SDK kapalı istemciyle SQL/retrain zamanlamasını doğruladı](STAGES/42.json) |
+| 43 Workbench şema/veri karşılaştırması ve migration | PASSED | [15 Workbench testi ve gerçek PostgreSQL/MySQL TLS aktarımı](STAGES/43.json) |
+| 44 Bağımsız Windows MSI ve bileşen manifesti | PASSED | [Üç gerçek MSI, 50 Server testi ve on olumsuz paket testi](STAGES/44.json) |
+| 45 Ortak Setup Wizard, bakım ve M9 | PASSED | [Gerçek MSI yaşam döngüsü, 50 Server ve 15 Workbench testi](STAGES/45.json) |
 
-[M1 temel altyapı raporu](M1_REPORT.md) · [M2 istemci ve depolama raporu](M2_REPORT.md) · [M3 SQL ve güvenlik raporu](M3_REPORT.md) · [Sıradaki etap](NEXT_TASK.md)
+[M1 temel altyapı raporu](M1_REPORT.md) · [M2 istemci ve depolama raporu](M2_REPORT.md) · [M3 SQL ve güvenlik raporu](M3_REPORT.md) · [M9 kurulum raporu](M9_REPORT.md) · [Sıradaki etap](NEXT_TASK.md)

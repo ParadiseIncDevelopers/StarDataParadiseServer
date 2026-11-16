@@ -107,8 +107,8 @@ Json object_image(const Object& object, bool definition)
 Json values_image(const Object& table, const disk::Row& row, bool project_all = false)
 {
     const auto record = history_record(row);
-    if (!record || record->table != table.id || record->version > table.version ||
-        record->values.size() + (table.version - record->version) != table.columns.size())
+    if (!record || record->table != table.id ||
+        !compatible_row_layout(table, record->version, record->values.size()))
         throw disk::Error(disk::Fault::corrupt, "Historical row has no matching schema");
     auto values = Json::object();
     const auto count = project_all ? table.columns.size() : record->values.size();
@@ -268,6 +268,8 @@ Json query_log(HistoryView& view, const HistoryCommand& command, const Visibilit
         if (revision.lsn < from) continue;
         if (!space || revision.lsn > to) break;
         check();
+        // A rewritten row's before image may use any schema superseded in this revision.
+        std::map<ObjectId, std::vector<Object>> prior_layouts;
         const bool date = (!command.since_utc || (revision.utc_seconds && *revision.utc_seconds >= *command.since_utc)) &&
             (!command.until_utc || (revision.utc_seconds && *revision.utc_seconds <= *command.until_utc));
         for (const auto& change : revision.changes)
@@ -278,6 +280,9 @@ Json query_log(HistoryView& view, const HistoryCommand& command, const Visibilit
             if (before_object || after_object)
             {
                 const auto& object = after_object ? *after_object : *before_object;
+                if (before_object && after_object && before_object->kind == ObjectKind::table &&
+                    before_object->version != after_object->version)
+                    prior_layouts[object.id].push_back(*before_object);
                 if (after_object) objects.insert_or_assign(object.id, object);
                 if (date && !command.row_id && (!target || target == object.id) && visibility.visible(object.id))
                 {
@@ -302,8 +307,19 @@ Json query_log(HistoryView& view, const HistoryCommand& command, const Visibilit
             const auto found = objects.find(record.table);
             if (found == objects.end()) throw disk::Error(disk::Fault::corrupt, "Historical row has no table");
             const auto& table = found->second;
+            const Object* before_table = &table;
+            if (previous && !compatible_row_layout(table, previous->version, previous->values.size()))
+            {
+                if (const auto older = prior_layouts.find(record.table); older != prior_layouts.end())
+                    for (auto layout = older->second.rbegin(); layout != older->second.rend(); ++layout)
+                        if (compatible_row_layout(*layout, previous->version, previous->values.size()))
+                        {
+                            before_table = &*layout;
+                            break;
+                        }
+            }
             space = page.add(entry(revision, table, qualified_object(objects, table), change.id, record.version,
-                previous ? values_image(table, before) : Json(), next ? values_image(table, after) : Json()));
+                previous ? values_image(*before_table, before) : Json(), next ? values_image(table, after) : Json()));
             if (!space) break;
         }
     }

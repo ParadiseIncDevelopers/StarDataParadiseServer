@@ -28,6 +28,7 @@ struct Config
     unsigned max_connections = 16;
     bool routine_test_instance{};
     bool decision_enabled = true;
+    bool ml_cpu_enabled = true;
     bool mlp_cpu_enabled = true;
     std::chrono::milliseconds timeout{10000};
 };

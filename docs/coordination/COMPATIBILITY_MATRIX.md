@@ -35,6 +35,15 @@
 | CPU model checkpoint ve lifecycle | Atomik epoch checkpoint, restart sonrası birebir CPU devam, sürüm rollback/deactivate/delete, History pin güvenliği. Native C ABI 1 typed model ve dataset. GPU eğitim backend’i unavailable. [Modeller](../../MODELS.md) |
 | Backup v1 | Quiesced fiziksel ve tipli logical yedek, SHA-256 manifest, doğrulanmış ayrı restore, Server job ve interval/daily schedule, Native ABI 1. PITR unavailable. [Yedek](../../BACKUP.md) |
 | Native SDK 0.4.0 | ABI 1, 45 önceki export ve ek oturum bilgisi, C++ RAII, gerçek yedek/bakım işi ve bağımsız örnek. Windows x64 Release ve ASan doğrulandı. |
+| Workbench SQL ve explorer Etap 37 | Native 0.4.0 ve Qt 6.11.3. İki canlı TLS oturumu, gerçek PL/SQL, tipli parametre, rollback ve taslak kurtarma. [Kabul](STAGES/37.json) |
+| Workbench tablo işlemleri Etap 38 | Gerçek TLS ile transaction içinde DDL, ERD, revision kontrollü grid ve tipli aktarım. [Kabul](STAGES/38.json) |
+| Workbench PL/SQL Studio Etap 39 | Gerçek TLS derleme, breakpoint/stack/watch, yalıtılmış test ve profil. JDK 17 standalone ve JDBC bağlantılı çıktı. [Kabul](STAGES/39.json) |
+| Workbench History ve Decision Etap 40 | Şema ve satır geçmişi, canlı recovery conflict denetimi, WHYNOT ve salt okunur simülasyon. [Kabul](STAGES/40.json) |
+| Workbench ML, Dataset ve Job Studio Etap 41 | Server snapshot, K-Means ve sınıflandırma, doğrulanmış metrikler, iki süreçli CPU MLP resume ve bağımsız availability. [Kabul](STAGES/41.json) |
+| Workbench DBA ve Backup Etap 42 | Gerçek TLS sağlık, ayrı doğrulanmış restore ve CLI/SDK yetkileri geçti. Server, Workbench kapalıyken SQL ve yeniden eğitim görevlerini tamamladı. Native 0.4.1 aynı ABI ile iki türü destekler. [Kanıt](STAGES/42.json) |
+| Workbench Compare/Migration Etap 43 | İki TLS Server ile DDL revizyon koruması ve PostgreSQL 18.1 / MySQL 8.0.43 ile kesintiden sonra doğrulanmış aktarım. [Kanıt](STAGES/43.json) |
+| Bağımsız Windows x64 MSI Etap 44 | Server, Workbench ve CLI paketleri, ayrı uygulama yerel DLL sahipliği ve manifest çözümleyicisi doğrulandı. İmzasız geliştirme çıktıları. [Kanıt](STAGES/44.json) |
+| Ortak Setup ve M9 Etap 45 | Çevrimdışı MSI yaşam döngüsü, uzak ve taşınabilir Workbench, veri ve etkin Decision koruması. Yönetici oturumunda sanal Windows hizmet hesabı ve kapsamı doğrulanmış firewall kuralı geçti. [Etap 45](STAGES/45.json) · [Yönetici kabulü](M9_ADMIN_ACCEPTANCE.md) |
 | Linux, macOS ve diğer Windows mimarileri | NOT_RUN. |
 
 Wire v1 kaynakları [contracts/v1](../../contracts/v1/PROTOCOL.md) altında. Etap kanıtları [M1](M1_REPORT.md) , [M2](M2_REPORT.md), [M3](M3_REPORT.md) , [M4](M4_REPORT.md) ve [M5](M5_REPORT.md) raporlarında.

@@ -1,0 +1,198 @@
+{
+  "stage_id": 38,
+  "status": "PASSED",
+  "started_at": "2026-11-15T21:10:52.9402596+03:00",
+  "finished_at": "2026-11-15T21:41:44.2238155+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 37,
+      "file": "STAGES/37.json",
+      "sha256": "7ae1dbbf3c61b11a81b32266c51ac5f4e9ba9d611a02a7902b6465a6baafab77"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "qt": "6.11.3",
+    "msvc": "v145",
+    "cmake": "4.2.2",
+    "native": "0.4.0",
+    "native_abi": 1,
+    "native_zip_sha256": "4ee15b8fa50c94c5ee012245d8ed8e3c16259df64fc154ca15fb286cb6a8ad25",
+    "server": "0.4.0 Stage 38 source candidate",
+    "scope": "Server DDL ve yetkili metadata değişikliği kullanıcı tarafından onaylandı."
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise",
+      "head": "2f6e72f1e69d1b10720c0d916347bfd0b7694f83",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "StarDataParadise/data_grid.cpp",
+        "StarDataParadise/data_grid.hpp",
+        "StarDataParadise/sql_pane.cpp",
+        "StarDataParadise/sql_pane.hpp",
+        "StarDataParadise/StarDataParadise.vcxproj",
+        "StarDataParadise/table_codec.cpp",
+        "StarDataParadise/table_codec.hpp",
+        "StarDataParadise/table_design.cpp",
+        "StarDataParadise/table_design.hpp",
+        "StarDataParadise/table_designer.cpp",
+        "StarDataParadise/table_transfer.cpp",
+        "StarDataParadise/table_transfer.hpp",
+        "StarDataParadise/workbench.cpp",
+        "tests/table_designer_smoke.cpp",
+        "tests/table_grid_smoke.cpp",
+        "tests/table_transfer_codec.cpp",
+        "tests/table_transfer_smoke.cpp",
+        "tests/workbench_grid_smoke.py"
+      ],
+      "source_manifest": "out/sdp-m8/stage38/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "387dadd33d65f2c98220dd663af24e998a227aa8557d47ac4c3fb97c387ea4eb"
+    },
+    {
+      "name": "StarDataParadiseServer",
+      "head": "d6be6218825d932c0e487ad9a339c4532cc73a84",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "sql/catalog.cpp",
+        "sql/catalog.hpp",
+        "sql/editor_metadata.hpp",
+        "sql/executor.cpp",
+        "sql/executor.hpp",
+        "sql/history_query.cpp",
+        "sql/relational.cpp",
+        "sql/relational.hpp",
+        "sql/session.cpp",
+        "sql/SQL.ebnf",
+        "sql/syntax.cpp",
+        "sql/syntax.hpp",
+        "tests/table_editor_ddl.py"
+      ],
+      "source_manifest": "out/sdp-m8/stage38/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "cfe1b998b578abf0366f31a38979d04289befb169a87a2a611d928c8e8456f04"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m8/stage38/workspace-before.zip",
+    "repo": "StarDataParadiseServer",
+    "manifest": "out/sdp-m8/stage38/workspace-before.json",
+    "archive_sha256": "9e0a0ffec6e75c7f05026204851d7189c3372205f8fc484fc9634de0406d987e"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m8/stage38/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage38/checkpoint.log",
+      "log_sha256": "45a8758fc4a1012ed7353dcbd6ea59d3f3b84e43f3d169b4cd92f17b2e2aaf57",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m4/workspace.py .. out/sdp-m8/stage38/workspace-before.json --check --allow StarDataParadise --allow StarDataParadiseServer; verify two original user file SHA-256 values",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage38/isolation.log",
+      "log_sha256": "8da238f1c6be699b8dcb802e1f8c4c17d02c73fc43ba94cada625d9bd5c7f4a9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure Server Release with pinned local dependencies and previous storage fixtures",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage38/server-configure.log",
+      "log_sha256": "4ad4ca5f3a2d2e9de904e27937504a610868463e9ad312c7dbeaf3bbdc7a95ab",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m8/stage38/server-build --config Release -- /m:1 /nodeReuse:false",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage38/server-build-full.log",
+      "log_sha256": "34e24c6fa7706390f664dc15ecf90e3e91d2db276be0ee0618b903dd76e1cb39",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m8/stage38/server-build -C Release --parallel 2 --output-on-failure",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage38/server-ctest.log",
+      "log_sha256": "1ffa6d89ba40f07469eaabaeb61bdb9e3209020014ddc957337dbf169651adfb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Configure Workbench with pinned Qt, Native TLS SDK, current Server and local OpenSSL",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage38/configure-full.log",
+      "log_sha256": "5778c4af1de97b2588493914aa8d314020c9b65979065d278fec6c374b13bbf3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --build out/sdp-m8/stage38/build --config Release --parallel 1 -- /nodeReuse:false",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage38/final-build.log",
+      "log_sha256": "77697289b98492f689cfd406591cc294319c93b44c1f88851b89a2f2d270b77a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --test-dir out/sdp-m8/stage38/build -C Release --output-on-failure -V -j 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage38/final-ctest.log",
+      "log_sha256": "86f9e1cc65888fc9b1faa514637618f3fdd0dbb9eb4ae80c5703899376c8b496",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S38-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Qt tasarımcı testi gerçek TLS üzerinde CREATE, DEFAULT, PK/FK/CHECK, indeks, veri sözlüğü, ERD, ALTER, eski şema reddi ve rollback doğruladı. Server DDL testi restart sonrasında satır kimliğini ve History’yi doğruladı."
+    },
+    {
+      "id": "S38-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Qt grid testi güvenli anahtar yokken düzenlemeyi engelledi, eşzamanlı değişiklikte çakışma üretti ve yeni History revizyonunu doğruladı. SELECT-only aktör düzenleme detaylarını alamadı."
+    },
+    {
+      "id": "S38-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Qt aktarım testi gerçek TLS üzerinde Türkçe, tam DECIMAL, SQL NULL ile boş metin/BLOB ve BLOB byte round-trip, reddedilen satır raporu ve ilk yazıdan sonra iptal rollback doğruladı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m8/stage38/build/Release/StarDataParadise.exe",
+      "sha256": "814d7eea3030f43460a276622c95ae89688a7da56b11f69f94e8835ff71f9d98"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m8/stage38/server-build/Release/StarDataParadiseServer.exe",
+      "sha256": "a2eb7280ab26b11aa2795c07a4688c5a17a5c0fdd0522af2af47095463b6357d"
+    }
+  ],
+  "remaining_issues": [
+    "Grid düzenleme SQL NULL kabul etmeyen PK veya UNIQUE constraint ister. İlgisiz bir commit ortak revizyonu ilerlettiyse Workbench güvenlik için yenileme ister.",
+    "SQL dosyası aktarımı çalışma sayfasında incelenir. BLOB ve bileşik tipleri için CSV veya Typed JSON gerekir.",
+    "Grid ve aktarım kaynak sınırlarıyla çalışır. Büyük DDL mevcut Server transaction bütçesine tabidir."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 39
+}

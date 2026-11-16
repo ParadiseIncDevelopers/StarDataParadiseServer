@@ -2,6 +2,7 @@
 
 #include "binder.hpp"
 #include "btree.hpp"
+#include <sdp/wire.hpp>
 
 namespace sdp::sql
 {
@@ -27,6 +28,17 @@ struct IndexCollation
 };
 
 std::optional<IndexCollation> catalog_index_collation(const Object& object);
+wire::Json catalog_index_details(const Object& object);
+wire::Json table_editor_definition(const Object& table);
+struct RowLocatorKey
+{
+    std::vector<size_t> columns;
+    bool primary_key{};
+};
+std::optional<RowLocatorKey> row_locator_key(const Object& table);
+bool compatible_row_layout(const Object& table, uint32_t version, size_t fields);
+bool execute_table_alter(disk::Transaction& transaction, disk::Owner owner, Catalog& catalog,
+    const Statement& statement, const WorkCheck& check);
 
 struct IndexAccess
 {

@@ -12,8 +12,15 @@ create        = "CREATE", ( "DATABASE", ident | "SCHEMA", schema-name
               | ( "USER" | "ROLE" ), ident ) ;
 drop          = "DROP", ( "DATABASE", ident | "SCHEMA", schema-name
               | ( "TABLE" | "INDEX" | "VIEW" | "SEQUENCE" ), table-name ) ;
-alter         = "ALTER", ( "TABLE", table-name, "ADD", [ "COLUMN" ], ident, type, [ nullability ]
+alter         = "ALTER", ( "TABLE", table-name, alter-table
               | "INDEX", table-name, "RENAME", "TO", ident ) ;
+alter-table   = "ADD", ( [ "COLUMN" ], column | table-key )
+              | "DROP", ( "COLUMN", ident | "CONSTRAINT", ( ident | "AT", integer ) )
+              | "RENAME", "COLUMN", ident, "TO", ident
+              | "ALTER", [ "COLUMN" ], ident, ( "TYPE", type
+                | "SET", ( "NOT", "NULL" | "DEFAULT", expr )
+                | "DROP", ( "NOT", "NULL" | "DEFAULT" | "IDENTITY" )
+                | "ADD", "GENERATED", "BY", "DEFAULT", "AS", "IDENTITY" ) ;
 truncate      = "TRUNCATE", [ "TABLE" ], table-name ;
 explain       = "EXPLAIN", [ "ANALYZE" ], query ;
 analyze       = "ANALYZE", [ "TABLE" ], table-name ;

@@ -1,5 +1,6 @@
 #include "manager.hpp"
 #include "schedule.hpp"
+#include "scheduled_retrain.hpp"
 #include "worker.hpp"
 #include "../sql/history_journal.hpp"
 #include "../sql/wire_values.hpp"
@@ -8,6 +9,7 @@
 #include "../ml/training.hpp"
 #include "../backup/archive.hpp"
 #include "../sql/definition.hpp"
+#include "../sql/session.hpp"
 
 #include <algorithm>
 #include <array>
@@ -195,17 +197,31 @@ Json external(const Entity& entity)
         {"cpu_rate_limited", data.at("cpu_rate_limited")}};
 }
 
-void durable(disk::Engine& engine, disk::Transaction& tx)
+void durable(disk::Engine& engine, disk::Transaction& tx, std::string_view actor = "job-system")
 {
-    sql::HistoryJournal(engine, tx, runner_owner).seal("job-system", utc());
+    sql::HistoryJournal(engine, tx, runner_owner).seal(actor, utc());
     tx.commit(runner_owner);
 }
 
-std::unique_ptr<disk::Transaction> acquire(disk::Engine& engine, std::stop_token stop)
+std::string_view scheduling_failure(W code, std::string_view fallback)
+{
+    switch (code)
+    {
+    case W::permission_denied: return "permission_denied";
+    case W::resource_limit: return "resource_limit";
+    case W::timeout: return "timeout";
+    case W::module_unavailable: return "module_unavailable";
+    case W::cancelled: return "cancelled";
+    default: return fallback;
+    }
+}
+
+std::unique_ptr<disk::Transaction> acquire(disk::Engine& engine, std::stop_token stop,
+    std::string_view actor = "job-system")
 {
     while (!stop.stop_requested())
     {
-        try { return engine.begin(runner_owner, 75ms, stop, 5s, "job-system"); }
+        try { return engine.begin(runner_owner, 75ms, stop, 5s, std::string(actor)); }
         catch (const disk::Error& error)
         {
             if (error.fault() != disk::Fault::busy) throw;
@@ -276,9 +292,11 @@ int64_t advance(const Json& rule, int64_t due, int64_t now)
 }
 }
 
-Manager::Manager(disk::Engine& engine, std::filesystem::path temporary, bool enable_mlp, backup::Archive* archives)
-    : engine_(engine), temporary_(std::move(temporary)), mlp_enabled_(enable_mlp && ml::mlp_compiled()),
-      archives_(archives), runner_([this](std::stop_token stop) { run(stop); })
+Manager::Manager(disk::Engine& engine, std::filesystem::path temporary, bool enable_mlp,
+    backup::Archive* archives, const sql::Security* security, bool enable_ml)
+    : engine_(engine), temporary_(std::move(temporary)), ml_enabled_(enable_ml),
+      mlp_enabled_(enable_ml && enable_mlp && ml::mlp_compiled()),
+      archives_(archives), security_(security), runner_([this](std::stop_token stop) { run(stop); })
 {
 }
 
@@ -290,12 +308,21 @@ Json Manager::inspect_backup(std::string_view operation, const Json& body, const
 
 Json Manager::capabilities() const
 {
-    auto kinds = Json::array({"compute", "dataset_plsql", "supervised", "unsupervised", "maintenance"});
+    auto kinds = Json::array({"compute", "maintenance"});
+    auto unavailable = Json::array({"recheck"});
+    auto schedule_kinds = Json::array({"compute", "maintenance"});
+    for (const auto kind : {"dataset_plsql", "supervised", "unsupervised"})
+        (ml_enabled_ ? kinds : unavailable).push_back(kind);
     if (mlp_enabled_) kinds.push_back("mlp_training");
-    auto unavailable = Json::array({"sql_script", "recheck", "retrain"});
-    if (archives_) kinds.push_back("backup");
+    for (const auto& [kind, enabled] : {std::pair{"sql_script", sql_scheduling_enabled()},
+            std::pair{"retrain", retraining_enabled()}})
+    {
+        (enabled ? kinds : unavailable).push_back(kind);
+        if (enabled) schedule_kinds.push_back(kind);
+    }
+    if (archives_) { kinds.push_back("backup"); schedule_kinds.push_back("backup"); }
     else unavailable.push_back("backup");
-    return {{"kinds", std::move(kinds)},
+    return {{"kinds", std::move(kinds)}, {"schedule_kinds", std::move(schedule_kinds)},
         {"maximum_workers", 1}, {"queued_capacity", job_limit}, {"unavailable_kinds", std::move(unavailable)},
         {"schedule_capacity", schedule_limit}, {"scheduler_paused", paused_.load()}, {"process_isolation", "windows_job_object"},
         {"hard_memory_limit", true}, {"wall_time_limit", true}, {"output_limit", "bounded_transfer"},
@@ -370,6 +397,9 @@ bool Manager::references_dataset(disk::Transaction& tx, disk::Owner owner, std::
 {
     for (const auto& item : list(tx, owner, job_schema, check))
         if (item.data.at("task").value("dataset", std::string{}) == dataset) return true;
+    for (const auto& item : list(tx, owner, schedule_schema, check))
+        if (item.data.at("enabled") == true && item.data.at("task").value("dataset", std::string{}) == dataset)
+            return true;
     return false;
 }
 
@@ -390,11 +420,29 @@ Reply Manager::request(disk::Transaction& tx, disk::Owner owner, std::string_vie
     if (submit)
     {
         if (paused_.load()) throw wire::Error(W::module_unavailable);
+        const auto& kind = wire::string_field(body, "kind");
         if (create_job) fields(body, {"request_token", "kind", "count", "timeout_ms", "memory_mib", "output_bytes", "max_bytes", "action"});
+        else if (kind == "sql_script")
+            fields(body, {"request_token", "kind", "sql", "rule", "misfire", "retries", "backoff_seconds"});
+        else if (kind == "retrain")
+            fields(body, {"request_token", "kind", "name", "dataset_id", "seed", "options", "rule", "misfire", "retries", "backoff_seconds"});
         else fields(body, {"request_token", "kind", "count", "timeout_ms", "memory_mib", "output_bytes", "max_bytes", "action",
             "rule", "misfire", "retries", "backoff_seconds"});
         const auto& token = identity(body, "request_token");
-        const auto config = task(body, admin, archives_ != nullptr);
+        const auto config = [&]() -> Json {
+            if (!create_schedule || (kind != "sql_script" && kind != "retrain"))
+                return task(body, admin, archives_ != nullptr);
+            if (!security_) throw wire::Error(W::module_unavailable);
+            if (kind == "retrain" && !retraining_enabled()) throw wire::Error(W::module_unavailable);
+            const auto principal = security_->active_principal(actor);
+            if (!principal) denied();
+            if (kind == "retrain") return pin_retrain(tx, owner, *security_, *principal, body, mlp_enabled_, check);
+            if (!body.contains("sql")) invalid();
+            const auto& statements = body.at("sql");
+            sql::validate_scheduled_sql(statements);
+            return {{"payload", {{"kind", kind}, {"sql", statements}}},
+                {"actor_id", std::to_string(principal->id)}};
+        }();
         auto existing = std::ranges::find_if(objects, [&](const Entity& item) {
             return item.actor == actor && item.request == token;
         });
@@ -465,8 +513,61 @@ Reply Manager::request(disk::Transaction& tx, disk::Owner owner, std::string_vie
             if (progress_.total) reply["progress"] = {{"done", progress_.done}, {"total", progress_.total}};
         }
     }
-    return {std::move(reply), changed, schedule ? std::string{} :
-        found->data.at("task").value("dataset", std::string{})};
+    const auto& config = found->data.at("task");
+    const auto no_retrain_result = !schedule && config.at("payload").value("kind", std::string{}) == "retrain" &&
+        found->data.at("result").is_null();
+    return {std::move(reply), changed, (schedule || no_retrain_result) ?
+        std::string{} : config.value("dataset", std::string{})};
+}
+
+void Manager::run_sql(std::string_view job_id, std::string_view actor, std::stop_token stop)
+{
+    auto tx = acquire(engine_, stop, actor);
+    auto jobs = list(*tx, runner_owner, job_schema);
+    auto& job = require_job(jobs, job_id);
+    const auto& config = job.data.at("task");
+    const auto save = tx->statement_savepoint(runner_owner);
+    auto output = Json(nullptr);
+    std::string reason;
+    if (job.data.at("cancel_requested").get<bool>()) reason = "cancelled";
+    else
+    {
+        // Work on the same transaction as the terminal job row. Recovering an
+        // interrupted run can never leave committed SQL without its receipt.
+        const auto deadline = std::chrono::steady_clock::now() + 2s;
+        const auto check = [&] {
+            if (stop.stop_requested()) throw wire::Error(W::cancelled);
+            if (std::chrono::steady_clock::now() >= deadline) throw wire::Error(W::timeout);
+        };
+        try
+        {
+            if (!security_) throw wire::Error(W::module_unavailable);
+            const auto actor_id = std::stoull(config.at("actor_id").get<std::string>());
+            output = sql::execute_scheduled_sql(*tx, runner_owner, *security_, job.actor, actor_id,
+                config.at("payload").at("sql"), check);
+            check();
+        }
+        catch (const wire::Error& error) { reason = scheduling_failure(error.code(), "sql_script_failed"); }
+        catch (const disk::Error& error)
+        {
+            if (error.fault() == disk::Fault::uncertain || error.fault() == disk::Fault::corrupt ||
+                error.fault() == disk::Fault::io || error.fault() == disk::Fault::cancelled) throw;
+            reason = error.fault() == disk::Fault::limit ? "resource_limit" : "sql_script_failed";
+        }
+        catch (const sql::Error&) { reason = "sql_script_failed"; }
+    }
+    const auto success = reason.empty();
+    if (!success) tx->rollback_to(runner_owner, save);
+    tx->release_savepoint(runner_owner, save);
+    const auto retry = reason == "timeout" &&
+        job.data.at("attempt").get<uint32_t>() <= job.data.at("retries").get<uint32_t>();
+    transition(job, success ? "succeeded" : retry ? "queued" : reason == "cancelled" ? "cancelled" : "failed");
+    job.data["reason"] = success ? Json(nullptr) : Json(reason);
+    job.data["result"] = success ? std::move(output) : Json(nullptr);
+    job.data["ended"] = retry ? 0 : utc();
+    if (retry) job.data["not_before"] = utc() + job.data.at("backoff_seconds").get<uint32_t>();
+    store(*tx, runner_owner, job);
+    durable(engine_, *tx, success ? std::string_view{job.actor} : std::string_view{"job-system"});
 }
 
 void Manager::recover(std::stop_token stop)
@@ -554,6 +655,18 @@ void Manager::step(std::stop_token stop)
     }
 
     const auto& config = claimed.data.at("task");
+    const auto& recipe = config.at("payload");
+    const auto& kind = recipe.at("kind").get_ref<const std::string&>();
+    if (kind == "sql_script")
+    {
+        run_sql(claimed.identity, claimed.actor, stop);
+        return;
+    }
+    const auto retrain = kind == "retrain";
+    // Catalog scans check the lease while holding the engine lock.
+    const auto stop_check = [&] {
+        if (stop.stop_requested()) throw wire::Error(W::cancelled);
+    };
     const Budget budget{config.at("timeout_ms").get<uint32_t>(), config.at("memory_mib").get<uint32_t>(),
         config.at("output_bytes").get<uint32_t>()};
     const auto progress = [&](uint32_t pid, uint64_t done, uint64_t total) {
@@ -574,12 +687,30 @@ void Manager::step(std::stop_token stop)
             return false;
         }
     };
-    const auto& payload = config.at("payload");
-    const auto& kind = payload.at("kind").get_ref<const std::string&>();
+    auto payload = recipe;
     const auto backup = kind == "backup";
     const auto maintenance = kind == "maintenance";
     const auto result = [&]() -> WorkerResult {
         using Status = WorkerResult::Status;
+        if (!ml_enabled_ && config.contains("dataset"))
+            return {Status::failed, "module_unavailable", nullptr};
+        if (retrain)
+        {
+            try
+            {
+                auto tx = acquire(engine_, stop);
+                if (!security_) throw wire::Error(W::module_unavailable);
+                const auto principal = security_->active_principal(claimed.actor);
+                if (!principal) denied();
+                payload = prepare_retrain(*tx, runner_owner, *security_, *principal, config, mlp_enabled_, stop_check);
+            }
+            catch (const wire::Error& error)
+            {
+                return {error.code() == W::cancelled ? Status::cancelled : Status::failed,
+                    std::string(scheduling_failure(error.code(), "retrain_preparation_failed")), nullptr};
+            }
+            catch (const sql::Error&) { return {Status::failed, "retrain_preparation_failed", nullptr}; }
+        }
         if (payload.value("kind", std::string{}) == "mlp_training" && !mlp_enabled_)
             return {Status::failed, "mlp_module_unavailable", nullptr};
         if (maintenance)
@@ -665,9 +796,24 @@ void Manager::step(std::stop_token stop)
         const auto save = tx->statement_savepoint(runner_owner);
         try
         {
+            if (retrain)
+            {
+                if (!security_) throw wire::Error(W::module_unavailable);
+                const auto principal = security_->active_principal(job.actor);
+                if (!principal) denied();
+                authorize_retrain(*tx, runner_owner, *security_, *principal, config, mlp_enabled_, stop_check);
+            }
             output = ml::publish_model(*tx, runner_owner, config.at("model").get<int64_t>(),
-                config.at("dataset").get<std::string>(), job.identity, result.result, config.at("payload").at("options"));
+                config.at("dataset").get<std::string>(), job.identity, result.result, payload.at("options"));
             tx->release_savepoint(runner_owner, save);
+        }
+        catch (const wire::Error& error)
+        {
+            tx->rollback_to(runner_owner, save);
+            tx->release_savepoint(runner_owner, save);
+            success = false;
+            reason = scheduling_failure(error.code(), "model_publish_failed");
+            output = nullptr;
         }
         catch (...)
         {
@@ -678,7 +824,9 @@ void Manager::step(std::stop_token stop)
             output = nullptr;
         }
     }
-    const bool retry = !cancel && !success && job.data.at("attempt").get<uint32_t>() <= job.data.at("retries").get<uint32_t>();
+    const bool retry = !cancel && !success && reason != "module_unavailable" &&
+        (!retrain || reason != "permission_denied") &&
+        job.data.at("attempt").get<uint32_t>() <= job.data.at("retries").get<uint32_t>();
     transition(job, retry ? "queued" : cancel ? "cancelled" : paused ? "paused" : success ? "succeeded" : "failed");
     job.data["reason"] = cancel ? Json("cancelled") : success ? Json(nullptr) : Json(reason);
     job.data["result"] = std::move(output);
@@ -686,7 +834,7 @@ void Manager::step(std::stop_token stop)
     job.data["cpu_rate_limited"] = result.cpu_rate_limited;
     if (retry) job.data["not_before"] = utc() + job.data.at("backoff_seconds").get<uint32_t>();
     store(*tx, runner_owner, job);
-    durable(engine_, *tx);
+    durable(engine_, *tx, retrain && success ? std::string_view{job.actor} : std::string_view{"job-system"});
 }
 
 void Manager::run(std::stop_token stop)

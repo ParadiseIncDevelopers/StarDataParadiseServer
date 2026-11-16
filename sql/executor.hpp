@@ -32,6 +32,7 @@ bool scan_table(disk::Transaction& transaction, disk::Owner owner, const Object&
     const TableRowVisitor& visitor, const WorkCheck& check = {});
 bool scan_table(disk::Store& store, const Object& table, const TableRowVisitor& visitor);
 void verify_table_rows(disk::Store& store, std::span<const Object> catalog);
+disk::Row encode_table_row(const Object& table, const RowValues& values);
 
 size_t execute_write(disk::Transaction& transaction, disk::Owner owner, const Plan& plan,
     const ParameterValues& parameters = {}, const WorkCheck& check = {}, const InvokerCheck& invoker = {});

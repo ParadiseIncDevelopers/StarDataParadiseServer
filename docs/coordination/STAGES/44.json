@@ -1,0 +1,225 @@
+{
+  "stage_id": 44,
+  "status": "PASSED",
+  "started_at": "2026-11-15T23:35:59.8004609+03:00",
+  "finished_at": "2026-11-15T23:50:41.0627801+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 43,
+      "file": "STAGES/43.json",
+      "sha256": "0f49a626bce1997e621678f1dbe1cc7d461f05c25cfb294d5103a08cc6b5a257"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "qt": "6.11.3",
+    "msvc": "v145 14.51.36231",
+    "cmake": "4.2.2",
+    "native": "0.4.1 (ABI 1)",
+    "wix": "5.0.2+aa65968c",
+    "signature": "unsigned development"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "d6be6218825d932c0e487ad9a339c4532cc73a84",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "jobs/manager.cpp",
+        "jobs/manager.hpp",
+        "packaging/Build-Packages.ps1",
+        "packaging/features/cpu-learning.json",
+        "packaging/features/decision.json",
+        "packaging/features/deep-learning.json",
+        "packaging/features/server-defaults.json",
+        "packaging/New-SdpMsi.ps1",
+        "packaging/PackagePlan.psm1",
+        "packaging/payload.json",
+        "packaging/README.md",
+        "packaging/sdk-artifacts.json",
+        "packaging/test_module_profiles.py",
+        "packaging/Test-Packages.ps1",
+        "packaging/THIRD-PARTY.md",
+        "sql/session.cpp",
+        "StarDataParadiseServer/config.cpp",
+        "StarDataParadiseServer/server.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/support_bundle.cpp"
+      ],
+      "source_manifest": "out/sdp-m9/stage44/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "dc8d76d744680c9e0855bffa00dc38469fc09803048c764a61c6dcdcdbd92bd7"
+    },
+    {
+      "name": "StarDataParadise",
+      "head": "2f6e72f1e69d1b10720c0d916347bfd0b7694f83",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "packaging/payload.json"
+      ],
+      "source_manifest": "out/sdp-m9/stage44/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "116c0ad84adbf9508c42b2dc6180279e542f256d413c74c5c73929282d6d6269"
+    },
+    {
+      "name": "StarDataParadiseCli",
+      "head": "b874a3b077a2125889b8f478d04efd12fd06dbd1",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "packaging/payload.json"
+      ],
+      "source_manifest": "out/sdp-m9/stage44/StarDataParadiseCli.changed.sha256",
+      "source_manifest_sha256": "54219fd8343aa7ee3ba93e3e855aee783d9271eb05e8c837cd3a164b89e59a50"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "3bcd6a809cc2fff4107e73de1eb63e14e3d1f7e7",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "packaging/client-runtime.json"
+      ],
+      "source_manifest": "out/sdp-m9/stage44/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "e957fd5117e1cf299ea1184a64416fe32fe02e27206e66679a68d324cc51d595"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m9/stage44/workspace-before.json",
+    "repo": "StarDataParadiseServer",
+    "archive_path": "out/sdp-m9/stage44/workspace-before.zip",
+    "archive_sha256": "1e04108a4e78bf0e22a6474a4dd46ee50c40dbd0ead587dcc937b2d21460b273"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m9/stage44/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage44/checkpoint.log",
+      "log_sha256": "19bf009a414a6626bcc5c4e8bf8b5598a51d02f039d27000f6034fd7c3224163",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "dotnet tool install wix --version 5.0.2 ve wix --version",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage44/wix-tool.log",
+      "log_sha256": "a56ab742893df1312464a898fc55651c2fdae9fb3325b1757e3430c31143f9f2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Kaynak checkpoint ve dört izinli repo üzerinden izolasyon doğrulaması",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage44/isolation.log",
+      "log_sha256": "ca35b67e7c371ca533fea69bfc9165dd43150c21584ebbf42429f12e731a4533",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CMake Windows x64 Release configure with local pinned dependencies",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage44/server-configure.log",
+      "log_sha256": "22d0f7e29b067b57b5164d3158e054f73651eb963c3fa273c89ea0a5b1c84170",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m9/stage44/server-build --config Release --parallel 3 -- /nodeReuse:false",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage44/server-release.log",
+      "log_sha256": "d15edd4127a7da42320274a02e121c09238cbd8c65db017ea69622d2445b291e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m9/stage44/server-build -C Release --output-on-failure -j 3",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage44/server-ctest.log",
+      "log_sha256": "89eea4b54cbd70dcc92132c8232228388d38b88fb494515948b263531a639f12",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python -B packaging/test_module_profiles.py against Server build and feature fragments",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage44/module-profiles-final.log",
+      "log_sha256": "2cc19e0015c3037ea4e29a6bb98dd87002b84b1005eb8e68890b6a8223e57825",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "packaging/Build-Packages.ps1 with exact pinned inputs and out/sdp-m9/stage44/bundle",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage44/package-final.log",
+      "log_sha256": "06f8c12f0f7e413126146375948d24fc5212b7a1a75a244c68436c558050fff1",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "packaging/Test-Packages.ps1 -ManifestPath out/sdp-m9/stage44/bundle/components.json with pinned Redist and WiX",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage44/package-validation.log",
+      "log_sha256": "76890ab2e11c0cc1ec5ddeb724d385d47a5b97dca6f4c1f3f8f1a506402f9ad7",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S44-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "WiX üç ayrı x64 MSI üretti. Windows Installer tabloları ve gömülü kabinler bağımsız Server, Workbench ve CLI ürünlerini ve Core dosyalarını doğruladı."
+    },
+    {
+      "id": "S44-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Server Core Qt ve GPU çalışma zamanı taşımadı. Her iki istemci çıkarılmış MSI içeriğinden yerel Server olmadan başladı. Workbench gerçek qwindows eklentisini kullandı. TLS testinde Core SQL/transaction/History ve isteğe bağlı ML ile Decision yetenekleri doğrulandı."
+    },
+    {
+      "id": "S44-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Çözümleyici bozuk hash, uyumsuz mimari, çakışma ve diğer olumsuz girdileri reddetti. Native DLL gerçek SHA-256 ile iki ayrı MSI bileşeninde ve uygulama kökünde doğrulandı. Dosya tablosundan kurulum boyutu ve tek ürün indirme boyutu ölçüldü."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m9/stage44/bundle/server-0.4.0-win-x64.msi",
+      "sha256": "02fee62129e655e1c0ab41267e1ab59778c658d7525e14b80d291bc55e508acb"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m9/stage44/bundle/workbench-0.1.0-win-x64.msi",
+      "sha256": "fbd44128e73632f19ae1d716e95e3cd7734ed60c74d0909ef93c6660f27f0e91"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m9/stage44/bundle/cli-0.2.0-win-x64.msi",
+      "sha256": "556e07f1e2ad56ebd937648c51ec44693f0aa33a8feb9a88183f91d65ab7c4d0"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m9/stage44/bundle/components.json",
+      "sha256": "3c7e5b415a7353ed4ad5650d54b30cd985be89c94280840c8665c84a0ab78aab"
+    }
+  ],
+  "remaining_issues": [
+    "Paketler yerel imzasız Windows x64 geliştirme çıktılarıdır. GPU backend’i ve Linux paketi yoktur.",
+    "Workbench Debugger çekirdeğe derlenmiştir. Migration yardımcı uygulaması, belgeler, export araçları ve SDK’lar seçimle dağıtılır. Server modülleri seçilen instance yapılandırmasıyla etkinleşir.",
+    "MSI kabinleri çıktı dizinlerine açıldı ve çalıştırıldı. Sistem kurulum yaşam döngüsü 45. etabın kabulüdür."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 45
+}

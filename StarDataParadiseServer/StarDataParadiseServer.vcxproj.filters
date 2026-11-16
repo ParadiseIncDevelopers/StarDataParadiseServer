@@ -111,6 +111,9 @@
     <ClCompile Include="..\jobs\manager.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\jobs\scheduled_retrain.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
     <ClCompile Include="..\backup\archive.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>

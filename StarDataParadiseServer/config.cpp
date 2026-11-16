@@ -211,7 +211,8 @@ Config read_config(const std::filesystem::path& path)
         auto root = std::filesystem::absolute(path).parent_path();
         const auto json = wire::parse_payload(read_text(path, max_config, "Cannot read configuration"));
         constexpr std::array keys{"data_dir", "log_dir", "temp_dir", "tls_certificate", "tls_private_key",
-            "bind", "allow_remote", "port", "max_connections", "timeout_ms", "routine_test_instance", "decision_enabled", "mlp_cpu_enabled", "backup", "instance_name"};
+            "bind", "allow_remote", "port", "max_connections", "timeout_ms", "routine_test_instance",
+            "decision_enabled", "ml_cpu_enabled", "mlp_cpu_enabled", "backup", "instance_name"};
         for (const auto& field : json.items())
             if (std::find(keys.begin(), keys.end(), field.key()) == keys.end())
                 throw StartupError("Unrecognized configuration key");
@@ -255,6 +256,7 @@ Config read_config(const std::filesystem::path& path)
 
         result.routine_test_instance = json.value("routine_test_instance", false);
         result.decision_enabled = json.value("decision_enabled", true);
+        result.ml_cpu_enabled = json.value("ml_cpu_enabled", true);
         result.mlp_cpu_enabled = json.value("mlp_cpu_enabled", true);
         if (json.contains("bind")) result.bind = wire::string_field(json, "bind");
         const bool allow_remote = json.value("allow_remote", false);

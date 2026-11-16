@@ -308,12 +308,15 @@ private:
             features["decision_v1"] = security_ != nullptr && config_.decision_enabled;
             features["decision_explain_v1"] = security_ != nullptr && config_.decision_enabled;
             features["jobs_v1"] = jobs_ != nullptr;
-            features["dataset_v1"] = jobs_ != nullptr;
-            features["supervised_ml_v1"] = jobs_ != nullptr;
-            features["unsupervised_ml_v1"] = jobs_ != nullptr;
+            features["scheduled_sql_v1"] = jobs_ && jobs_->sql_scheduling_enabled();
+            features["scheduled_retrain_v1"] = jobs_ && jobs_->retraining_enabled();
+            const auto ml_enabled = jobs_ && jobs_->ml_enabled();
+            features["dataset_v1"] = ml_enabled;
+            features["supervised_ml_v1"] = ml_enabled;
+            features["unsupervised_ml_v1"] = ml_enabled;
             features["mlp_cpu_v1"] = jobs_ != nullptr && jobs_->mlp_enabled();
             features["model_checkpoints_v1"] = jobs_ != nullptr && jobs_->mlp_enabled();
-            features["model_lifecycle_v1"] = jobs_ != nullptr;
+            features["model_lifecycle_v1"] = ml_enabled;
             features["ml_gpu_v1"] = false;
             features["backup_v1"] = jobs_ != nullptr && jobs_->backup_enabled();
             features["pitr_v1"] = false;
@@ -692,7 +695,8 @@ int run(const Config& config, std::stop_token stop, const std::function<void()>&
     const auto archives = database && !config.backup.empty() ?
         std::make_unique<backup::Archive>(*database, config.backup, config.temp) : nullptr;
     const auto scheduler = database ?
-        std::make_unique<jobs::Manager>(*database, config.temp, config.mlp_cpu_enabled, archives.get()) : nullptr;
+        std::make_unique<jobs::Manager>(*database, config.temp, config.mlp_cpu_enabled, archives.get(), security.get(),
+            config.ml_cpu_enabled) : nullptr;
     Service service(config, admin, std::move(tls), database.get(), security.get(), scheduler.get());
     return service.run(stop, ready);
 }

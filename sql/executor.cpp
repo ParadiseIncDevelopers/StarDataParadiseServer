@@ -81,8 +81,8 @@ Values decode_record(const Object& table, const disk::Row& stored)
     if (record_table(stored) != table.id) invalid_record();
     const auto* version = std::get_if<int64_t>(&stored.values[1]);
     const auto fields = stored.values.size() - row_fields;
-    if (!version || *version <= 0 || *version > table.version || fields > table.columns.size() ||
-        fields + (table.version - static_cast<uint32_t>(*version)) != table.columns.size())
+    if (!version || *version <= 0 || *version > table.version ||
+        !compatible_row_layout(table, static_cast<uint32_t>(*version), fields))
         invalid_record();
 
     Values result;
@@ -203,7 +203,8 @@ void execute_ddl(disk::Transaction& transaction, disk::Owner owner, const Statem
         return;
     }
     if (routine_ddl(catalog, statement, true) || auxiliary_ddl(catalog, statement, true) ||
-        execute_index_ddl(transaction, owner, catalog, statement, check))
+        execute_index_ddl(transaction, owner, catalog, statement, check) ||
+        execute_table_alter(transaction, owner, catalog, statement, check))
         return;
     if (statement.action == Action::truncate_table)
     {
@@ -235,6 +236,7 @@ void execute_ddl(disk::Transaction& transaction, disk::Owner owner, const Statem
         }
         mutation.drop_indexes();
     }
+    if (statement.action == Action::add_column) check_decision_drop(catalog.list(), planned);
     if (statement.action == Action::add_column && !planned.columns.back().nullable)
     {
         const auto full_scan = transaction.scan(owner, 0, [&](disk::RowId, const disk::Row& row) {
@@ -332,8 +334,7 @@ RowValues read_history_values(const Object& table, const disk::Row& row)
 {
     const auto record = history_record(row);
     if (!record || record->table != table.id) invalid_record();
-    if (record->version > table.version ||
-        record->values.size() + (table.version - record->version) != table.columns.size())
+    if (!compatible_row_layout(table, record->version, record->values.size()))
         throw Error(Code::unsupported, {}, "Historical row schema is incompatible with the current table");
     RowValues values(record->values.begin(), record->values.end());
     values.resize(table.columns.size());
@@ -394,6 +395,11 @@ void apply_history_rows(disk::Transaction& transaction, disk::Owner owner, const
         }
         return mutations.size();
     });
+}
+
+disk::Row encode_table_row(const Object& table, const RowValues& values)
+{
+    return encode_record(table, values);
 }
 
 RowValues read_table_row(disk::Transaction& transaction, disk::Owner owner, const Object& table, disk::RowId id)

@@ -1,0 +1,212 @@
+{
+  "stage_id": 37,
+  "status": "PASSED",
+  "started_at": "2026-11-15T20:48:49.3767387+03:00",
+  "finished_at": "2026-11-15T21:08:42.3172272+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 36,
+      "file": "STAGES/36.json",
+      "sha256": "eb0ce9d6471e66a7edb53884f729c949f9ac819ab35b990a58b4fb78e0d15fbf"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "qt": "6.11.3",
+    "msvc": "v145",
+    "cmake": "4.2.2",
+    "server": "0.4.0",
+    "native": "0.4.0",
+    "native_abi": 1,
+    "native_zip_sha256": "4ee15b8fa50c94c5ee012245d8ed8e3c16259df64fc154ca15fb286cb6a8ad25"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise",
+      "head": "2f6e72f1e69d1b10720c0d916347bfd0b7694f83",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "BUILD.md",
+        "cmake/NativeSdk.cmake",
+        "CMakeLists.txt",
+        "StarDataParadise/sql_definition.cpp",
+        "StarDataParadise/sql_definition.hpp",
+        "StarDataParadise/sql_editor.cpp",
+        "StarDataParadise/sql_editor.hpp",
+        "StarDataParadise/sql_pane.cpp",
+        "StarDataParadise/sql_pane.hpp",
+        "StarDataParadise/sql_script.cpp",
+        "StarDataParadise/sql_script.hpp",
+        "StarDataParadise/sql_session.cpp",
+        "StarDataParadise/sql_session.hpp",
+        "StarDataParadise/StarDataParadise.vcxproj",
+        "StarDataParadise/workbench.cpp",
+        "StarDataParadise/workbench.hpp",
+        "tests/sql_workbench_smoke.cpp",
+        "tests/workbench_sql_smoke.py"
+      ],
+      "source_manifest": "out/sdp-m8/stage37/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "4d55b6a13eb211968d5d5d4bb52890813c72df5186c8d9449dad6dd80df5c044"
+    }
+  ],
+  "checkpoint": {
+    "archive_sha256": "a174ea77d64997ab9ba01012f273ba4cf2bab331cb3142a07a3a4d014c688517",
+    "manifest": "out/sdp-m8/stage37/workspace-before.json",
+    "repo": "StarDataParadiseServer",
+    "archive_path": "out/sdp-m8/stage37/workspace-before.zip"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Checkpoint eight repositories including dirty user files",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/checkpoint.log",
+      "log_sha256": "719270e8d85a22d2c49e73a1c1a3c35a1e2a46e3e3eef994b2b5c07477de41d7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify the seven non-participating source trees and original user file contents",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/isolation.log",
+      "log_sha256": "0f92a9806db100b6b4606dc1eee8d26c9e738f56f7b1f0d163850e928062e253",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Configure initial source with frozen Native SDK 0.1.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/baseline/configure.log",
+      "log_sha256": "cc8b6e59b09e68bb61b90d46dbbf947a063137adb30d84513fd33e523b7b7097",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Build initial source",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/baseline/build.log",
+      "log_sha256": "d6f5d13b8a4b70ee2db410798f081afbdace8c48bc58d3c31459f9e7be5c4bc6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Initial GUI test missing the requested offscreen QPA plugin",
+      "exit_code": 8,
+      "expected_exit_code": 8,
+      "log_path": "out/sdp-m8/stage37/baseline/ctest-missing-offscreen.log",
+      "log_sha256": "a6a59e56c67218491ede22dee655c916aad12a9367162eb242f2a6c926dea8a4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Rerun both initial tests using configured pinned Qt offscreen plugin",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/baseline/ctest-offscreen.log",
+      "log_sha256": "5969b024f7162515446e828cd00ff7676a686a21419e3c2a1c8f78d488c90efc",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Configure actual Workbench against Native 0.4.0 and Server 0.4.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/candidate/configure.log",
+      "log_sha256": "e235aa3f27859933b17066aa608e0388b15bed6d68ce772d6eab176cbae4796b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Build complete Workbench CMake Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/candidate/final-build.log",
+      "log_sha256": "cafb8833dd9a1b9efcd7eccc382a0355dd6b9e4a8851a180f6ed2685c6f6806b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Run all Qt and real TLS Workbench tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/candidate/final-ctest.log",
+      "log_sha256": "a2c90ed002a221af42c6019900f3d555009b2dc22e230a625f38f87a83fbfab5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Build official Visual Studio solution in independent Win x64 directory",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/candidate/msbuild.log",
+      "log_sha256": "6d1a15d3aaf52a979b075faf71c4bad3a9c66d6e98da1be36db9b3151f06629e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Run real named-routine breakpoint, step, watch and lost-COMMIT verification with Native TLS",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/session-check/debugger-test.log",
+      "log_sha256": "bf9551c0d62d4ab932b8ac8d61fee0bfbb463f584fff6dcfabad34cfe73de333",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Run real unknown-commit and savepoint verification",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/session-check/ledger-test.log",
+      "log_sha256": "2286cc4ee0981244d4df1893c90fd8dd1eb2d9ee67ee342f18f39eb6c091f57e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Detailed real TLS Workbench acceptance",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage37/candidate/fixture-ctest.log",
+      "log_sha256": "e6317dc73d5be2d9a5e8a9f3c5fe72390f34ebf25d4521585d55724385ecc2ee",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S37-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek iki TLS sunucusunda sekme bazlı kimlik, nesne ağacı ve farklı veriye giden sorgular doğrulandı."
+    },
+    {
+      "id": "S37-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Unicode ve 53 bitten büyük tamsayı bind değerleri, seçili/mevcut SQL, PL/SQL OUT/cursor, rollback ve 1.200 satırlık veri üzerinde 170 satır sınırı sırasında Qt olay döngüsü doğrulandı."
+    },
+    {
+      "id": "S37-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Açık işlem kapatma uyarısı, iptal ve açık rollback doğrulandı. Zorla kapanmadan sonra SQL taslağı döndü. Parola ve bind değerleri diskte bulunmadı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m8/stage37/candidate/build/Release/StarDataParadise.exe",
+      "sha256": "298ebe8a1c21260a5b8d62d32acc17b97342783a68eaeee6f978ba109f4a0072"
+    }
+  ],
+  "remaining_issues": [
+    "Server 0.4.0 anonim blokları debugger hedefi olarak tanımlamaz. Adlandırılmış yordamda iki gerçek TLS oturumu ile breakpoint, step ve watch geçti.",
+    "Tablo anahtarları ve DDL tanımı yalnız mevcut History tanımı ve Server yetkileriyle elde edilir.",
+    "Yerel sorgu süresi Native bağlantı zaman aşımına tabidir."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 38
+}

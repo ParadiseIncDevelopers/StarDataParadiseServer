@@ -43,6 +43,7 @@ public:
     Object resolve_relation(const Name& name) const;
     Object validate_auxiliary(ObjectKind kind, const Name& name) const;
     void update_definition(const Object& object, std::string definition, bool revise = false);
+    void replace_table(const Object& before, const Object& after, Source source);
     void remove(const Object& object);
     void restore_object(const Object& object);
     void rename(const Object& object, const Name& new_name);

@@ -1,0 +1,275 @@
+{
+  "stage_id": 42,
+  "status": "PASSED",
+  "started_at": "2026-11-15T22:29:15.7083791+03:00",
+  "finished_at": "2026-11-15T23:15:15.3746195+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 41,
+      "file": "STAGES/41.json",
+      "sha256": "b10d4fea68d6ea10203c2f7365946c110bbec04268b1be3d1ee4c8ad8bb47a13"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "qt": "6.11.3",
+    "msvc": "v145",
+    "cmake": "4.2.2",
+    "native": "0.4.1 (ABI 1, protocol v1)",
+    "native_abi": 1,
+    "server": "Etap 42 Release, Windows x64",
+    "cli": "0.2.0"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise",
+      "head": "2f6e72f1e69d1b10720c0d916347bfd0b7694f83",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "BUILD.md",
+        "cmake/NativeSdk.cmake",
+        "CMakeLists.txt",
+        "StarDataParadise/admin_center.cpp",
+        "StarDataParadise/admin_center.hpp",
+        "StarDataParadise/backup_center.cpp",
+        "StarDataParadise/backup_center.hpp",
+        "StarDataParadise/security_center.cpp",
+        "StarDataParadise/security_center.hpp",
+        "StarDataParadise/sql_pane.cpp",
+        "StarDataParadise/sql_pane.hpp",
+        "StarDataParadise/StarDataParadise.vcxproj",
+        "StarDataParadise/workbench_help.cpp",
+        "StarDataParadise/workbench_help.hpp",
+        "StarDataParadise/workbench.cpp",
+        "StarDataParadise/workbench.hpp",
+        "tests/admin_studio_smoke.cpp",
+        "tests/workbench_admin_smoke.py",
+        "tests/workbench_sql_smoke.py"
+      ],
+      "source_manifest": "out/sdp-m9/stage42/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "0737151dfef4daad8d578204f64ced297d1c5b62fbbe410c54ec46abeea00b20"
+    },
+    {
+      "name": "StarDataParadiseServer",
+      "head": "d6be6218825d932c0e487ad9a339c4532cc73a84",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "CMakeLists.txt",
+        "JOBS.md",
+        "jobs/manager.cpp",
+        "jobs/manager.hpp",
+        "jobs/scheduled_retrain.cpp",
+        "jobs/scheduled_retrain.hpp",
+        "sql/security.cpp",
+        "sql/security.hpp",
+        "sql/session.cpp",
+        "sql/session.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "tests/scheduled_retrain_rpc.py",
+        "tests/scheduled_sql_rpc.py"
+      ],
+      "source_manifest": "out/sdp-m9/stage42/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "3389df26253429e488adfdbd4cce941c1f0675d9f06cf7f80b2a298d46d209ff"
+    },
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "3bcd6a809cc2fff4107e73de1eb63e14e3d1f7e7",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "ABI.md",
+        "BUILD.md",
+        "CMakeLists.txt",
+        "COMPATIBILITY.md",
+        "examples/cpp/CMakeLists.txt",
+        "StarDataParadiseDLLler/api.cpp",
+        "StarDataParadiseDLLler/transport.cpp",
+        "StarDataParadiseDLLler/version.cpp",
+        "tests/consumer/CMakeLists.txt",
+        "tests/consumer/main.cpp",
+        "tests/package_integration.py",
+        "tests/version_smoke.c"
+      ],
+      "source_manifest": "out/sdp-m9/stage42/StarDataParadiseDLLler.changed.sha256",
+      "source_manifest_sha256": "1c51ae8d3d1c079402550d9e97673fdbf88c8bb6f17559a73f8a7fff719c3acb"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m9/stage42/workspace-before.zip",
+    "manifest": "out/sdp-m9/stage42/workspace-before.json",
+    "archive_sha256": "9436ed7e07b999d56c995819b859356e9d97adb008df3a5beb082a6f4e54b633",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m9/stage42/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/checkpoint.log",
+      "log_sha256": "c1ddbcde3a6ed5c275aa1e5b8c951d99d28da53ff8401331785b06dd9300584c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m9/stage42/workspace-before.json --check --allow StarDataParadise --allow StarDataParadiseServer --allow StarDataParadiseDLLler",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/isolation-scheduled-final.log",
+      "log_sha256": "b384b39907c961aa78ae17916d5cf5cdccb3b6dddbe4e1ef37110a17f7173caf",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure Server Windows x64 Release with pinned dependencies",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/server-configure.log",
+      "log_sha256": "836851db813190c88f4300ece318debb7a5ce7859cd7f46bd6501b0587f51582",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m9/stage42/server -C Release --output-on-failure -j 3",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/server-ctest-accepted.log",
+      "log_sha256": "993b3cc3da242242288c43c6ab9211d6183b0a96cc50e07f621f41c39b16fc6a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Configure Workbench Windows x64 Release with Native SDK 0.4.1 and Etap 42 Server",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/configure-scheduled-final.log",
+      "log_sha256": "66fa2c23b84b54706aece825f8bfe72b012d233380072b3d6c7934c60df583b1",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --build out/sdp-m9/stage42/build-scheduled --config Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/build-scheduled.log",
+      "log_sha256": "07777cc2fc7bd184d54343fd324b84a410b830a05b2d3b66b83f10fc3171b099",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --build out/sdp-m9/stage42/build-scheduled --config Release --target workbench_admin_studio_smoke",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/build-scheduled-final.log",
+      "log_sha256": "c69c8a55d753551318a1809efe5da96a5c4c08b756dacb40b43a2d753c65402e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --test-dir out/sdp-m9/stage42/build-scheduled -C Release --output-on-failure -V -j 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/ctest-scheduled-accepted.log",
+      "log_sha256": "82d1fe0288c51f074e7981f395d1be25227d1827321050d84b51789c471a1c36",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "ctest --test-dir out/sdp-m9/stage42/release/build -C Release --output-on-failure",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/release/ctest.log",
+      "log_sha256": "6e3bd8c36af49b8551f683d64fde897648b0d91fe60f3589d560dd5a67cb5fb0",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "cpack -G ZIP -C Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/release/cpack.log",
+      "log_sha256": "6f133f921820ddfb65eb7b90b1f619b87c95cce1ad34556139430eb8f1859ce7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "dumpbin /exports for 0.4.0 and 0.4.1 and exact exported name comparison",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/exports.log",
+      "log_sha256": "81ef87d008927f431a3e5d3f2781f3b554f2dc8b74d21ecf249f0d938633a9c4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "Native 0.4.1 package integration with frozen Server 0.4.0",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/regression-0.4.0.log",
+      "log_sha256": "c286af009c464d1894addb1356667a0826d39b70112428f2d7d7c01e3ce9e291",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m9/stage42/server --config Release --target StarDataParadiseServer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/server-retrain-stable-build.log",
+      "log_sha256": "6b8b48525771007e132f849029fd177f4482623a6b6e00b9ed6864ee53eb1629",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "command": "python tests/package_integration.py --scheduled-recipes against final Server and installed Native 0.4.1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage42/scheduled-recipes-final.log",
+      "log_sha256": "0770ab0985962c8d953abc5112a259ec4378c9549c015cbac7766a6c4bd63088",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S42-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Qt sağlık ekranı ölçülmemiş kontrolleri UNKNOWN gösterdi. Workbench doğrulanmış arşivden ayrı hedef oluşturdu ve ayrı TLS Server’da satır, routine ve History tekrar okundu."
+    },
+    {
+      "id": "S42-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Workbench GRANT/REVOKE önceki bağımsız CLI ve Native istemcide etkili. Workbench işlemi kapandıktan sonra hesap, atomik SQL betiği ve sabit veri setiyle model yeniden eğitimi sunucuda tamamlandı. Canlı yetki iptali, iş başına tek commit, geri alma, tekrar deneme ve yeniden başlatma sınırları Server TLS regresyonlarıyla doğrulandı. Bağımsız Native 0.4.1 tüketicisi de iki yeni türü gerçek TLS üzerinden zamanladı ve sonucu yeniden bağlanarak okudu."
+    },
+    {
+      "id": "S42-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Yerel özet, Server destek paketi ve profil çıktısında sentetik sır görülmedi. Desteklenmeyen komut alanlı profil reddedildi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m9/stage42/build-scheduled/Release/StarDataParadise.exe",
+      "sha256": "3cf72219cdab7e55631486bf17ac8e9e4df99ea638296d2722ddb38bab0d7da9"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m9/stage42/server/Release/StarDataParadiseServer.exe",
+      "sha256": "88d351b6f7fd4c9d78954ab523e55e76b6bd164db515948e6c471a972ed78d9c"
+    },
+    {
+      "repo": "StarDataParadiseDLLler",
+      "file": "out/sdp-m9/stage42/release/package/StarDataParadiseDLLler-0.4.1-win-x64.zip",
+      "sha256": "8073941b68c6c037ea646d4cc3f2bcc31445462356c9bd0db513b35cc2378041"
+    }
+  ],
+  "remaining_issues": [],
+  "next_stage_allowed": true,
+  "next_stage_id": 43
+}

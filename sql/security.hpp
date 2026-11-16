@@ -28,6 +28,7 @@ public:
     uint64_t commit_and_publish(std::shared_ptr<const Snapshot> snapshot, const std::function<uint64_t()>& commit);
 
     std::optional<Principal> authenticate(std::string_view user, std::string_view password) const;
+    std::optional<Principal> active_principal(std::string_view user) const;
     bool allowed(const Principal& actor, std::string_view verb, ObjectId target = 0, ObjectId schema = 0,
         ObjectId database = 0) const;
     void apply(disk::Transaction& transaction, disk::Owner owner, const Principal& actor, const Statement& statement);

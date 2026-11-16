@@ -1,0 +1,177 @@
+{
+  "stage_id": 43,
+  "status": "PASSED",
+  "started_at": "2026-11-15T23:15:33.0953399+03:00",
+  "finished_at": "2026-11-15T23:35:59.5850606+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 42,
+      "file": "STAGES/42.json",
+      "sha256": "4040f33761dd105fca899b2bdfd850ea9c58841661108751adab3a5f6b556fd9"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "qt": "6.11.3",
+    "msvc": "v145",
+    "cmake": "4.2.2",
+    "native": "0.4.1 (ABI 1)",
+    "postgresql": "18.1",
+    "mysql": "8.0.43",
+    "server": "Etap 42 Release"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise",
+      "head": "2f6e72f1e69d1b10720c0d916347bfd0b7694f83",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "BUILD.md",
+        "CMakeLists.txt",
+        "StarDataParadise.slnx",
+        "StarDataParadise/compare_studio.cpp",
+        "StarDataParadise/compare_studio.hpp",
+        "StarDataParadise/migration_plan.cpp",
+        "StarDataParadise/migration_plan.hpp",
+        "StarDataParadise/migration_source_driver.cpp",
+        "StarDataParadise/migration_source_driver.hpp",
+        "StarDataParadise/migration_source_main.cpp",
+        "StarDataParadise/migration_source_protocol.hpp",
+        "StarDataParadise/migration_source.cpp",
+        "StarDataParadise/migration_source.hpp",
+        "StarDataParadise/migration_studio.cpp",
+        "StarDataParadise/migration_studio.hpp",
+        "StarDataParadise/StarDataParadise.vcxproj",
+        "StarDataParadise/StarDataParadiseMigrationSource.vcxproj",
+        "StarDataParadise/table_design.cpp",
+        "StarDataParadise/workbench.cpp",
+        "StarDataParadise/workbench.hpp",
+        "tests/compare_studio_smoke.cpp",
+        "tests/migration_studio_smoke.cpp",
+        "tests/workbench_compare_smoke.py",
+        "tests/workbench_migration_smoke.py"
+      ],
+      "source_manifest": "out/sdp-m9/stage43/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "f4047062858d696141b3c19cd7ad0a849e6eac6996dd1bf58218c6802d6a0cde"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m9/stage43/workspace-before.json",
+    "archive_sha256": "fb44a8246197635206caa6aaff9e3ed246d9e46b0c3f737d430a5c76ab6f0d6f",
+    "archive_path": "out/sdp-m9/stage43/workspace-before.zip",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m9/stage43/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage43/checkpoint.log",
+      "log_sha256": "17e92fc0ad463191cbf5fe12aa5348a4eb96d24db5b24d4c52d388dad4e00c3d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m9/stage43/workspace-before.json --check --allow StarDataParadise",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage43/isolation.log",
+      "log_sha256": "45e028b2bbb80a1995d73c76a82c21836ae2de44fc7312ab311ea2588cc09b90",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "CMake x64 Release yapılandırması Qt, Native, Server, CLI, PostgreSQL ve MySQL sabit yollarıyla",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage43/configure.log",
+      "log_sha256": "9934855f1fdf5356ce871bae6870bd050b946dfdee113b9baabd980052fc80e0",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --build out/sdp-m9/stage43/build --config Release --parallel 1 -- /nodeReuse:false",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage43/build-accepted.log",
+      "log_sha256": "5277c9c44dc096e2765da6ac016e9262d5329d148c031319173b612c5fb5f72e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --test-dir out/sdp-m9/stage43/build -C Release --output-on-failure -V -j 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage43/ctest-accepted.log",
+      "log_sha256": "aa5f254a2eaa3b971f51e088b847e92fe998fde108cad0ebe6c9d0c065e023c2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "StarDataParadise.exe --smoke-test, QT_QPA_PLATFORM=windows, yerel qwindows eklentisi",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage43/windows-platform.log",
+      "log_sha256": "1184e94564db4cc5ae64a7c02293422dd373b61a93da855ca0970197287454ff",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Gerçek libpq ve libmysql bağlayıcı süreç testi",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage43/vendor-adapter.log",
+      "log_sha256": "5c83fbf2f653f894c0877e69baef42db89b52d25d558007063a72c49aa9cfa1b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --test-dir out/sdp-m9/stage43/build -C Release -R ^workbench_compare_studio$ --output-on-failure",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage43/compare-t01-live.log",
+      "log_sha256": "18a0ee93d293fc93d7373e2d764671eb69ca4963d6a1b292f643a86e0ca45733",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S43-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İki izole TLS Server’da açık kolon yeniden adlandırması, yıkıcı DDL onayı, başka oturum veri yazınca stale revizyon kontrolü, sonraki CHECK başarısızlığında atomik rollback, tablo/FK/index/default, kesin DECIMAL, Türkçe collation, NULL, duplicate anahtar ve seçili tarihsel nesne karşılaştırması."
+    },
+    {
+      "id": "S43-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Workbench, PostgreSQL ve MySQL gerçek TLS fixture’larında 16 satırdan sonra durdu. Yeni süreç 104 satırı tekrarsız tamamladı. Kaynak değişen ikinci checkpoint yeni süreçte reddedildi ve hedef ile checkpoint değişmedi."
+    },
+    {
+      "id": "S43-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Her iki üretici sürücüsü sunucu adını doğruladı ve yanlış adı reddetti. Türkçe Unicode, DECIMAL(38,11), UTC, NULL/boş metin, foreign key ve desteklenmeyen yordam/görünüm uyarıları gerçek sağlayıcılarda doğrulandı. PostgreSQL trigger da raporlandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m9/stage43/build/Release/StarDataParadise.exe",
+      "sha256": "095ba2a146790b2b9e850c9e8c69d46575bf6a87a9c2efbf9d2c7a179b2069f2"
+    },
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m9/stage43/build/Release/StarDataParadiseMigrationSource.exe",
+      "sha256": "4810be890242e8f444b65d3def73e8af05c1e963b27de8db1a43b20ec20ce426"
+    }
+  ],
+  "remaining_issues": [
+    "Tam tarihsel katalog yerine seçili nesnenin görünür History tanımı karşılaştırılır. Görünüm, yordam ve rule tanımlarına otomatik DDL uygulanmaz.",
+    "Kopya canlı CDC içermez; kaynak seçimi tutarlı snapshot ile sınırlıdır. Desteklenmeyen tip, döngüsel ilişki ve varsayılan dışı FK aksiyonları elle dönüşüm ister. MySQL trigger görünürlüğü kaynak yetkilerine bağlıdır."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 44
+}

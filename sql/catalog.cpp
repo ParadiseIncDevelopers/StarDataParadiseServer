@@ -342,6 +342,35 @@ void Catalog::update_definition(const Object& object, std::string definition, bo
     transaction_->update(owner_, static_cast<disk::RowId>(current.id), encode_object(current), disk::ChangeKind::catalog);
 }
 
+void Catalog::replace_table(const Object& before, const Object& after, Source source)
+{
+    if (!transaction_) throw Error(Code::unsupported, source, "Metadata view is read-only");
+    if (before.kind != ObjectKind::table || after.kind != ObjectKind::table || before.id != after.id ||
+        before.parent != after.parent || before.name != after.name || before.version == UINT32_MAX ||
+        after.version != before.version + 1)
+        throw Error(Code::constraint, source, "Invalid replacement table revision");
+    if (after.columns.empty() || after.columns.size() > max_columns)
+        throw Error(Code::limit, source, "Invalid replacement column count");
+    std::set<std::string_view> names;
+    for (size_t i = 0; i < after.columns.size(); ++i)
+    {
+        const auto& column = after.columns[i];
+        if (!valid_name(column.name) || !names.insert(column.name).second || column.ordinal != i + 1)
+            throw Error(Code::name, source, "Invalid or duplicate column identifier");
+        if (column.type.kind == Kind::null) throw Error(Code::type, source, "Column needs a concrete type");
+        validate_type(column.type, source);
+    }
+    if (after.definition.size() > max_definition)
+        throw Error(Code::limit, source, "Oversized replacement table definition");
+    if (!valid_utf8(after.definition)) throw Error(Code::type, source, "Invalid UTF-8 table definition");
+    const auto id = static_cast<disk::RowId>(before.id);
+    const auto current = decode_object(id, transaction_->get(owner_, id));
+    if (current.kind != before.kind || current.parent != before.parent || current.name != before.name ||
+        current.version != before.version || current.definition != before.definition)
+        throw Error(Code::constraint, source, "Table schema changed during ALTER");
+    transaction_->update(owner_, id, encode_object(after), disk::ChangeKind::catalog);
+}
+
 void Catalog::remove(const Object& object)
 {
     if (!transaction_) throw Error(Code::unsupported, {}, "Metadata view is read-only");

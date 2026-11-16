@@ -1,0 +1,27 @@
+[
+  {
+    "repo": "StarDataParadise.SDK.NET",
+    "file": "out/packages/StarDataParadiseDrive.2.0.0-preview.1.nupkg",
+    "sha256": "bdfca7e3e2c117916095eb4289cb06dc3fb85e537b27ed8a6f2185f533ac5063"
+  },
+  {
+    "repo": "StarDataParadise.SDK.NET",
+    "file": "out/packages/StarDataParadiseNetFramework.2.0.0-preview.1.nupkg",
+    "sha256": "606c612fc4d3cbc8acfff6437cd7c6350cd8b8aaa9f723d880e2f363196cab48"
+  },
+  {
+    "repo": "StarDataParadiseServer",
+    "file": "out/sdp-m7/stage33/release/stardataparadise-jdbc-0.2.0.jar",
+    "sha256": "c40f92b8d725eefff235980f25b264fbfca056b13fa313aa5a00d2fa14c69298"
+  },
+  {
+    "repo": "StarDataParadise.SDK.Python",
+    "file": "out/packages/stardataparadise_sdk-0.2.0-py3-none-any.whl",
+    "sha256": "b48ec6e5ed8e52e5fa2b04186f9c7229628dbffe3d6a5693f48c5a154e160940"
+  },
+  {
+    "repo": "StarDataParadise.SDK.Node",
+    "file": "out/packages/stardataparadise-sdk-0.1.0.tgz",
+    "sha256": "5831f4e456e397bdaf3c477dad160477bd8ba2e23eeafb80ee203dee2e104ad6"
+  }
+]

@@ -2,6 +2,8 @@
 #include "collation.hpp"
 
 #include "definition.hpp"
+#include "decision.hpp"
+#include "routines.hpp"
 #include "executor.hpp"
 
 #include <algorithm>
@@ -37,6 +39,7 @@ struct TableDefinition
 {
     std::vector<ColumnRule> defaults;
     std::vector<TableKey> constraints;
+    uint32_t row_layout_floor{1};
 };
 
 [[noreturn]] void corrupt()
@@ -53,7 +56,7 @@ const Object& table_by_id(std::span<const Object> objects, ObjectId id)
 
 std::string table_definition(const TableDefinition& definition)
 {
-    if (definition.defaults.empty() && definition.constraints.empty()) return {};
+    if (definition.defaults.empty() && definition.constraints.empty() && definition.row_layout_floor == 1) return {};
     Json defaults = Json::array();
     for (const auto& rule : definition.defaults)
     {
@@ -75,7 +78,9 @@ std::string table_definition(const TableDefinition& definition)
         if (rule.predicate) entry["predicate"] = write_expression(*rule.predicate);
         checks.push_back(std::move(entry));
     }
-    return Json{{"relational_table", 1}, {"defaults", std::move(defaults)}, {"constraints", std::move(checks)}}.dump();
+    Json result{{"relational_table", 1}, {"defaults", std::move(defaults)}, {"constraints", std::move(checks)}};
+    if (definition.row_layout_floor != 1) result["row_layout_floor"] = definition.row_layout_floor;
+    return result.dump();
 }
 
 bool valid_key(std::span<const size_t> columns, size_t width)
@@ -94,6 +99,8 @@ TableDefinition read_table(const Object& table)
     try
     {
         const auto root = Json::parse(table.definition);
+        result.row_layout_floor = root.value("row_layout_floor", uint32_t{1});
+        if (!result.row_layout_floor || result.row_layout_floor > table.version) corrupt();
         const auto& defaults = root.at("defaults");
         const auto& constraints = root.at("constraints");
         if (root.at("relational_table") != 1 || !defaults.is_array() || !constraints.is_array() ||
@@ -213,75 +220,86 @@ bool has_unique(const TableDefinition& definition, const std::vector<size_t>& co
     });
 }
 
-TableDefinition prepare_table(Catalog& catalog, const Object& table, const Statement& statement)
+ColumnRule prepare_default(Catalog& catalog, const Column& column, size_t index, bool identity,
+    const std::optional<Expr>& expression, Source source)
+{
+    ColumnRule rule{index, {}, {}, {}};
+    if (identity)
+    {
+        if (column.type.kind != Kind::integer)
+            throw Error(Code::type, source, "IDENTITY requires BIGINT");
+        rule.identity_next = 1;
+    }
+    else if (expression->op == Expr::Op::next_value)
+    {
+        if (column.type.kind != Kind::integer)
+            throw Error(Code::type, source, "A sequence DEFAULT requires BIGINT");
+        rule.sequence = catalog.resolve(ObjectKind::sequence, expression->name).id;
+    }
+    else
+    {
+        const auto bound = bind_expression(catalog, *expression);
+        const auto value = coerce(evaluate(bound), bound.type, column.type, bound.source);
+        if (!column.nullable && std::holds_alternative<std::monostate>(value))
+            throw Error(Code::constraint, bound.source, "DEFAULT NULL conflicts with NOT NULL");
+        rule.expression = *expression;
+    }
+    return rule;
+}
+
+void add_table_rule(Catalog& catalog, Object& table, TableDefinition& result, const ConstraintDefinition& constraint)
+{
+    if (result.constraints.size() == 64) throw Error(Code::limit, constraint.source, "Too many table constraints");
+    TableKey rule{constraint.kind, {}, 0, {}, constraint.predicate, constraint.name.value_or("")};
+    if (constraint.name && std::ranges::find(result.constraints, *constraint.name, &TableKey::name) !=
+        result.constraints.end())
+        throw Error(Code::name, constraint.source, "Duplicate constraint name");
+    if (constraint.kind == KeyKind::check)
+    {
+        if (!rule.predicate) throw Error(Code::syntax, constraint.source, "CHECK requires a predicate");
+        const auto bound = bind_expression(catalog, table, *rule.predicate);
+        if (!can_coerce(bound.type, {Kind::boolean}))
+            throw Error(Code::type, bound.source, "CHECK requires a boolean predicate");
+    }
+    else
+    {
+        rule.columns = column_numbers(table, constraint.columns, constraint.source);
+        if (constraint.kind == KeyKind::primary_key)
+        {
+            if (std::ranges::find(result.constraints, KeyKind::primary_key, &TableKey::kind) != result.constraints.end())
+                throw Error(Code::constraint, constraint.source, "A table can have one PRIMARY KEY");
+            for (const auto column : rule.columns) table.columns[column].nullable = false;
+        }
+        if (constraint.kind == KeyKind::foreign_key)
+        {
+            const auto parent = catalog.resolve(ObjectKind::table, constraint.referenced_table);
+            if (parent.id == table.id)
+                throw Error(Code::unsupported, constraint.source, "A FOREIGN KEY must reference another table");
+            rule.referenced_table = parent.id;
+            rule.referenced_columns = column_numbers(parent, constraint.referenced_columns, constraint.source);
+            if (rule.columns.size() != rule.referenced_columns.size() ||
+                !has_unique(read_table(parent), rule.referenced_columns))
+                throw Error(Code::constraint, constraint.source, "FOREIGN KEY requires a referenced PRIMARY or UNIQUE key");
+            for (size_t i = 0; i < rule.columns.size(); ++i)
+                if (table.columns[rule.columns[i]].type != parent.columns[rule.referenced_columns[i]].type)
+                    throw Error(Code::type, constraint.source, "Foreign key column types differ from the referenced key");
+        }
+    }
+    result.constraints.push_back(std::move(rule));
+}
+
+TableDefinition prepare_table(Catalog& catalog, Object table, const Statement& statement)
 {
     TableDefinition result;
     for (size_t index = 0; index < statement.columns.size(); ++index)
     {
         const auto& column = statement.columns[index];
-        if (!column.identity && !column.default_value) continue;
-        ColumnRule rule{index, {}, {}, {}};
-        if (column.identity)
-        {
-            if (column.type.kind != Kind::integer)
-                throw Error(Code::type, column.name.source, "IDENTITY requires BIGINT");
-            rule.identity_next = 1;
-        }
-        else if (column.default_value->op == Expr::Op::next_value)
-        {
-            if (column.type.kind != Kind::integer)
-                throw Error(Code::type, column.name.source, "A sequence DEFAULT requires BIGINT");
-            rule.sequence = catalog.resolve(ObjectKind::sequence, column.default_value->name).id;
-        }
-        else
-        {
-            const auto bound = bind_expression(catalog, *column.default_value);
-            const auto value = coerce(evaluate(bound), bound.type, table.columns[index].type, bound.source);
-            if (!table.columns[index].nullable && std::holds_alternative<std::monostate>(value))
-                throw Error(Code::constraint, bound.source, "DEFAULT NULL conflicts with NOT NULL");
-            rule.expression = *column.default_value;
-        }
-        result.defaults.push_back(std::move(rule));
+        if (column.identity || column.default_value)
+            result.defaults.push_back(prepare_default(catalog, table.columns[index], index, column.identity,
+                column.default_value, column.name.source));
     }
-    if (statement.constraints.size() > 64)
-        throw Error(Code::limit, statement.source, "Too many table constraints");
-    std::set<std::string> constraint_names;
-    bool primary{};
     for (const auto& constraint : statement.constraints)
-    {
-        TableKey rule{constraint.kind, {}, 0, {}, constraint.predicate, constraint.name.value_or("")};
-        if (constraint.name && !constraint_names.insert(*constraint.name).second)
-            throw Error(Code::name, constraint.source, "Duplicate constraint name");
-        if (constraint.kind == KeyKind::check)
-        {
-            if (!rule.predicate) throw Error(Code::syntax, constraint.source, "CHECK requires a predicate");
-            const auto bound = bind_expression(catalog, table, *rule.predicate);
-            if (!can_coerce(bound.type, {Kind::boolean}))
-                throw Error(Code::type, bound.source, "CHECK requires a boolean predicate");
-        }
-        else
-        {
-            rule.columns = column_numbers(table, constraint.columns, constraint.source);
-            if (constraint.kind == KeyKind::primary_key)
-            {
-                if (primary) throw Error(Code::constraint, constraint.source, "A table can have one PRIMARY KEY");
-                primary = true;
-            }
-            if (constraint.kind == KeyKind::foreign_key)
-            {
-                // A referenced table and its declared candidate key must already exist.
-                const auto parent = catalog.resolve(ObjectKind::table, constraint.referenced_table);
-                rule.referenced_table = parent.id;
-                rule.referenced_columns = column_numbers(parent, constraint.referenced_columns, constraint.source);
-                if (rule.columns.size() != rule.referenced_columns.size() || !has_unique(read_table(parent), rule.referenced_columns))
-                    throw Error(Code::constraint, constraint.source, "FOREIGN KEY requires a referenced PRIMARY or UNIQUE key");
-                for (size_t i = 0; i < rule.columns.size(); ++i)
-                    if (table.columns[rule.columns[i]].type != parent.columns[rule.referenced_columns[i]].type)
-                        throw Error(Code::type, constraint.source, "Foreign key column types differ from the referenced key");
-            }
-        }
-        result.constraints.push_back(std::move(rule));
-    }
+        add_table_rule(catalog, table, result, constraint);
     if (table_definition(result).size() > 16 * 1024)
         throw Error(Code::limit, statement.source, "Table constraint definitions exceed the catalog limit");
     return result;
@@ -402,6 +420,235 @@ void reject_incoming(Catalog& catalog, const Object& table)
     }
 }
 
+using AlterKind = AlterTable::Kind;
+
+struct TableAlterPlan
+{
+    Object before, after;
+    TableDefinition rules;
+    std::optional<size_t> column;
+};
+
+bool includes(std::span<const size_t> columns, size_t ordinal)
+{
+    return std::ranges::find(columns, ordinal) != columns.end();
+}
+
+bool moves_key(std::span<const size_t> columns, size_t ordinal)
+{
+    return std::ranges::any_of(columns, [&](size_t column) { return column >= ordinal; });
+}
+
+bool references_column(const Expr& expression, std::string_view column)
+{
+    return (expression.op == Expr::Op::name && !expression.name.parts.empty() &&
+        expression.name.parts.back() == column) ||
+        std::ranges::any_of(expression.args, [&](const Expr& arg) { return references_column(arg, column); });
+}
+
+void rename_check_column(Expr& expression, std::string_view from, const std::string& to)
+{
+    if (expression.op == Expr::Op::name && !expression.name.parts.empty() && expression.name.parts.back() == from)
+        expression.name.parts.back() = to;
+    for (auto& arg : expression.args) rename_check_column(arg, from, to);
+}
+
+TableAlterPlan plan_table_alter(Catalog& catalog, const Statement& statement)
+{
+    if (!statement.alteration) throw Error(Code::syntax, statement.source, "Expected ALTER TABLE operation");
+    const auto& edit = *statement.alteration;
+    auto before = catalog.resolve(ObjectKind::table, statement.target);
+    if (before.version == UINT32_MAX) throw Error(Code::limit, statement.source, "Table schema version exhausted");
+    const auto snapshot = catalog.list();
+    check_decision_drop(snapshot, before);
+    for (const auto& object : snapshot)
+    {
+        if (object.kind != ObjectKind::view && object.kind != ObjectKind::routine) continue;
+        const auto dependencies = object_dependencies(object);
+        if (std::ranges::find(dependencies, before.id) != dependencies.end())
+            throw Error(Code::constraint, statement.source, "A view or routine depends on this table");
+    }
+    if (has_trigger_dependency(catalog, before.id))
+        throw Error(Code::constraint, statement.source, "A trigger depends on this table");
+
+    auto after = before;
+    ++after.version;
+    auto rules = read_table(before);
+    rules.row_layout_floor = after.version;
+    std::optional<size_t> ordinal;
+    if (edit.kind != AlterKind::add_column && edit.kind != AlterKind::add_constraint &&
+        edit.kind != AlterKind::drop_constraint)
+    {
+        const auto found = edit.subject.parts.size() == 1 ?
+            std::ranges::find(after.columns, edit.subject.parts.front(), &Column::name) : after.columns.end();
+        if (found == after.columns.end()) throw Error(Code::name, edit.subject.source, "Unknown ALTER TABLE column");
+        ordinal = static_cast<size_t>(found - after.columns.begin());
+    }
+    if (edit.kind == AlterKind::add_column)
+    {
+        auto append = statement;
+        append.action = Action::add_column;
+        after = catalog.validate(append);
+        ordinal = after.columns.size() - 1;
+    }
+    if (edit.kind == AlterKind::drop_column || edit.kind == AlterKind::change_type)
+    {
+        const auto conflicts = [&](std::span<const size_t> columns) {
+            return edit.kind == AlterKind::drop_column ? moves_key(columns, *ordinal) : includes(columns, *ordinal);
+        };
+        for (const auto& index : indexes(snapshot, before.id))
+            if (conflicts(index.columns))
+                throw Error(Code::constraint, edit.subject.source, "Drop the dependent index before editing this column");
+        for (const auto& object : snapshot)
+        {
+            if (object.kind != ObjectKind::table) continue;
+            for (const auto& rule : read_table(object).constraints)
+                if (rule.kind == KeyKind::foreign_key && rule.referenced_table == before.id &&
+                    conflicts(rule.referenced_columns))
+                    throw Error(Code::constraint, edit.subject.source, "A FOREIGN KEY depends on this column layout");
+        }
+    }
+
+    const auto def = std::ranges::find(rules.defaults, ordinal.value_or(after.columns.size()), &ColumnRule::column);
+    switch (edit.kind)
+    {
+    case AlterKind::add_column:
+    {
+        const auto& input = statement.columns.front();
+        for (const auto& rule : statement.constraints) add_table_rule(catalog, after, rules, rule);
+        if (input.identity || input.default_value)
+            rules.defaults.push_back(prepare_default(catalog, after.columns[*ordinal], *ordinal, input.identity,
+                input.default_value, input.name.source));
+        break;
+    }
+    case AlterKind::drop_column:
+    {
+        if (after.columns.size() == 1)
+            throw Error(Code::constraint, edit.subject.source, "A table needs at least one column");
+        for (auto& rule : rules.constraints)
+        {
+            if (includes(rule.columns, *ordinal) || (rule.predicate &&
+                references_column(*rule.predicate, after.columns[*ordinal].name)))
+                throw Error(Code::constraint, edit.subject.source, "Drop the dependent constraint before dropping this column");
+            for (auto& column : rule.columns)
+                if (column > *ordinal) --column;
+        }
+        if (def != rules.defaults.end()) rules.defaults.erase(def);
+        for (auto& rule : rules.defaults)
+            if (rule.column > *ordinal) --rule.column;
+        after.columns.erase(after.columns.begin() + *ordinal);
+        for (size_t i = *ordinal; i < after.columns.size(); ++i)
+            after.columns[i].ordinal = static_cast<uint32_t>(i + 1);
+        break;
+    }
+    case AlterKind::rename_column:
+    {
+        const auto& name = edit.replacement.parts.front();
+        if (std::ranges::find(after.columns, name, &Column::name) != after.columns.end())
+            throw Error(Code::name, edit.replacement.source, "Duplicate column identifier");
+        auto& column = after.columns[*ordinal];
+        for (auto& rule : rules.constraints)
+        {
+            if (!rule.predicate) continue;
+            rename_check_column(*rule.predicate, column.name, name);
+        }
+        column.name = name;
+        break;
+    }
+    case AlterKind::change_type:
+    {
+        auto& column = after.columns[*ordinal];
+        if (!can_coerce(column.type, edit.type))
+            throw Error(Code::type, edit.subject.source, "Unsupported column type conversion");
+        column.type = edit.type;
+        break;
+    }
+    case AlterKind::set_nullability:
+        if (edit.nullable && std::ranges::any_of(rules.constraints, [&](const TableKey& key) {
+            return key.kind == KeyKind::primary_key && includes(key.columns, *ordinal);
+        }))
+            throw Error(Code::constraint, edit.subject.source, "PRIMARY KEY columns require NOT NULL");
+        after.columns[*ordinal].nullable = edit.nullable;
+        break;
+    case AlterKind::set_default:
+        if (def != rules.defaults.end())
+        {
+            if (def->identity_next)
+                throw Error(Code::constraint, edit.subject.source, "Drop IDENTITY before setting a default");
+            rules.defaults.erase(def);
+        }
+        rules.defaults.push_back(prepare_default(catalog, after.columns[*ordinal], *ordinal, false,
+            edit.default_value, edit.subject.source));
+        break;
+    case AlterKind::drop_default:
+    case AlterKind::drop_identity:
+        if (def == rules.defaults.end() || def->identity_next.has_value() != (edit.kind == AlterKind::drop_identity))
+            throw Error(Code::constraint, edit.subject.source, "Column has no matching default or identity");
+        rules.defaults.erase(def);
+        break;
+    case AlterKind::add_identity:
+        if (def != rules.defaults.end())
+            throw Error(Code::constraint, edit.subject.source, "Column already has a default or identity");
+        rules.defaults.push_back(prepare_default(catalog, after.columns[*ordinal], *ordinal, true, {}, edit.subject.source));
+        break;
+    case AlterKind::add_constraint:
+        for (const auto& rule : statement.constraints) add_table_rule(catalog, after, rules, rule);
+        break;
+    case AlterKind::drop_constraint:
+    {
+        auto found = rules.constraints.end();
+        if (edit.constraint_ordinal)
+        {
+            if (*edit.constraint_ordinal < rules.constraints.size() && rules.constraints[*edit.constraint_ordinal].name.empty())
+                found = rules.constraints.begin() + *edit.constraint_ordinal;
+        }
+        else if (edit.subject.parts.size() == 1)
+            found = std::ranges::find(rules.constraints, edit.subject.parts.front(), &TableKey::name);
+        if (found == rules.constraints.end())
+            throw Error(Code::name, statement.source, "Unknown constraint or unnamed constraint position");
+        rules.constraints.erase(found);
+        break;
+    }
+    }
+
+    for (const auto& rule : rules.defaults)
+    {
+        const auto& column = after.columns[rule.column];
+        if ((rule.sequence || rule.identity_next) && column.type.kind != Kind::integer)
+            throw Error(Code::constraint, statement.source, "Sequence defaults and identity require BIGINT");
+        if (rule.expression)
+            (void)prepare_default(catalog, column, rule.column, false, rule.expression, statement.source);
+    }
+    const auto validate_reference = [&](const Object& child, const TableKey& key) {
+        if (key.kind != KeyKind::foreign_key) return;
+        const auto& parent = key.referenced_table == before.id ? after : table_by_id(snapshot, key.referenced_table);
+        const auto parent_rules = parent.id == before.id ? rules : read_table(parent);
+        if (!valid_key(key.referenced_columns, parent.columns.size()) || !has_unique(parent_rules, key.referenced_columns))
+            throw Error(Code::constraint, statement.source, "A FOREIGN KEY requires the referenced PRIMARY or UNIQUE key");
+        if (types_for(child, key.columns) != types_for(parent, key.referenced_columns))
+            throw Error(Code::type, statement.source, "Foreign key column types differ from the referenced key");
+    };
+    for (const auto& rule : rules.constraints)
+    {
+        if (rule.predicate)
+        {
+            const auto bound = bind_expression(catalog, after, *rule.predicate);
+            if (!can_coerce(bound.type, {Kind::boolean}))
+                throw Error(Code::type, bound.source, "CHECK requires a boolean predicate");
+        }
+        validate_reference(after, rule);
+    }
+    for (const auto& child : snapshot)
+    {
+        if (child.kind != ObjectKind::table || child.id == before.id) continue;
+        for (const auto& rule : read_table(child).constraints)
+            if (rule.referenced_table == before.id) validate_reference(child, rule);
+    }
+    if (table_definition(rules).size() > 16 * 1024)
+        throw Error(Code::limit, statement.source, "Table constraint definitions exceed the catalog limit");
+    return {std::move(before), std::move(after), std::move(rules), ordinal};
+}
+
 void unique_index(BTree& tree, const IndexKey& key, disk::RowId ignored)
 {
     if (null_key(key)) return;
@@ -450,6 +697,63 @@ std::optional<IndexCollation> catalog_index_collation(const Object& object)
     return IndexCollation{std::move(index.collation), std::move(index.sort_version), stale};
 }
 
+wire::Json catalog_index_details(const Object& object)
+{
+    const auto index = read_index(object);
+    return Json{{"columns", index.columns}, {"unique", index.unique}, {"table_id", std::to_string(index.table)}};
+}
+
+wire::Json table_editor_definition(const Object& table)
+{
+    const auto definition = read_table(table);
+    auto columns = Json::array();
+    for (size_t i = 0; i < table.columns.size(); ++i)
+        columns.push_back(Json{{"identity", false}, {"has_default", false}});
+    for (const auto& rule : definition.defaults)
+    {
+        auto& column = columns[rule.column];
+        column["identity"] = rule.identity_next.has_value();
+        column["has_default"] = rule.expression.has_value() || rule.sequence.has_value();
+        if (rule.expression) column["default_expression"] = write_expression(*rule.expression);
+        if (rule.sequence) column["default_sequence_id"] = std::to_string(*rule.sequence);
+    }
+    auto constraints = Json::array();
+    for (const auto& rule : definition.constraints)
+    {
+        const char* kind = rule.kind == KeyKind::primary_key ? "primary_key" :
+            rule.kind == KeyKind::unique ? "unique" : rule.kind == KeyKind::foreign_key ? "foreign_key" : "check";
+        Json entry{{"name", rule.name}, {"kind", kind}, {"columns", rule.columns}};
+        if (rule.kind == KeyKind::foreign_key)
+        {
+            entry["reference_table_id"] = std::to_string(rule.referenced_table);
+            entry["reference_columns"] = rule.referenced_columns;
+        }
+        if (rule.predicate) entry["check_expression"] = write_expression(*rule.predicate);
+        constraints.push_back(std::move(entry));
+    }
+    return Json{{"columns", std::move(columns)}, {"constraints", std::move(constraints)}};
+}
+
+std::optional<RowLocatorKey> row_locator_key(const Object& table)
+{
+    const auto definition = read_table(table);
+    for (auto kind : {KeyKind::primary_key, KeyKind::unique})
+        for (const auto& rule : definition.constraints)
+            if (rule.kind == kind && std::ranges::none_of(rule.columns, [&](size_t column) {
+                return table.columns[column].nullable;
+            }))
+                return RowLocatorKey{rule.columns, kind == KeyKind::primary_key};
+    return {};
+}
+
+bool compatible_row_layout(const Object& table, uint32_t version, size_t fields)
+{
+    if (!version || version > table.version || fields > table.columns.size() ||
+        table.version - version != table.columns.size() - fields)
+        return false;
+    return version == table.version || version >= read_table(table).row_layout_floor;
+}
+
 std::vector<Type> index_types(const Object& table, const IndexDefinition& index)
 {
     if (table.id != index.table) corrupt();
@@ -462,6 +766,9 @@ bool relational_ddl(Catalog& catalog, const Statement& statement)
     {
     case Action::create_table:
         prepare_table(catalog, catalog.validate(statement), statement);
+        return true;
+    case Action::alter_table:
+        plan_table_alter(catalog, statement);
         return true;
     case Action::drop_table:
         reject_incoming(catalog, catalog.validate(statement));
@@ -511,6 +818,107 @@ std::vector<ObjectId> relational_dependencies(const Object& object)
     std::ranges::sort(dependencies);
     dependencies.erase(std::unique(dependencies.begin(), dependencies.end()), dependencies.end());
     return dependencies;
+}
+
+bool execute_table_alter(disk::Transaction& transaction, disk::Owner owner, Catalog& catalog,
+    const Statement& statement, const WorkCheck& check)
+{
+    if (statement.action != Action::alter_table) return false;
+    auto plan = plan_table_alter(catalog, statement);
+    const auto& edit = *statement.alteration;
+    const auto fill = std::ranges::find(plan.rules.defaults, plan.column.value_or(plan.after.columns.size()),
+        &ColumnRule::column);
+    struct Replacement { disk::RowId id; disk::Row row; };
+    std::vector<Replacement> rows;
+    std::vector<disk::RowId> ids;
+    scan_table(transaction, owner, plan.before, [&](disk::RowId id, const RowValues&) {
+        if (ids.size() == disk::change_count_limit - 1)
+            throw Error(Code::limit, statement.source, "ALTER TABLE row rewrite exceeds the transaction budget");
+        ids.push_back(id);
+        return true;
+    }, check);
+    rows.reserve(ids.size());
+    size_t bytes{};
+    for (const auto id : ids)
+    {
+        if (check) check();
+        auto values = read_table_row(transaction, owner, plan.before, id);
+        switch (edit.kind)
+        {
+        case AlterKind::add_column:
+        {
+            disk::Value value;
+            if (fill != plan.rules.defaults.end())
+            {
+                if (fill->identity_next)
+                {
+                    const auto current = *fill->identity_next;
+                    if (!current) throw Error(Code::limit, statement.source, "IDENTITY counter exhausted");
+                    value = current;
+                    *fill->identity_next = current == (std::numeric_limits<int64_t>::max)() ? 0 : current + 1;
+                }
+                else if (fill->sequence) value = advance_sequence(catalog, *fill->sequence);
+                else
+                {
+                    const auto expression = bind_expression(catalog, *fill->expression);
+                    value = coerce(evaluate(expression), expression.type, plan.after.columns[*plan.column].type,
+                        expression.source);
+                }
+            }
+            values.push_back(std::move(value));
+            break;
+        }
+        case AlterKind::drop_column:
+            values.erase(values.begin() + *plan.column);
+            break;
+        case AlterKind::change_type:
+        {
+            auto& value = values[*plan.column];
+            const auto from = plan.before.columns[*plan.column].type;
+            const auto to = plan.after.columns[*plan.column].type;
+            auto converted = coerce(value, from, to, edit.subject.source);
+            if (from != to && !std::holds_alternative<std::monostate>(value) &&
+                compare_non_null(value, from, converted, to, edit.subject.source) != 0)
+                throw Error(Code::range, edit.subject.source, "ALTER COLUMN TYPE would round an existing value");
+            value = std::move(converted);
+            break;
+        }
+        case AlterKind::add_identity:
+            if (const auto* value = std::get_if<int64_t>(&values[*plan.column]); value && *fill->identity_next &&
+                *value >= *fill->identity_next)
+                *fill->identity_next = *value == (std::numeric_limits<int64_t>::max)() ? 0 : *value + 1;
+            break;
+        default: break;
+        }
+        for (size_t i = 0; i < values.size(); ++i)
+            if (!plan.after.columns[i].nullable && std::holds_alternative<std::monostate>(values[i]))
+                throw Error(Code::constraint, statement.source, "Existing rows would violate NOT NULL");
+        auto row = encode_table_row(plan.after, values);
+        const auto size = disk::encode(row).size();
+        if (size > disk::change_budget - bytes)
+            throw Error(Code::limit, statement.source, "ALTER TABLE row rewrite exceeds the transaction byte budget");
+        bytes += size;
+        rows.push_back({id, std::move(row)});
+    }
+    plan.after.definition = table_definition(plan.rules);
+    // Log the catalog transition before rewritten rows so history can resolve both row images.
+    catalog.replace_table(plan.before, plan.after, statement.source);
+    for (const auto& row : rows)
+    {
+        if (check) check();
+        transaction.update(owner, row.id, row.row);
+    }
+    if (!plan.rules.constraints.empty())
+    {
+        TableMutation validate(transaction, owner, plan.after, check);
+        for (const auto id : ids)
+        {
+            if (check) check();
+            const auto values = read_table_row(transaction, owner, plan.after, id);
+            validate.inspect(id, nullptr, &values);
+        }
+    }
+    return true;
 }
 
 void install_table_rules(Catalog& catalog, const Object& table, const Statement& statement)

@@ -176,6 +176,7 @@
     <ClCompile Include="..\sql\decision_condition.cpp" />
     <ClCompile Include="..\sql\decision_inspection.cpp" />
     <ClCompile Include="..\jobs\manager.cpp" />
+    <ClCompile Include="..\jobs\scheduled_retrain.cpp" />
     <ClCompile Include="..\backup\archive.cpp" />
     <ClCompile Include="..\jobs\schedule.cpp" />
     <ClCompile Include="..\jobs\worker.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="..\sql\decision_condition.hpp" />
     <ClInclude Include="..\sql\decision_inspection.hpp" />
     <ClInclude Include="..\jobs\manager.hpp" />
+    <ClInclude Include="..\jobs\scheduled_retrain.hpp" />
     <ClInclude Include="..\backup\archive.hpp" />
     <ClInclude Include="..\jobs\schedule.hpp" />
     <ClInclude Include="..\jobs\worker.hpp" />

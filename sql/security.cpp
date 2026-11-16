@@ -397,6 +397,15 @@ std::optional<Principal> Security::authenticate(std::string_view user, std::stri
     return found->second.principal;
 }
 
+std::optional<Principal> Security::active_principal(std::string_view user) const
+{
+    const auto state = current();
+    if (!state) return {};
+    const auto found = state->accounts.find(user);
+    if (found == state->accounts.end() || !found->second.verifier) return {};
+    return found->second.principal;
+}
+
 bool Security::allowed(const Principal& actor, std::string_view verb, ObjectId target, ObjectId schema,
     ObjectId database) const
 {

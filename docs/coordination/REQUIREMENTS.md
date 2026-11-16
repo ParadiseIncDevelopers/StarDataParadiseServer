@@ -89,3 +89,11 @@ Etap 12–15 SQL ve güvenlik kabul kanıtları [M3 raporunda](M3_REPORT.md).
 Etap 16–20 PL/SQL ve History kabul kanıtları [M4 raporunda](M4_REPORT.md).
 
 Etap 21–25 Decision, Jobs ve CPU model kabul kanıtları [M5 raporunda](M5_REPORT.md).
+
+R25 SQL betiği ve yeniden eğitim zamanlaması 42. etapta gerçek Server, Native SDK ve Workbench ile doğrulandı. [Güncel kanıt](STAGES/42.json)
+
+Etap 43 şema farkı, hedef revizyonu ve tutarlı PostgreSQL/MySQL anlık görüntüsüyle aktarımı doğruladı. [Kanıt](STAGES/43.json)
+
+Etap 44 bağımsız Windows MSI, bileşen, boyut, SHA-256 ve uygulama yerel DLL sahipliği doğrulandı. [Kanıt](STAGES/44.json)
+
+Etap 45 çevrimdışı kurulum ve M9 yaşam döngüsü kabulü. [M9 raporu](M9_REPORT.md)

@@ -13,6 +13,10 @@ namespace sdp::sql
 class Debugger;
 struct HistoryPlan;
 
+void validate_scheduled_sql(const wire::Json& sql);
+wire::Json execute_scheduled_sql(disk::Transaction& tx, disk::Owner owner, const Security& security,
+    std::string_view actor, uint64_t actor_id, const wire::Json& sql, const WorkCheck& check);
+
 class Session
 {
 public:

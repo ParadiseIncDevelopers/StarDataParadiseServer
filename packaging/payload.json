@@ -1,0 +1,84 @@
+{
+  "id": "server",
+  "name": "StarDataParadise Server (Development)",
+  "version": "0.4.0",
+  "scope": "perMachine",
+  "directory": "Server",
+  "features": [
+    {
+      "id": "Core",
+      "title": "Server Core",
+      "component": "server.core",
+      "dataOwner": "instance",
+      "files": [
+        [
+          "release",
+          "StarDataParadiseServer.exe",
+          "StarDataParadiseServer.exe"
+        ],
+        [
+          "repo",
+          "BUILD.md",
+          "docs/Server-BUILD.md"
+        ],
+        [
+          "repo",
+          "packaging/THIRD-PARTY.md",
+          "docs/THIRD-PARTY.md"
+        ],
+        [
+          "repo",
+          "packaging/features/server-defaults.json",
+          "features/defaults.json"
+        ]
+      ]
+    },
+    {
+      "id": "CpuLearning",
+      "title": "CPU machine learning and clustering",
+      "component": "server.ml-cpu",
+      "dataOwner": "instance",
+      "files": [
+        [
+          "repo",
+          "packaging/features/cpu-learning.json",
+          "features/cpu-learning.json"
+        ],
+        [
+          "repo",
+          "JOBS.md",
+          "docs/JOBS.md"
+        ]
+      ]
+    },
+    {
+      "id": "DeepLearning",
+      "title": "CPU deep learning and checkpoints",
+      "component": "server.deep-learning",
+      "dataOwner": "instance",
+      "depends": [
+        "server.ml-cpu"
+      ],
+      "files": [
+        [
+          "repo",
+          "packaging/features/deep-learning.json",
+          "features/deep-learning.json"
+        ]
+      ]
+    },
+    {
+      "id": "Decision",
+      "title": "Decision rule evaluation",
+      "component": "server.decision",
+      "dataOwner": "instance",
+      "files": [
+        [
+          "repo",
+          "packaging/features/decision.json",
+          "features/decision.json"
+        ]
+      ]
+    }
+  ]
+}

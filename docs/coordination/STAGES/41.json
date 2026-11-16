@@ -1,0 +1,137 @@
+{
+  "stage_id": 41,
+  "status": "PASSED",
+  "started_at": "2026-11-15T22:14:46.1735114+03:00",
+  "finished_at": "2026-11-15T22:29:15.4785762+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 40,
+      "file": "STAGES/40.json",
+      "sha256": "e12f2aaea9082f6661520a947f397f570c7d3e679cf89856121ae3cb94f7390a"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "qt": "6.11.3",
+    "msvc": "v145",
+    "cmake": "4.2.2",
+    "native": "0.4.0",
+    "native_abi": 1,
+    "server": "Stage 38 Release",
+    "training": "Server CPU"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise",
+      "head": "2f6e72f1e69d1b10720c0d916347bfd0b7694f83",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "BUILD.md",
+        "CMakeLists.txt",
+        "StarDataParadise/dataset_studio.cpp",
+        "StarDataParadise/dataset_studio.hpp",
+        "StarDataParadise/job_center.cpp",
+        "StarDataParadise/job_center.hpp",
+        "StarDataParadise/ml_studio.cpp",
+        "StarDataParadise/ml_studio.hpp",
+        "StarDataParadise/sql_pane.cpp",
+        "StarDataParadise/sql_pane.hpp",
+        "StarDataParadise/StarDataParadise.vcxproj",
+        "StarDataParadise/workbench.cpp",
+        "tests/ml_studio_smoke.cpp",
+        "tests/workbench_ml_smoke.py",
+        "tests/workbench_sql_smoke.py"
+      ],
+      "source_manifest": "out/sdp-m9/stage41/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "58a336ff06c08d84ec310a7a7d0e47fcb1b8b066786752c2c89f36fccc11bc86"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m9/stage41/workspace-before.zip",
+    "repo": "StarDataParadiseServer",
+    "manifest": "out/sdp-m9/stage41/workspace-before.json",
+    "archive_sha256": "1836d9ec63b46646e508f73a0852aa2cff5b9a506339a986347d28160fa339c6"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m9/stage41/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage41/checkpoint.log",
+      "log_sha256": "d765745734cf731d0e865b7958700ba75198d51a052e2d153b80e179948940b9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m9/stage41/workspace-before.json --check --allow StarDataParadise",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage41/isolation.log",
+      "log_sha256": "049e43fcb9cd27c5f9e1a3593bfd5e86dfc7d768c3b663fd642b1bebf9dde053",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Configure Workbench with unchanged TLS Server and pinned Qt and SDK",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage41/configure.log",
+      "log_sha256": "92f120654b1390eef0ec48cbffe4f06c359d0e031455c03eff0aaf7a4c1984a1",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --build out/sdp-m9/stage41/build --config Release --parallel 1 -- /nodeReuse:false",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage41/build-final.log",
+      "log_sha256": "086a61bcd4e8aacc0b1f22d714ee03d85ac28450e79bff431e6c87e9c6553bae",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --test-dir out/sdp-m9/stage41/build -C Release --output-on-failure -V -j 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m9/stage41/ctest-final.log",
+      "log_sha256": "69d8b0bed2d0d534223c5d7ecce73d77019ef465757492f9360d62488548ab09",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S41-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Qt Dataset Studio sent typed snapshots over real TLS. K-Means and logistic training published checksums, held-out metrics and active versions. Live SQL predictions matched observed cluster/class."
+    },
+    {
+      "id": "S41-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "A fresh Workbench process reopened a persisted paused CPU MLP job ID on the same Server, verified the checksum and resumed to a new successful job. Real failed/output_limit and cancelled states stayed distinct."
+    },
+    {
+      "id": "S41-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "The connected Server exposed an actual unavailable GPU backend and a separate instance disabled remote MLP. An invalid local Python path produced its own independent status."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m9/stage41/build/Release/StarDataParadise.exe",
+      "sha256": "5d326d3205707d93140128ecabd1ddbf64156fc6a4a53f70d1dcbda416c1f8fa"
+    }
+  ],
+  "remaining_issues": [
+    "Dataset Studio gösterimi yakalanan Server snapshot’u kapsamındadır.",
+    "Yerel iş geçmişi yalnız profil özeti ve doğrulanmış job ID’lerini saklar. Checkpoint için model adı ve canlı sunucu yetkisi gerekir.",
+    "Uzak GPU eğitim backend’i bu Server derlemesinde kapalıdır."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 42
+}

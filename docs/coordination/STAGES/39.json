@@ -1,0 +1,159 @@
+{
+  "stage_id": 39,
+  "status": "PASSED",
+  "started_at": "2026-11-15T21:41:44.4668873+03:00",
+  "finished_at": "2026-11-15T21:59:18.8476081+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 35,
+      "file": "STAGES/35.json",
+      "sha256": "ded3fb00caec6470c505fb18c181b3a784c27ef1acc4b101d3eea1bbc8d5f3ed"
+    },
+    {
+      "stage_id": 38,
+      "file": "STAGES/38.json",
+      "sha256": "144a7ebce3902210b907b5a1cee47b5e5c60569e2da52976e014c2cbe2526cd4"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "qt": "6.11.3",
+    "msvc": "v145",
+    "cmake": "4.2.2",
+    "native": "0.4.0",
+    "native_abi": 1,
+    "jdk": "17.0.12",
+    "jdbc": "0.2.0",
+    "gson": "2.13.2",
+    "python": "3.12.4",
+    "dotnet": "10.0.402"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise",
+      "head": "2f6e72f1e69d1b10720c0d916347bfd0b7694f83",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "BUILD.md",
+        "CMakeLists.txt",
+        "StarDataParadise/routine_debugger.cpp",
+        "StarDataParadise/routine_debugger.hpp",
+        "StarDataParadise/routine_export.cpp",
+        "StarDataParadise/routine_export.hpp",
+        "StarDataParadise/routine_studio.cpp",
+        "StarDataParadise/routine_studio.hpp",
+        "StarDataParadise/sdk_examples.cpp",
+        "StarDataParadise/sql_definition.cpp",
+        "StarDataParadise/sql_definition.hpp",
+        "StarDataParadise/sql_pane.cpp",
+        "StarDataParadise/sql_pane.hpp",
+        "StarDataParadise/StarDataParadise.vcxproj",
+        "StarDataParadise/workbench.cpp",
+        "tests/routine_export_smoke.cpp",
+        "tests/routine_studio_smoke.cpp",
+        "tests/workbench_java_export_smoke.py",
+        "tests/workbench_routine_smoke.py",
+        "tests/workbench_sql_smoke.py"
+      ],
+      "source_manifest": "out/sdp-m8/stage39/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "be6983efc6ea16e025b4239e19fbb44dbec4179f328496969b6003c0d20452ca"
+    }
+  ],
+  "checkpoint": {
+    "manifest": "out/sdp-m8/stage39/workspace-before.json",
+    "archive_path": "out/sdp-m8/stage39/workspace-before.zip",
+    "repo": "StarDataParadiseServer",
+    "archive_sha256": "73845081ed73fd9ae1875b6f06f2a4328666991ec2e4ad7604f7c518a5fb578a"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m8/stage39/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage39/checkpoint.log",
+      "log_sha256": "c8a51c8530db6ae21dab76c5b218d055199a803dad9800d10541af03c35face4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m8/stage39/workspace-before.json --check --allow StarDataParadise",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage39/isolation.log",
+      "log_sha256": "049e43fcb9cd27c5f9e1a3593bfd5e86dfc7d768c3b663fd642b1bebf9dde053",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Configure Java export fixtures with pinned local dependencies and JDK 17",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage39/configure-full.log",
+      "log_sha256": "1ff5293ca5680e71dc4062558c9fbb4a99b41c81c5248362bb2b00ee14595402",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --build out/sdp-m8/stage39/build --config Release --parallel 1 -- /nodeReuse:false",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage39/build-full.log",
+      "log_sha256": "77ceca5d178b22c3ce6b61e10a60b034d288cfbb18b656de746efc5030b49bc3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --test-dir out/sdp-m8/stage39/build -C Release --output-on-failure -V -j 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage39/ctest-full.log",
+      "log_sha256": "f4704e7d0aefc13472545814cd8b71a51e5a397246d96c4cb95ae44cff38fdff",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "C:/Program Files/Python312/python.exe -B out/sdp-m8/stage39/verify_sdk_examples.py",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage39/sdk-examples.log",
+      "log_sha256": "3d90df6ae0cbe1eaa6598ba743f5ddaea52d9db43b9ceb5a7a26c17a8846b3c9",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S39-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Qt Studio gerçek TLS üzerinde fonksiyonu derledi, stack ve watch 5→7, devam ve çıktı 7, profil ölçümü ile rollback yapan testleri doğruladı."
+    },
+    {
+      "id": "S39-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Server süreci kapandıktan sonra Workbench JDK 17 derleme/testi geçti. Üretilen fonksiyona bağımsız Java çağrısı 7 döndü. Bağlı wrapper sabit JDBC/Gson ile derlenip yüklendi."
+    },
+    {
+      "id": "S39-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Yabancı kontrol oturumu aktif locals ve watch okuyamadı. EXECUTE yetkili ve dependency yetkisiz hesap için Qt planı ve kaynak boş kaldı. Desteklenmeyen standalone SQL doğru satır/sütun verdi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m8/stage39/build/Release/StarDataParadise.exe",
+      "sha256": "81e9b4ee528ac8e03eea332ad8ab0c57e825dfcf7fecef0845ee805621f6a1cf"
+    }
+  ],
+  "remaining_issues": [
+    "Test senaryoları Studio penceresi açıkken tutulur. Server üzerinde explicit test instance gerekir.",
+    "Trigger yeniden derleme, doğrulanan tek işlemde eski trigger’ı değiştirir ve yeni bir katalog kimliği oluşturur.",
+    "Java aktarımı yerel doğrulanmış Stage 35 üreticisi ve Python ister. JDK yalnız yerel derleme için gerekir. Bağlı artefakt gerçek yordam çalıştırımı için Server ister."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 40
+}

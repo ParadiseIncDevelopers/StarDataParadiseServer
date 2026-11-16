@@ -48,7 +48,7 @@ struct ColumnDefinition
 
 enum class Action
 {
-    create_database, drop_database, create_schema, drop_schema, create_table, drop_table, add_column,
+    create_database, drop_database, create_schema, drop_schema, create_table, drop_table, add_column, alter_table,
     select, insert, update, delete_, create_index, drop_index, rename_index, truncate_table,
     create_view, drop_view, create_sequence, drop_sequence, explain, explain_analyze, analyze, reindex,
     create_user, create_role, grant, revoke, create_routine, call_routine, pl_block,
@@ -102,6 +102,19 @@ struct ConstraintDefinition
     std::optional<Expr> predicate;
     std::optional<std::string> name;
     Source source;
+};
+
+struct AlterTable
+{
+    enum class Kind { add_column, drop_column, rename_column, change_type, set_nullability,
+        set_default, drop_default, add_identity, drop_identity, add_constraint, drop_constraint };
+    Kind kind{};
+    Name subject;
+    Name replacement;
+    Type type;
+    bool nullable{};
+    std::optional<Expr> default_value;
+    std::optional<size_t> constraint_ordinal;
 };
 
 struct JoinClause
@@ -164,6 +177,7 @@ struct Statement
     bool unique_index{};
     std::string view_sql;
     std::vector<ConstraintDefinition> constraints;
+    std::optional<AlterTable> alteration;
     std::vector<JoinClause> joins;
     std::vector<Expr> group_by;
     std::optional<Expr> having;

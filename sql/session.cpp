@@ -3,6 +3,7 @@
 #include "routines.hpp"
 #include "pl_runtime.hpp"
 #include "definition.hpp"
+#include "editor_metadata.hpp"
 #include "debugger.hpp"
 #include "history_restore.hpp"
 #include "decision.hpp"
@@ -242,6 +243,103 @@ void ensure_rows_in_frame(const Json& result)
     // The fixed wire envelope and correlation identifiers also consume space.
     if (result.dump().size() > wire::max_payload - 4096) reject(W::resource_limit);
 }
+
+std::vector<Statement> parse_scheduled_sql(const Json& script)
+{
+    constexpr size_t statement_limit = 16;
+    constexpr size_t statement_bytes = 4096;
+    constexpr size_t script_bytes = 16384;
+    if (!script.is_array() || script.empty() || script.size() > statement_limit)
+        reject(W::invalid_argument);
+
+    std::vector<Statement> statements;
+    statements.reserve(script.size());
+    size_t total{};
+    for (const auto& value : script)
+    {
+        if (!value.is_string()) reject(W::invalid_argument);
+        const auto& sql = value.get_ref<const std::string&>();
+        if (sql.empty() || sql.find('\0') != std::string::npos) reject(W::invalid_argument);
+        if (sql.size() > statement_bytes || sql.size() > script_bytes - total)
+            reject(W::resource_limit);
+        total += sql.size();
+        auto statement = parse(sql);
+        switch (statement.action)
+        {
+        case Action::select:
+        case Action::insert:
+        case Action::update:
+        case Action::delete_:
+            statements.push_back(std::move(statement));
+            break;
+        default:
+            throw Error(Code::unsupported, statement.source, "Scheduled SQL accepts SELECT, INSERT, UPDATE and DELETE");
+        }
+    }
+    return statements;
+}
+}
+
+void validate_scheduled_sql(const Json& sql)
+{
+    (void)parse_scheduled_sql(sql);
+}
+
+Json execute_scheduled_sql(disk::Transaction& tx, disk::Owner owner, const Security& security,
+    std::string_view actor, uint64_t actor_id, const Json& sql, const WorkCheck& check)
+{
+    constexpr size_t row_limit = 1024;
+    const auto principal = security.active_principal(actor);
+    if (!principal || principal->id != actor_id || tx.actor() != actor) reject(W::permission_denied);
+    auto script = parse_scheduled_sql(sql);
+    Catalog catalog(tx, owner, check);
+    const InvokerCheck invoker = [&](std::span<const Requirement> required) {
+        enforce(security, *principal, required);
+    };
+
+    size_t selected{};
+    size_t affected{};
+    for (const auto& statement : script)
+    {
+        if (check) check();
+        try
+        {
+            invoker(access_requirements(catalog, statement));
+        }
+        catch (const Error& error)
+        {
+            if (!principal->administrator && error.code() == Code::name) reject(W::permission_denied);
+            throw;
+        }
+        auto plan = sdp::sql::bind(catalog, statement);
+        if (auto* select = std::get_if<SelectPlan>(&plan))
+        {
+            Cursor cursor(std::move(*select), {}, row_limit + 1);
+            for (;;)
+            {
+                auto batch = cursor.fetch(tx, owner, 64, batch_budget, check);
+                selected += batch.rows.size();
+                if (selected > row_limit) reject(W::resource_limit);
+                if (batch.done) break;
+                if (batch.rows.empty()) reject(W::resource_limit);
+            }
+        }
+        else if (const auto* advanced = std::get_if<AdvancedSelection>(&plan))
+        {
+            selected += run_advanced(*advanced->plan, tx, owner, {}, check, query_memory, row_limit + 1).size();
+            if (selected > row_limit) reject(W::resource_limit);
+        }
+        else if (std::holds_alternative<MutationPlan>(plan))
+        {
+            affected += execute_write(tx, owner, plan, {}, check, invoker);
+            if (affected > row_limit) reject(W::resource_limit);
+        }
+        else
+        {
+            throw Error(Code::unsupported, statement.source, "Scheduled SQL requires a table query or table mutation");
+        }
+    }
+    return {{"statements", script.size()}, {"affected_rows", affected}, {"selected_rows", selected}};
 }
 
 class Session::Spill
@@ -747,33 +845,73 @@ Json Session::metadata()
 {
     if (result_) reject(W::invalid_state);
     std::unique_ptr<disk::Transaction> local;
-    Catalog catalog(use(local), owner_, [this] { check_deadline(); });
+    auto& tx = use(local);
+    Catalog catalog(tx, owner_, [this] { check_deadline(); });
     auto objects = Json::array();
     const auto snapshot = catalog.list();
+    // All catalog reads below are within the same Engine lease as this revision.
+    const auto revision = std::to_string(engine_.current().lsn);
     for (const auto& object : snapshot)
     {
         check_deadline();
-        if (security_ && !principal_.administrator)
-        {
-            bool visible = false;
-            for (const auto verb : {"usage", "select", "insert", "update", "delete", "ddl", "execute", "history", "backup", "debug"})
-            {
-                const auto target = object_access(snapshot, object, verb);
-                visible |= security_->allowed(principal_, target.verb, target.target, target.schema, target.database);
-            }
-            if (!visible) continue;
-        }
+        const auto can = [&](std::string_view verb) {
+            if (!security_ || principal_.administrator) return true;
+            const auto target = object_access(snapshot, object, verb);
+            return security_->allowed(principal_, target.verb, target.target, target.schema, target.database);
+        };
+        const bool select = can("select"), insert = can("insert");
+        const bool ddl = !security_ || security_->allowed(principal_, "ddl");
+        const bool update = can("update"), remove = can("delete");
+        if (!select && !ddl && !can("ddl") && !insert && !update && !remove && !can("usage") &&
+            !can("execute") && !can("history") && !can("backup") && !can("debug")) continue;
+
         auto columns = Json::array();
         for (const auto& column : object.columns)
-            columns.push_back({{"ordinal", column.ordinal}, {"name", column.name},
-                {"type", type_name(column.type)}, {"nullable", column.nullable}});
+        {
+            Json details{{"ordinal", column.ordinal}, {"name", column.name},
+                {"type", type_name(column.type)}, {"nullable", column.nullable}};
+            if (column.type.kind == Kind::decimal)
+            {
+                details["precision"] = column.type.precision;
+                details["scale"] = column.type.scale;
+            }
+            columns.push_back(std::move(details));
+        }
         auto dependencies = Json::array();
         for (const auto id : object_dependencies(object)) dependencies.push_back(std::to_string(id));
-        objects.push_back({{"id", std::to_string(object.id)}, {"kind", static_cast<int>(object.kind)},
+        Json image{{"id", std::to_string(object.id)}, {"kind", static_cast<int>(object.kind)},
             {"qualified_name", Catalog::qualified(object, snapshot).parts},
-            {"schema_version", object.version}, {"columns", std::move(columns)}, {"depends_on", std::move(dependencies)}});
+            {"schema_version", object.version}, {"columns", std::move(columns)},
+            {"depends_on", std::move(dependencies)}};
+
+        if (object.kind == ObjectKind::table)
+        {
+            image["permissions"] = {{"select", select}, {"insert", insert}, {"update", update},
+                {"delete", remove}, {"ddl", ddl}};
+            if (select && (insert || update || remove || ddl)) image["data_revision"] = revision;
+            if (select && (update || remove))
+                if (const auto key = row_locator_key(object))
+                    image["row_locator"] = {{"columns", key->columns},
+                        {"kind", key->primary_key ? "primary_key" : "unique"}};
+            if (ddl)
+            {
+                auto definition = table_editor_definition(object);
+                for (size_t index = 0; index < image["columns"].size(); ++index)
+                {
+                    auto& column = definition["columns"].at(index);
+                    editor_metadata::add_expression_sql(column, "default_expression", "default_sql");
+                    image["columns"][index].update(column);
+                }
+                for (auto& constraint : definition["constraints"])
+                    editor_metadata::add_expression_sql(constraint, "check_expression", "check_sql");
+                image["constraints"] = std::move(definition["constraints"]);
+                image["schema_details"] = true;
+            }
+        }
         if (const auto collation = catalog_index_collation(object))
-            objects.back()["collation"] = {{"name", collation->name}, {"version", collation->version}, {"stale", collation->stale}};
+            image["collation"] = {{"name", collation->name}, {"version", collation->version}, {"stale", collation->stale}};
+        if (object.kind == ObjectKind::index && ddl) image["index"] = catalog_index_details(object);
+        objects.push_back(std::move(image));
     }
     if (security_ && objects.empty()) reject(W::permission_denied);
     Json response{{"objects", std::move(objects)}};
@@ -973,6 +1111,7 @@ Json Session::create_dataset(disk::Transaction& tx, const Json& body)
 Json Session::dataset_request(std::string_view operation, const Json& body)
 {
     if (!security_ || !jobs_) reject(W::unsupported);
+    if (!jobs_->ml_enabled()) reject(W::module_unavailable);
     if (transaction_ || result_) reject(W::invalid_state);
     auto tx = begin();
     if (operation == "dataset_create") return create_dataset(*tx, body);
@@ -1116,6 +1255,7 @@ Json Session::enqueue_model(disk::Transaction& tx, int64_t model, std::string_vi
 Json Session::model_request(std::string_view operation, const Json& body)
 {
     if (!jobs_ || !security_) reject(W::unsupported);
+    if (!jobs_->ml_enabled()) reject(W::module_unavailable);
     if (transaction_ || result_) reject(W::invalid_state);
     auto tx = begin();
     const auto check = [this] { check_deadline(); };

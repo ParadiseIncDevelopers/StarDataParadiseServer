@@ -1,7 +1,7 @@
 # Sıradaki etap
 
-**37 Workbench SQL editörü ve explorer**
+**46 Güncelleme, format ve geri dönüş**
 
-Workbench ile SQL düzenleme, çalıştırma ve nesne gezgini. Resmi Etap 37 kapsamı ve kabul ölçütleriyle ilerle.
+Etap 45 kabulü tamamlandı. Güncelleme ve veri formatına ilişkin Etap 46 iş akışı sıradadır.
 
-[Etap 36 kabul kanıtı](STAGES/36.json)
+[Etap 45 kabul kanıtı](STAGES/45.json)

@@ -69,7 +69,7 @@ add_library(sdp_sql STATIC sql/syntax.cpp sql/types.cpp sql/catalog.cpp sql/bind
     sql/btree.cpp sql/definition.cpp sql/relational.cpp sql/advanced.cpp sql/collation.cpp sql/security.cpp sql/access.cpp sql/pl_ir.cpp sql/pl_runtime.cpp sql/routines.cpp sql/debugger.cpp
     sql/history_journal.cpp sql/history_query.cpp sql/history_restore.cpp
     sql/decision.cpp sql/decision_condition.cpp sql/decision_inspection.cpp
-    jobs/manager.cpp jobs/schedule.cpp jobs/worker.cpp backup/archive.cpp
+    jobs/manager.cpp jobs/schedule.cpp jobs/scheduled_retrain.cpp jobs/worker.cpp backup/archive.cpp
     ml/dataset.cpp ml/preprocess.cpp ml/pl_dataset_job.cpp
     ml/model.cpp ml/training.cpp ml/devices.cpp ml/linear_models.cpp ml/tree_models.cpp ml/clustering.cpp ml/pca.cpp)
 if(SDP_WITH_CPU_MLP)
@@ -211,6 +211,16 @@ if(BUILD_TESTING)
         --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
         --scratch "${CMAKE_CURRENT_BINARY_DIR}/jobs-rpc")
     set_tests_properties(jobs_rpc PROPERTIES TIMEOUT 120)
+    add_test(NAME scheduled_retrain_rpc COMMAND Python3::Interpreter -B
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/scheduled_retrain_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/retrain-rpc")
+    set_tests_properties(scheduled_retrain_rpc PROPERTIES TIMEOUT 80)
+    add_test(NAME scheduled_sql_rpc COMMAND Python3::Interpreter -B
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/scheduled_sql_rpc.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/scheduled-sql-rpc")
+    set_tests_properties(scheduled_sql_rpc PROPERTIES TIMEOUT 120)
     add_executable(decision_condition_smoke tests/decision_condition_smoke.cpp)
     target_link_libraries(decision_condition_smoke PRIVATE sdp_sql)
     add_test(NAME decision_condition COMMAND decision_condition_smoke "${CMAKE_CURRENT_BINARY_DIR}/decision-condition")
@@ -256,6 +266,10 @@ if(BUILD_TESTING)
         --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
         --scratch "${CMAKE_CURRENT_BINARY_DIR}/sql-rpc")
     set_tests_properties(sql_rpc PROPERTIES TIMEOUT 90)
+    add_test(NAME table_editor_ddl COMMAND Python3::Interpreter -B "${CMAKE_CURRENT_SOURCE_DIR}/tests/table_editor_ddl.py"
+        --server $<TARGET_FILE:StarDataParadiseServer> --openssl "${SDP_OPENSSL_TOOL}"
+        --scratch "${CMAKE_CURRENT_BINARY_DIR}/table-editor-ddl")
+    set_tests_properties(table_editor_ddl PROPERTIES TIMEOUT 120)
     add_test(NAME sql_checker COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/tests/sql_checker.py"
         --server $<TARGET_FILE:StarDataParadiseServer> --scratch "${CMAKE_CURRENT_BINARY_DIR}/sql-checker")
 endif()

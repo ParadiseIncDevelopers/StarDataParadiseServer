@@ -1,0 +1,193 @@
+{
+  "stage_id": 40,
+  "status": "PASSED",
+  "started_at": "2026-11-15T21:59:19.0478248+03:00",
+  "finished_at": "2026-11-15T22:14:45.8486381+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 39,
+      "file": "STAGES/39.json",
+      "sha256": "9421c871f6fd561813ceee01cee6a3892f4a68d0456f154a07ed1e2466be0852"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "qt": "6.11.3",
+    "msvc": "v145",
+    "cmake": "4.2.2",
+    "native": "0.4.0",
+    "native_abi": 1,
+    "server": "Stage 38 Release",
+    "cli": "0.2.0",
+    "jdk": "17.0.12",
+    "python": "3.12.4"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadise",
+      "head": "2f6e72f1e69d1b10720c0d916347bfd0b7694f83",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "BUILD.md",
+        "CMakeLists.txt",
+        "StarDataParadise/decision_studio.cpp",
+        "StarDataParadise/decision_studio.hpp",
+        "StarDataParadise/history_studio.cpp",
+        "StarDataParadise/history_studio.hpp",
+        "StarDataParadise/sql_pane.cpp",
+        "StarDataParadise/sql_pane.hpp",
+        "StarDataParadise/StarDataParadise.vcxproj",
+        "StarDataParadise/workbench.cpp",
+        "tests/decision_studio_smoke.cpp",
+        "tests/history_decision_smoke_support.hpp",
+        "tests/history_studio_smoke.cpp"
+      ],
+      "source_manifest": "out/sdp-m8/stage40/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "ace32fbdcebae816670559dc386e8e055f9f43de7304841dac9649df93bb95e0"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m8/stage40/workspace-before.zip",
+    "manifest": "out/sdp-m8/stage40/workspace-before.json",
+    "archive_sha256": "753fd2a3ee93f2389425e4f88c5617157a48fb6c1adb8d7a9ddb6b87b11be1c8",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m8/stage40/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/checkpoint.log",
+      "log_sha256": "19ce4de249cd09bde5cb1e1216f6a0d497fbe101a627655224bccc531b3baf03",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python out/sdp-m7/workspace.py .. out/sdp-m8/stage40/workspace-before.json --check --allow StarDataParadise",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/isolation.log",
+      "log_sha256": "049e43fcb9cd27c5f9e1a3593bfd5e86dfc7d768c3b663fd642b1bebf9dde053",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Configure Workbench Release with pinned Qt 6.11.3, Native 0.4.0 and isolated TLS/JDK fixtures",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/configure.log",
+      "log_sha256": "d46dad3fa0e5ee688e2067afba4d3550876b419e444c67238fe270b9f6b0b2dc",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "cmake --build out/sdp-m8/stage40/build --config Release --parallel 1 -- /nodeReuse:false",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/build-final.log",
+      "log_sha256": "921e5f2d5e1bbfe2f5f1b7c074e665012b5b67ab2e5f1e6af6a24cdfca96778f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "ctest --test-dir out/sdp-m8/stage40/build -C Release --output-on-failure -V -j 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/ctest-final.log",
+      "log_sha256": "4038cd98aecf5c1a07c10e9b4b02641c3d1552f46c8e0d2541519d9f8d8cc06d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "StarDataParadise.exe --smoke-test with the deployed Windows QPA plugin",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/windows-platform.log",
+      "log_sha256": "0bc93e735d4b9f6e800f3bbfe4b1b2f4a82c24c05fd7d3fddd34c3256e7c94d9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "cmake --build out/sdp-m8/stage40/cli-build --config Release --parallel 1 -- /nodeReuse:false",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/cli-build.log",
+      "log_sha256": "b0348bdb7b63b9898e1b9e94c1b459d950882621d76d6d5f154db63820722c6f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m8/stage40/cli-build -C Release --output-on-failure -j 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/cli-ctest.log",
+      "log_sha256": "30e8ae02c74740c3126e02e30d057a23115b3cc7f9b6a9564b2971ba0216d9a3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "ctest --test-dir out/sdp-m8/stage38/server-build -C Release --output-on-failure -j 2",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/server-ctest.log",
+      "log_sha256": "e292c35f27832a668e9f0f7fa7487033574d8d50b6d710489939a67528f2fa00",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "pwsh -NoProfile -File out/sdp-m8/stage40/sdk-regression.ps1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m8/stage40/sdk-regression.log",
+      "log_sha256": "3abd4e5dc0258757b308bfecfd23a0101fdc2e95afeacf2c3ff7b96646327a10",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S40-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Qt History gerçek TLS geçmişinde silinen satırı buldu, canlı PK çakışmasını gösterdi ve aynı kalıcı satırla yeni revision’da restore etti. Alan revert, diff ve tarihsel görüntü doğrulandı."
+    },
+    {
+      "id": "S40-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Ayrı oturumun commit’inden sonra eski önizleme reddedildi. Retention sınırı ve güncel History yetkisi zorunlu. VERIFY sonucu sunucudan alındı."
+    },
+    {
+      "id": "S40-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Canlı reddin WHYNOT koşulları ve evaluated/skipped ayrımı ile API kopyası. WHATIF ve iki kural sürümü aynı snapshot’u kullandı. Tablo, trigger denetim satırları ve History revizyonu değişmedi."
+    },
+    {
+      "id": "S40-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "11 Workbench, 7 CLI ve 48 Server CTest. Native, .NET 10, .NET Framework 4.8, JDBC, Python ve Node.js bağımsız paket tüketicileri gerçek TLS üzerinde geçti."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m8/stage40/build/Release/StarDataParadise.exe",
+      "sha256": "89c4f7ed4d1378704d2d79a8b12a91f553eaba650ce5b5a7b3886ca74724e961"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m8/stage40/cli-build/Release/StarDataParadiseCLI.exe",
+      "sha256": "4a79d05e789006b5a8f4784fd5e33712cf648d4d35a9f05b1889dd2c5dec568d"
+    }
+  ],
+  "remaining_issues": [
+    "History actor ve deleted-only filtreleri yetkili sunucu sayfasında yerel uygulanır. Sonraki sayfa aynı revizyona sabitlenir.",
+    "Kurtarma önizlemesi etkilenecek görüntüleri sunar. Güncel kural ve bütünlük kontrolleri sunucudaki uygulama adımında kesinleşir.",
+    "Bilinmeyen sonuçta aynı istek token’ı gösterilir ve otomatik yeniden uygulama yapılmaz."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 41
+}

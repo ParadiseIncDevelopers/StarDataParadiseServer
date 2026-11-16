@@ -7,6 +7,7 @@
 #include <thread>
 
 namespace sdp::backup { class Archive; }
+namespace sdp::sql { class Security; }
 
 namespace sdp::jobs
 {
@@ -21,8 +22,11 @@ class Manager
 {
 public:
     Manager(disk::Engine& engine, std::filesystem::path temporary, bool enable_mlp = true,
-        backup::Archive* archives = nullptr);
+        backup::Archive* archives = nullptr, const sql::Security* security = nullptr, bool enable_ml = true);
     bool backup_enabled() const noexcept { return archives_ != nullptr; }
+    bool sql_scheduling_enabled() const noexcept { return security_ != nullptr; }
+    bool ml_enabled() const noexcept { return ml_enabled_; }
+    bool retraining_enabled() const noexcept { return ml_enabled_ && sql_scheduling_enabled(); }
     wire::Json inspect_backup(std::string_view operation, const wire::Json& body, const std::function<void()>& check);
     bool mlp_enabled() const noexcept { return mlp_enabled_; }
     wire::Json capabilities() const;
@@ -41,6 +45,7 @@ private:
     void run(std::stop_token stop);
     void step(std::stop_token stop);
     void recover(std::stop_token stop);
+    void run_sql(std::string_view job_id, std::string_view actor, std::stop_token stop);
 
     struct ProgressState
     {
@@ -50,8 +55,9 @@ private:
     };
     disk::Engine& engine_;
     std::filesystem::path temporary_;
-    const bool mlp_enabled_;
+    const bool ml_enabled_, mlp_enabled_;
     backup::Archive* const archives_;
+    const sql::Security* const security_;
     mutable std::mutex progress_mutex_;
     ProgressState progress_;
     std::atomic_bool paused_{false};
