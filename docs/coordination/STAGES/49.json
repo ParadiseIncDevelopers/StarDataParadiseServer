@@ -1,0 +1,260 @@
+{
+  "stage_id": 49,
+  "status": "PASSED",
+  "started_at": "2026-11-16T11:08:23.6817976+03:00",
+  "finished_at": "2026-11-16T14:58:38.6320835+03:00",
+  "prerequisite_evidence": [
+    {
+      "sha256": "d92090de0ef8d950750e167c404b1b194b5fe9cf41cddc2fd0c61d23954e786c",
+      "file": "STAGES/48.json",
+      "stage_id": 48
+    }
+  ],
+  "toolchain": {
+    "target_available": true,
+    "target": "Windows x64 isolated clean guest",
+    "host": "Microsoft Windows 11 Home 26300",
+    "guest": "SDP-QA49-W11, Windows 11 Enterprise LTSC Evaluation x64 10.0.26100.1742",
+    "virtualization": "Oracle VirtualBox 7.2.22, Guest Additions 7.2.22",
+    "clean_snapshot": "Clean-Windows11-x64, f716b07f-4761-4116-9a18-3b5ac7ddde89"
+  },
+  "repositories": [],
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Inspect local Windows Sandbox, Hyper-V and VM providers; check whether a separate test endpoint was supplied",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/environment.log",
+      "log_sha256": "70127fd40566df91c786398d9cfdf9146e4c2941491cf8f08aab20f4960819bf",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Windows PE DISM Apply-Image /CheckIntegrity /Verify",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/vm-pe-dism-final-check.png",
+      "log_sha256": "4ca5a6947d5c24e48c48f1b3a66f6bebe17f17cecadb7e7a9c462671f8ca3df0",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Windows PE BCDBoot and verify the EFI boot file on the isolated disk",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/vm-pe-boot-files.png",
+      "log_sha256": "2550131921e97bb3a50d7604166d66f784fbfdb042c7a7883e6ca897139c9c57",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "VBoxManage Guest Control verifies named VirtualBox guest, Windows x64 and Explorer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/guest-probe.log",
+      "log_sha256": "64eac8cde8177ae0591cca98ce281dd891668337d9c09a328e30a7fc7764ebc9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Attempt VirtualBox live snapshot, then cancel the stalled operation using Oracle IProgress",
+      "exit_code": 1,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/vm-clean-snapshot.log",
+      "log_sha256": "7c331aba5d183f055027d7be6d4cc0bfc1325a24f2f0fbc272fff3f1740d3dc1",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Take powered-off VirtualBox clean disk snapshot before product transfer",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/vm-cold-snapshot.log",
+      "log_sha256": "4431638a8bce6adb4c1f343487fd42820e56600e190c00779d0e9e15dac1de22",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Stage approved packages and attempt archive extraction before interrupted guest channel",
+      "exit_code": 1,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/guest-stage.log",
+      "log_sha256": "0b29aa32f6711a3029eb9741788a929eb587a7e1ce5e6a7badb437e94fb710f7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Windows slmgr /dlv and attempted evaluation activation, then disconnect temporary NAT",
+      "exit_code": 2,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/vm-evaluation-license.log",
+      "log_sha256": "59cef0d3db9e7b17f10ef0fb5ee311329d8d5d6608dee379189715e2ed185c18",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Invoke-Stage49Guest.ps1 -Phase ResumeStage, validate all guest payload hashes",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/guest-resumestage.log",
+      "log_sha256": "c8d1afaaea91aa00dc22cdcbc641d63cdec128809f6784b1b745ef437c31765c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Guest TCP preflight to two independent host-only TLS endpoints",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/guest-remote-preflight.log",
+      "log_sha256": "79fbee21ccfe5201332581271fe4f9e32a64ce811c97da659166172965b57514",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build-SetupBundle.ps1 with accepted Stage48 MSI and Stage49 portable move fix",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/portable-fix-build.log",
+      "log_sha256": "5d971d840b91a8e68b330ea19a14a052f0e4c21f6538bdd6d05f52ea2834864f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Open file reproduces NTFS rename error 5, release allows atomic publish",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/portable-rename-host-smoke.log",
+      "log_sha256": "73516a5b696990510925329d6cc8b9eb46fbb245048db80dc892f245d5c9bc76",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Original Portable Workbench standard-user failure before fix",
+      "exit_code": 1,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/guest-evidence/standard-second-steps.txt",
+      "log_sha256": "d9b5b6f12f634b43786e5ec31dddf9e42b8ead698d48805d9bd0b37ca5d06c80",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Guest elevated Launch49.cmd and temporary standard user, full install matrix",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/guest-evidence/attempt-cb0db90e937642f69983eec9a0202ef9-676dc904.zip",
+      "log_sha256": "11efd7d0dd6460e584f9b35ae74a1e163e57296f2d788a2c0b31dde32c74f1ef",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Independent guest E2E on Complete MSI installation",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/guest-evidence/attempt-cb0db90e937642f69983eec9a0202ef9-676dc904.zip",
+      "log_sha256": "11efd7d0dd6460e584f9b35ae74a1e163e57296f2d788a2c0b31dde32c74f1ef",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Original nested guest updater attempt stops at source inspect",
+      "exit_code": 1,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/guest-evidence/upgrade-inner-stderr.log",
+      "log_sha256": "6c4a0044eb8cb1bb68213eebd4c2d6102f07a88fdf0b35bfa4c528529a00f55d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Guest Run-GuestUpdateShort49.ps1, signed upgrade with six interruption boundaries and job drain",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage49/guest-evidence/update-short-b.log",
+      "log_sha256": "2d7a15e22f4a25462696e414e9f560ec2c85e9259f001126d6ae005d24cd0e46",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S49-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek MSI ve Portable Windows 11 x64. Standart kullanıcı ve yönetici, uzak iki TLS oturumu, modül ekleme ve korumalı silme, iki Server örneği ve bağımsız runtime sahipliği."
+    },
+    {
+      "id": "S49-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Başarısız MSI doğrulaması ve kesinti sonrası kurtarma geçti. Gerçek 0.3.0 -> 0.4.0 güncelleme altı kesintiden aynı günlükle döndü, kaynak hash ve SQL korundu. İş boşaltma, rollback ve ayrı örneğe restore geçti."
+    },
+    {
+      "id": "S49-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Kurulu Python SDK ve CLI ile SQL/PLSQL, Decision reddi, 32 satır History restore, Java 58, ML tahmini 58, normal Workbench kapanışı ve ayrı örneğe backup restore."
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "vm-provisioning.json",
+      "path": "out/sdp-m10/stage49/vm-provisioning.json",
+      "sha256": "c352842d52d4982c828e7e53f42a0e1cd26545f588448a174b63d6143086c4e9"
+    },
+    {
+      "name": "vm-clean-snapshot-inventory.log",
+      "path": "out/sdp-m10/stage49/vm-clean-snapshot-inventory.log",
+      "sha256": "5ae25f854d3bcd4872d06909a20499730e76d998fe7b993114bb8019ada2a67b"
+    },
+    {
+      "name": "vm-host-memory-pressure.json",
+      "path": "out/sdp-m10/stage49/vm-host-memory-pressure.json",
+      "sha256": "24c4a2b0733270909b12f138c93a385981f24a7a0abe802981ce61479bc3ce51"
+    },
+    {
+      "name": "vm-activation-link-stall.log",
+      "path": "out/sdp-m10/stage49/vm-activation-link-stall.log",
+      "sha256": "79b7cf70b74ec17c484910541deb9dbf597acd16e0332e87e44140b885e452cb"
+    },
+    {
+      "name": "guest-update-checks-crt.zip",
+      "path": "out/sdp-m10/stage49/guest-update-checks-crt.zip",
+      "sha256": "530fc7732c74d23b1492fa5e41ce1cb882c103ee266d02e883cfcfa7baec5603"
+    },
+    {
+      "name": "s49-e2e-guest-embedded.zip",
+      "path": "out/sdp-m10/stage49/s49-e2e-guest-embedded.zip",
+      "sha256": "cc81e86f0076541a922e8af6cbdda8f9ed62909adf16a9ed7c6ede8753038747"
+    },
+    {
+      "path": "out/sdp-m10/stage49/guest-evidence/attempt-cb0db90e937642f69983eec9a0202ef9-676dc904.zip",
+      "sha256": "11efd7d0dd6460e584f9b35ae74a1e163e57296f2d788a2c0b31dde32c74f1ef"
+    },
+    {
+      "path": "out/sdp-m10/stage49/accepted-offline-portable-fix.zip",
+      "sha256": "a67b97d0cc712452cde70a33ee9241b17937d3b42795263ae74d0725f2d4872f"
+    },
+    {
+      "path": "out/sdp-m10/stage49/guest-evidence/update-short-b-preflight.json",
+      "sha256": "b7aa17e7cf59e7806877879b5777d1abd177e305b270e0964dab80e311696d4a"
+    },
+    {
+      "path": "out/sdp-m10/stage49/guest-evidence/update-short-b/upgrade.stdout.log",
+      "sha256": "cd3d36a81e92c942fea61bfe8884a0a5e405d6b6d425db1f439da86f16714669"
+    },
+    {
+      "path": "out/sdp-m10/stage49/guest-evidence/update-short-b/job-drain.stdout.log",
+      "sha256": "5025582f3eb459f708319824090550b10567c1065edfd5c04484d8af722b2790"
+    },
+    {
+      "path": "out/sdp-m10/stage49/guest-evidence/update-short-b/runtime-resolution.json",
+      "sha256": "173919857a5382eb557c080ab3fe38083a1a748c7c0586d6c08e9a8cf295c99f"
+    }
+  ],
+  "remaining_issues": [
+    "Temiz Windows konukta 261 karakterlik geçici WAL yolu ilk güncellemeyi durdurdu. Aynı paket kısa mutlak yollarla geçti.",
+    "Windows değerlendirme lisansı bildirim durumundaydı. Konuk testleri gerçek Windows 11 x64 üzerinde tamamlandı.",
+    "Paketler imzasız geliştirme profilinde. GPU seçilmedi. Bağımsız Server EXE Windows-only aramasında VC runtime gerektirdi, kurulum paketinde app-local runtime doğrulandı."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 50
+}

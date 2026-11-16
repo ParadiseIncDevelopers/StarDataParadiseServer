@@ -329,7 +329,7 @@ Json Manager::capabilities() const
         {"checkpoint_resume", mlp_enabled_}, {"schedule_types", Json::array({"interval", "daily"})}};
 }
 
-Json Manager::statistics(disk::Transaction& tx, disk::Owner owner) const
+static Json job_counts(disk::Transaction& tx, disk::Owner owner)
 {
     Json states{{"queued", 0u}, {"starting", 0u}, {"running", 0u}, {"succeeded", 0u},
         {"failed", 0u}, {"cancelled", 0u}, {"paused", 0u}, {"checkpointing", 0u}};
@@ -339,7 +339,22 @@ Json Manager::statistics(disk::Transaction& tx, disk::Owner owner) const
         if (!states.contains(key)) throw disk::Error(disk::Fault::corrupt, "Unknown job state");
         states[key] = states[key].get<unsigned>() + 1;
     }
-    return {{"states", std::move(states)}, {"schedules", list(tx, owner, schedule_schema).size()},
+    return states;
+}
+
+Json update_job_state(disk::Transaction& tx, disk::Owner owner)
+{
+    auto states = job_counts(tx, owner);
+    const auto schedules = list(tx, owner, schedule_schema);
+    const auto enabled = std::ranges::count_if(schedules, [](const Entity& schedule) {
+        return schedule.data.at("enabled").get<bool>();
+    });
+    return {{"states", std::move(states)}, {"enabled_schedules", enabled}};
+}
+
+Json Manager::statistics(disk::Transaction& tx, disk::Owner owner) const
+{
+    return {{"states", job_counts(tx, owner)}, {"schedules", list(tx, owner, schedule_schema).size()},
         {"scheduler_paused", paused_.load()}, {"job_capacity", job_limit}, {"schedule_capacity", schedule_limit}};
 }
 

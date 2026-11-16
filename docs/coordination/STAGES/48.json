@@ -1,0 +1,744 @@
+{
+  "stage_id": 48,
+  "status": "PASSED",
+  "started_at": "2026-11-16T10:33:36.0955621+03:00",
+  "finished_at": "2026-11-16T11:07:30.0108044+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 47,
+      "file": "STAGES/47.json",
+      "sha256": "7d32d90d601ff1059a5b9a0685f4700a455689ed62a6546b0cf06ad4863e7f12"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows 11 Home x64 26300",
+    "cmake": "4.2.2",
+    "msvc": "v145",
+    "compiler": "14.51.36231",
+    "diagnostic": "MSVC AddressSanitizer",
+    "qt": "6.11.3",
+    "cpu": "AMD Ryzen 5 4600H"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "ac96e44f90ad2894bb1bd095adbfdb24449bf062",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "packaging/audit-release-inventory.py",
+        "sql/history_query.cpp",
+        "tests/crash_and_concurrency.py",
+        "tests/model_lifecycle_smoke.cpp",
+        "tests/resource_benchmark.py",
+        "tests/security_boundaries.py"
+      ],
+      "source_manifest": "out/sdp-m10/stage48/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "76626d0c48e2865b474f211d71a3bfa3b2a0ee7f8a811c8d839a1ac4caace682"
+    },
+    {
+      "name": "StarDataParadise",
+      "head": "7db3733ce149bce79974099b0f1a3d74a1576196",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "tests/process_memory.py",
+        "tests/workbench_grid_smoke.py"
+      ],
+      "source_manifest": "out/sdp-m10/stage48/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "91697f6f0fb5f9fb55a6a6bb440eae2885f9189706f3770bcc3844808d4c724f"
+    }
+  ],
+  "checkpoint": {
+    "repo": "StarDataParadiseServer",
+    "manifest": "out/sdp-m10/stage48/workspace-before.json",
+    "archive_path": "out/sdp-m10/stage48/workspace-before.zip",
+    "archive_sha256": "a56164ecfd2941694eba422c7aa6d967f6ad2b7be408312c77519a431149eda1"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Hash and archive the pre-Stage48 workspace",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/checkpoint.log",
+      "log_sha256": "3c7b905e61f67c4d324fff2300281f5fcc3d27c484b37e7e3542cb5764dfd9c7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "24 Release Server crash, auth, SQL, storage and resource regressions",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-s-ctest.log",
+      "log_sha256": "1d30b68a9c8f1453be7522d2c8a238ab533955405d6e17249c96ece6889e3ea4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "2 Release CLI TLS and JSON boundary regressions",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-c-ctest.log",
+      "log_sha256": "47bd862218858c0a75225d78e8afaccd82119070005d65c241ff666c0a340343",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "7 Release Workbench resource, transfer and administration regressions",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-w-ctest.log",
+      "log_sha256": "56e8bd9c85f8c1803af1235df055b96db0aa4bd6b68125645152cca4906e3417",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Compile test-only publication interruption driver",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/publication-driver-build.log",
+      "log_sha256": "808782ce328a4a2ea28d0b91962cc1541d916fe020ccc3423f36e9126728b624",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Rebuild publication assertions for before/after and access denied",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/publication-driver-final-build.log",
+      "log_sha256": "813538867c407693d3187a220076f6ca08d2562f95edbd190d835b8a35ba903e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First supplemental run exposed unsupported RHS expression in test-only SQL",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage48/recovery-races.log",
+      "log_sha256": "d31c07c58d465082516fa50248eef574990e832fffe573a990ffbabb9b602368",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run fixture with supported conditional debit and verify purge-wins invariant",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/recovery-races-retry.log",
+      "log_sha256": "5393e303f45ca6ed6d90b63d105b11e6872733a8945d21b7dc6b4e9fcecafc2e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Six real publication kills, Windows access denial and TLS races",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/recovery-races-final.log",
+      "log_sha256": "af816d7a0f8cc988f87fdf79b0fad72ca72a3a27f9bc38b104515203972b393e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Model lifecycle catalog standalone regression CTest",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/model-driver-regression.log",
+      "log_sha256": "98bb6e624550c98a1775fe8c29befb3be8c95c3c5db16826e674bc88087aa384",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial safe corpus test used unsupported SQL form",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage48/security-boundaries.log",
+      "log_sha256": "75a16b86ccf625a63b06df9c3f0ad6713c3749a8aea1cfa32ae0f79b32ef7a08",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Safe SQL corpus, size boundary, CLI human/JSON control handling and redaction",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/security-boundaries-retry.log",
+      "log_sha256": "c7e1774187646b3e0e1ac265636bda2a832ececb8b3d6b74f953099e1d0226ce",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify artifact hashes/licenses and actual SPDX inventory",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-audit.log",
+      "log_sha256": "d35f73c1dadf1d037d33cf2cfee4291a49a606b57092d4e1375e6d928823f7d2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Validate each redacted credential rule against synthetic inputs",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/secret-detector-self-check.log",
+      "log_sha256": "9108f705cb4684ee7436c941da58c6be6cb25f5a05dee68f8eb0ccf336858bcf",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Actual isolated Workbench import/cancel and Windows process counters",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/workbench-memory.log",
+      "log_sha256": "62ddcfa6c82ac8cd0139bdb31e6779429a30eba0832b1e61ded1233f88928ef5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Read benchmark host OS, CPU, logical cores and RAM",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/benchmark-host.log",
+      "log_sha256": "77731a1bcfceac5262e833651e40ef69f8c9d1948047ccd0d8feec3237736842",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First measurement wrapper missed temporary directory and PowerShell param handling",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage48/benchmark-probe.log",
+      "log_sha256": "0287284175c971b7bee8b073ad8fef6747204a8c814808a92f3557a12cc4355f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Benchmark config revealed missing configured data and temp folders",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage48/benchmark-diagnostic.log",
+      "log_sha256": "b8a1474ece7114945a2d39c6d117c0d44bf6a880d093ddffe41cba2ec5967084",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Fixture bootstrap needed password confirmation via stdin",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage48/benchmark-validation.log",
+      "log_sha256": "9dd8ba6c12e557507ffdc9fc5481a8a2722c2821dd4acd2525de76064e1dcba4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Actual benchmark pass before fully paged History observation",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/benchmark-validation-final.log",
+      "log_sha256": "9a86c103ddc0196897171772678f197a552c6dfd923d02a56eaa57a7e358aa48",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Record warm reads, durable commits, cold process latency, History diff and resources",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/benchmark-history.log",
+      "log_sha256": "88ebb96bde59365b6a663a48f4cd73ae84624e3e5c01ca947369abcf055d701e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify byte-for-byte scope on all eight repositories",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/source-scope.log",
+      "log_sha256": "8e338284ba2f6ef6794ccb47033b927cc536b17e1576c19a025f7c7918011294",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure MSVC Server with SDP_STORAGE_ASAN enabled",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/server-configure.log",
+      "log_sha256": "f1d63c34236e0839977914d67c23550fddbc262e5f550001fb9b7547975a5f2a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build selected instrumented Server targets",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/server-build.log",
+      "log_sha256": "118392b2075ff177759db94555d3c9c821844ba873e6b433b5a6cd6ab435f57e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify actual Server ASan runtime import",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/server-imports.log",
+      "log_sha256": "974c2f3b50e5347b7bb7e0ee2e2d4a8f6be2677d1295b29b4e8b9c493140454f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run eleven instrumented core tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/server-core-ctest.log",
+      "log_sha256": "50299493844bc32af0d518a84e0ee3eeb3f85c0f428de499214b3a690892af8d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure Native DLL using SDP_ADDRESS_SANITIZER",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/native-configure.log",
+      "log_sha256": "23a35b76d5ba1ca87e00518b06bb46a1baec3647e31b6c3b75aec9ceb537cd2b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build instrumented SDK",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/native-build.log",
+      "log_sha256": "1630f5f931ef15eff79d7ee31640c9a1b614fdfdef12dace3e1fbde9aa80ee6d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CPack instrumented Native Windows ZIP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/native-package.log",
+      "log_sha256": "5422d948e1f6ec5bf0ef59eb7385f5b0d3375474219cc765d43a18bea3196b7b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify actual Native ASan runtime imports",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/native-imports.log",
+      "log_sha256": "c0b34bcad91a8900906224c9662681fa22066c0f4675b15773a6dd7f659fe365",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run compiled Native CTests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/native-ctest.log",
+      "log_sha256": "7cf86aa829111e1a59823872dfd04cd26d7f78a69ce3783ff161e9ebb8b74868",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First instrumented RPC run lacked app-local ASan DLL for stripped worker environment",
+      "exit_code": 8,
+      "expected_exit_code": 8,
+      "log_path": "out/sdp-m10/stage48/as/server-rpc-ctest.log",
+      "log_sha256": "22bbe81c861e42d9c22e1ba61710a32b7bbdc43f4e6df9f81fdd2bea45578587",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Second instrumented RPC group with app-local DLL; mixed-suite timeouts and recursion EOF",
+      "exit_code": 8,
+      "expected_exit_code": 8,
+      "log_path": "out/sdp-m10/stage48/as/server-rpc-applocal.log",
+      "log_sha256": "028879a98c43c99296db40a204574215d97ef82720a0dbca561c85058ac32459",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First Native instrumented consumer run alongside instrumented Server, History timed out",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage48/as/native-installed.log",
+      "log_sha256": "19fc2cc94a659b776c029672f60076afcb9c27e729c453f0f42b5046dc19bf3c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First direct recursion test observed TLS EOF",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage48/as/plsql-diagnostic.log",
+      "log_sha256": "bd5f81378cc375fe6f06534ba0fbfdfc1c23eee8c80d22ef15cb5d710f1e9cf5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial scope inventory included explicitly copied Visual Studio scratch metadata",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage48/source-scope-final.log",
+      "log_sha256": "55020d34b8b4b8a25e0c178e24b9f9dc4769bf34e8d9e82703f9b73b94e4410c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify final original source integrity and changed files only",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/source-scope-complete.log",
+      "log_sha256": "cba15684f5d6fe3aaa6c8ca17d74ca115609271f74b934da9ee138ae52ead30e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Fresh Release build configure after starting defensive History repair",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-repair-configure.log",
+      "log_sha256": "40483e1b8259cd4777e9ef92a4e92e5f55249caa1a18562fd347d068077e4849",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First repair builds clean from current snapshot",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-repair-build.log",
+      "log_sha256": "d01e428d9ad1daf63e1d85460e5d8d075b417ee8de303fd18b78bceb48052d6e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First Release test attempt omitted one History test driver",
+      "exit_code": 8,
+      "expected_exit_code": 8,
+      "log_path": "out/sdp-m10/stage48/release-repair-ctest.log",
+      "log_sha256": "52af8cde0ad7c00d15c7d1b897809566406f7a763c4a96ec7857c7a25dfaa248",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build the independent History journal test driver",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-repair-history-driver.log",
+      "log_sha256": "487b7a74e463c34a89a676129ecd40bda22ae8869b8085b476e8e3ae5c4b3953",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First attempt completed Release 11/11 before sanitizer still reported History",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-repair-ctest-final.log",
+      "log_sha256": "c0e4cba27951fb74591944a55d2dda417e417730c42765c4a9e2f37470816bce",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Create and verify all three MSI packages after first repair attempt",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/corrected-packages.log",
+      "log_sha256": "fa274e9e63c39ea3e2aeccb7da87e4674e22ec168733769a7b72a9013e70483d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Baseline timing after first repair attempt",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/benchmark-corrected.log",
+      "log_sha256": "7ea0816078f5704bef24a00f3118aff74b99d4f267eff00da28af8f171fd8071",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify first History patch source copy and checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/patched-source.log",
+      "log_sha256": "b812b26392f6880cd6da0367612049c2db53527937738b9731eeac69c8fedf84",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Compile first History patch under MSVC ASan",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/patched-server-build.log",
+      "log_sha256": "0f233c31b60925b7cba6e11cdc0232cd9fdafa96372b5c10d51bffe2beac6e8b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First History repair remained insufficient under original ASan test",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage48/as/patched-history.log",
+      "log_sha256": "d92ba769d6b0a63a62afa48820beda7a03935237bbe1d98e0b4b39266e59d641",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Install Native MSVC ASan C/C++ package and run 24 checks with clean Release Server",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/native-installed-release-server.log",
+      "log_sha256": "ee8f7e632a8f79a90ad87f0983eeb52d7dbf1500c011c5eec3f93281130bae47",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify current owned History image implementation in isolated sanitizer source copy",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/owner-source.log",
+      "log_sha256": "3eb1340b1189dab5d74a0e98352072ebcfdf914db99731f1cc9ba5608164b121",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Incrementally rebuild final instrumented Server",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/owner-server-build.log",
+      "log_sha256": "00d2428d85ced90eb86e731561a7b5f02ef4431ea5ededb7acd7500a51f77a10",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify imported ASan DLL in final diagnostic executable",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/owner-imports.log",
+      "log_sha256": "4b729df7d1d5c2e23f611d79203d783f09491bd4048259c15f610948d7103b36",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Rebuild Server diagnostic unit test binaries",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/owner-test-build.log",
+      "log_sha256": "693ba0ab456a4c023420414e0f6a0c76c5be4a748fc641277e32ed48dfaf48b6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run final 11 MSVC ASan core tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/owner-core.log",
+      "log_sha256": "3358f2f32acbf0d6ef407e8c7782a2f569a9b601a0fabcc9a594f65b87bef11d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run original History TLS fixture on final MSVC ASan Server with default limits",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/owner-history.log",
+      "log_sha256": "b6b4e7cf5adc0742b05bdcb2932574dcf536fe8e0c1ede1c33b722fa3dec6d5a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run final 8 MSVC ASan real TLS tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/owner-rpc.log",
+      "log_sha256": "94ee8a658142449f1437ea06682635367077cf5e8de1ca55060675273fb5dfa9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify PL/SQL diagnostic copy changes only Windows PE stack reserve",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/owner-stack-proof.log",
+      "log_sha256": "75db5167fcc04b9fbb1bdf6c4456dfec017305804704b9cf41c01738206e5d7b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run original PL/SQL limits and rollback tests with larger ASan diagnostic-only stack reserve",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/as/owner-plsql.log",
+      "log_sha256": "384d8e4e10e71b0ee284bdcfbdbf98348f8c5ac11f5c3a9a6c2223a63d5e7ed9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Compile final Release Server and drivers after owned object fix",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-owned-history-build.log",
+      "log_sha256": "95438767b4fcedd11059817c4952cffb35ad1f03dfa74c683f495c7022adb439",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run all 11 corrected Release regression checks",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/release-owned-history-ctest.log",
+      "log_sha256": "e191ee037f6c37aafce0ca3fcddad5fbe5506f40cc7bd07fa811614e0ead405f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Replay CLI, publication cuts, Windows access denial and race fixtures on the final Release Server",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/final-boundaries.log",
+      "log_sha256": "a9a939d538d37c92c7cd6fd16081d73e7377bb1b0d132557a47d20cf3cba98ec",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify final 3 independent MSI extractions, dependencies, checksums and updated SPDX",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/final-packages.log",
+      "log_sha256": "1b8c0a14c27e59080262d26b6c315f24aaee42e12998a57db66c9150f0ef4a37",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Measure exact final Release image, verify 1,272 History events and 72 row diff",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage48/benchmark-final.log",
+      "log_sha256": "d6f7ca711a84e7325b1f561cf93330f24643f8bb42252a483e422b723c49cede",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S48-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Release Server 24/24. WAL/History/checkpoint, model/backup/restore gerçek process kill ve Windows erişim reddi. Typed SQL/wire/format limitleri fail-closed. Bakiye/FK/Decision/retention/model yarış invariant’ları doğrulandı."
+    },
+    {
+      "id": "S48-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İlk History raporu sahipli nesnelerle giderildi. Aynı varsayılan limitli History RPC, final Server MSVC ASan temel 11/11 ve TLS 8/8, Native 2/2 ve kurulu C/C++ tüketicide 24 davranış testi geçti. PL/SQL özyineleme, yalnız tanılama kopyasında 8 MiB yığınla test edildi; normal Release özgün sınırlarla geçti."
+    },
+    {
+      "id": "S48-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "CLI 2/2, Workbench 7/7. Gerçek Workbench import/cancel testinin bellek zirvesi 40.239.104 B. Server 160 sıcak okuma, 72 durability commit ve 12 restart örneği ile p50/p95/p99/throughput, History 1200→1272, 5 diff sayfası ve ham süreler kaydedildi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/as/p/StarDataParadiseDLLler-0.4.1-win-x64.zip",
+      "sha256": "10112eb59fe663a276e99e585b2617a4dbde646b4d0d6581cba708bb184b82f9"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/product/s/b/recovery-evidence/crash-matrix.json",
+      "sha256": "52f8337f78d43b1ecf66c95ba6f9fee5815bc113789a21466f42e65b1ad22dd1"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/security-boundaries.json",
+      "sha256": "15d9d781b977138efa7610cf51d52dd30bfe219ea1bef5df674bf7e5e66cba5e"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/release.spdx.json",
+      "sha256": "940398d462159e658a7272ca58cce372064683d1d6f99b55782ef4b5b37f8d4a"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/release-audit.json",
+      "sha256": "1e51739c98190e8acce2fc3915fe7832ebce041576e74cb39aecdd353a18e3af"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/benchmark-history-data/resource-benchmark.json",
+      "sha256": "3408b967165d47373b396f4e6a5ab8e467d71055b3bd732b8cda931ca9120a7c"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/benchmark-host.json",
+      "sha256": "77731a1bcfceac5262e833651e40ef69f8c9d1948047ccd0d8feec3237736842"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/workbench-memory.json",
+      "sha256": "b429ae098a600de24ac92d71639a5f991c1842cfc044f2da3b604dfea4bd9b92"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "docs/coordination/S48_RELIABILITY.md",
+      "sha256": "b82e1ba813b57c5ecb22a514bf7aab06dfde243ae02557460870afc173eb4a91"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/as/pb/Release/StarDataParadiseServer.exe",
+      "sha256": "1353308e8d54194fb6e46b3315fdbb4548d59086b7618056266c095cb734fbb1"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/as/owner-artifacts.sha256",
+      "sha256": "42f32ba2622e4919792422664a4243b40a7db9cfc77c6659f7556395a728fb2c"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/rel/Release/StarDataParadiseServer.exe",
+      "sha256": "f9187202bd1a20b5e0ec8a82210e9efd461b83d8c0e71d18e8a506b94d175537"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/rel/recovery-evidence/crash-matrix.json",
+      "sha256": "a03f2f2aacb24b2be9f0fd26197860c2e517788b8855bed4f649cf9209d7fede"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/final-package/release-manifest.json",
+      "sha256": "bb771b8930b779ab5b3c6950eeff4a89e8b7861b9a3a6edb64dd656949f8ed26"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/final-package/components/components.json",
+      "sha256": "3a930a11cc7159f8281472fab324fb4c564fa5b985d042e5dd42d3b492aa1094"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/final-package/release.spdx.json",
+      "sha256": "10b92662b8812e6e362edfa80d1c08222a133991a9f523c027470afd680bde53"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/final-package/release-audit.json",
+      "sha256": "0bbe206336513eb2092680178beaa9d036f7765a5ec3a61461a5c70a8f4ae649"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/final-security-boundaries.json",
+      "sha256": "15d9d781b977138efa7610cf51d52dd30bfe219ea1bef5df674bf7e5e66cba5e"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage48/benchmark-final-data/resource-benchmark.json",
+      "sha256": "fbb672b6afa135b17fceba22cf1586ac8ac7124ffd22fd9bde43a43f0d4b3e2c"
+    }
+  ],
+  "remaining_issues": [
+    "OS önbelleği temizlenmedi. Restart ölçümü süreç başlangıcı ile ilk doğrulanmış TLS okumasını kapsar.",
+    "Disk dolu ve fsync için sürücü kancaları kullanıldı. Windows gerçek erişim reddi ayrı geçici dizinlerde sınandı.",
+    "MSVC AddressSanitizer kapsamı enstrümante edilen Server ve Native hedefleridir. Qt ve OpenSSL üçüncü taraf hazır binary.",
+    "Credential taraması kaydedilen örüntüler ve envanter ile sınırlıdır. Windows MSI’ları unsigned-development.",
+    "ASan PL/SQL tanılama kopyası için PE yığın rezervi 8 MiB kullanıldı. Final Release normal yığın rezerviyle 11/11 geçti."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 49
+}

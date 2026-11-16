@@ -438,6 +438,8 @@ public:
         if (error) throw StartupError("Bind/listen failed. Check port availability");
     }
 
+    uint16_t bound_port() const { return acceptor_.local_endpoint().port(); }
+
     int run(std::stop_token token, const std::function<void()>& ready)
     {
         if (token.stop_requested()) return 0;
@@ -666,6 +668,15 @@ private:
     bool stopping_{};
     bool failed_{};
 };
+}
+
+uint16_t probe_update_listener(const Config& config)
+{
+    asio::ssl::context tls(asio::ssl::context::tls_server);
+    configure_tls(tls, config);
+    const auto admin = load_admin(config);
+    const Service service(config, admin, std::move(tls), nullptr, nullptr, nullptr);
+    return service.bound_port();
 }
 
 int run(const Config& config, std::stop_token stop, const std::function<void()>& ready)

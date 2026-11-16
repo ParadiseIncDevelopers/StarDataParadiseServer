@@ -65,4 +65,5 @@ Admin load_admin(const Config& config);
 void bootstrap_admin(const Config& config, std::string_view username);
 void log_event(const Config& config, bool auth, std::string_view event, std::string_view correlation = {}) noexcept;
 int run(const Config& config, std::stop_token stop = {}, const std::function<void()>& ready = {});
+uint16_t probe_update_listener(const Config& config);
 }

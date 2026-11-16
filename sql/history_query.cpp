@@ -2,6 +2,7 @@
 #include "wire_values.hpp"
 
 #include <algorithm>
+#include <memory>
 #include <set>
 
 namespace sdp::sql
@@ -12,10 +13,12 @@ using wire::Json;
 using W = wire::Code;
 using Objects = std::map<ObjectId, Object>;
 
-std::optional<Object> catalog_image(disk::RowId id, const disk::Bytes& bytes)
+std::unique_ptr<Object> catalog_image(disk::RowId id, const disk::Bytes& bytes)
 {
     if (bytes.empty()) return {};
-    return Catalog::history_object(id, disk::decode(bytes));
+    auto object = Catalog::history_object(id, disk::decode(bytes));
+    if (!object) return {};
+    return std::make_unique<Object>(std::move(*object));
 }
 
 void change_catalog(Objects& objects, const disk::Change& change, bool forward)
@@ -288,9 +291,11 @@ Json query_log(HistoryView& view, const HistoryCommand& command, const Visibilit
                 {
                     const auto qualified = qualified_object(objects, object);
                     const bool show_source = visibility.definition(object.id);
-                    space = page.add(entry(revision, object, qualified, 0, object.version,
-                        before_object ? object_image(*before_object, show_source) : Json(),
-                        after_object ? object_image(*after_object, show_source) : Json()));
+                    const auto version = object.version;
+                    auto previous_image = before_object ? object_image(*before_object, show_source) : Json();
+                    auto current_image = after_object ? object_image(*after_object, show_source) : Json();
+                    space = page.add(entry(revision, object, qualified, 0, version,
+                        std::move(previous_image), std::move(current_image)));
                 }
                 if (!after_object) objects.erase(object.id);
                 if (!space) break;

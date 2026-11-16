@@ -48,5 +48,10 @@
 | 43 Workbench şema/veri karşılaştırması ve migration | PASSED | [15 Workbench testi ve gerçek PostgreSQL/MySQL TLS aktarımı](STAGES/43.json) |
 | 44 Bağımsız Windows MSI ve bileşen manifesti | PASSED | [Üç gerçek MSI, 50 Server testi ve on olumsuz paket testi](STAGES/44.json) |
 | 45 Ortak Setup Wizard, bakım ve M9 | PASSED | [Gerçek MSI yaşam döngüsü, 50 Server ve 15 Workbench testi](STAGES/45.json) |
+| 46 Güvenli güncelleme ve format uyumluluğu | PASSED | [İmzalı güncelleme, gerçek 0.3.0 verisi ve altı kesinti sınırı](STAGES/46.json) |
+| 47 Çapraz SDK ve protokol regresyonu | PASSED | [Yedi temiz derleme, bağımsız paket ve dört SDK ortak TLS sözleşmesi](STAGES/47.json) |
+| 48 Güvenlik, crash, eşzamanlılık ve kaynak testleri | PASSED | [Release, ASan, Windows izin/çökme matrisi, benchmark ve SPDX](STAGES/48.json) |
+| 49 Temiz kurulum ve kurtarma kabulü | PASSED | [Temiz Windows VM, kurulum matrisi, altı kesinti ve geri yükleme](STAGES/49.json) |
+| 50 Final teslim kontrolü | PASSED | [M10 yerel aday ve kanıtlar](M10_REPORT.md) |
 
 [M1 temel altyapı raporu](M1_REPORT.md) · [M2 istemci ve depolama raporu](M2_REPORT.md) · [M3 SQL ve güvenlik raporu](M3_REPORT.md) · [M9 kurulum raporu](M9_REPORT.md) · [Sıradaki etap](NEXT_TASK.md)

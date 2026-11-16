@@ -151,6 +151,7 @@
     <ClCompile Include="support_bundle.cpp" />
     <ClCompile Include="windows_service.cpp" />
     <ClCompile Include="storage_admin.cpp" />
+    <ClCompile Include="update_snapshot.cpp" />
     <ClCompile Include="..\sql\syntax.cpp" />
     <ClCompile Include="..\sql\types.cpp" />
     <ClCompile Include="..\sql\catalog.cpp" />

@@ -1,0 +1,35 @@
+var observed = new Dictionary<string, object?>();
+try
+{
+    await Write(connection, "INSERT INTO sdk_guard VALUES (1,-1)");
+    throw new InvalidOperationException("Active Decision rule accepted a denied write");
+}
+catch (SdpException error) when (error.Code == 1006)
+{
+    Check(error.SqlState == "42501" && !error.UnknownOutcome, "Decision denial SQLSTATE");
+    observed["decision_denied"] = error.Code;
+}
+var snapshot = await connection.ReadHistoryAsync("sdk_seed", Env("SEED_LSN"));
+observed["history_rows"] = snapshot.GetProperty("rows").GetArrayLength();
+Check((int)observed["history_rows"]! == 2, "Shared History row count");
+var stage47Prediction = predicted.GetProperty("prediction").GetDouble();
+observed["prediction"] = (int)Math.Round(stage47Prediction);
+if (Environment.GetEnvironmentVariable("SDP_SDK_EXPIRED_TOKEN") is { } expiredToken)
+{
+    var expired = await connection.GetOutcomeAsync(expiredToken);
+    var expiry = expired.GetProperty("status").GetString();
+    Check(expiry == "unknown" && !expired.TryGetProperty("lsn", out _), "Expired durable outcome remains unresolved");
+    observed["expired_outcome"] = expiry;
+}
+if (Environment.GetEnvironmentVariable("SDP_SDK_READ_FAULT_PORT") is { } readFaultPort)
+{
+    using var disconnected = Connect(owner, ownerPassword, int.Parse(readFaultPort));
+    await disconnected.OpenAsync();
+    await CheckError(1010, () => Scalar(disconnected, "SELECT id FROM sdk_seed WHERE id=1"));
+    using var recovered = Connect(owner, ownerPassword, port);
+    await recovered.OpenAsync();
+    Check(await Scalar(recovered, "SELECT id FROM sdk_seed WHERE id=1") is 1L, "Fresh stream read after lost response");
+    Console.WriteLine("SDP_STAGE47_READ_RECOVERY caller_reconnect");
+}
+Console.WriteLine("SDP_STAGE47_RESET verified_physical_pool");
+Console.WriteLine("SDP_STAGE47_RESULT " + JsonSerializer.Serialize(observed));

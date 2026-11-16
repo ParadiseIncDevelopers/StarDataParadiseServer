@@ -1,0 +1,13 @@
+# Sürüm adayı kapsamı ve bilinen sınırlamalar
+
+| Alan | Kapsam |
+| --- | --- |
+| Dağıtım ve imza | Aday kanalı `unsigned-development`. Ortak Setup, bu kanalı kurmak için açık geliştirme onayı ister. Üretim imzası ve yayın doğrulaması ayrı kapılardır. İmzalı güncelleme deneyi güven zinciri ve kesinti davranışını kapsar. [Paket ve imza politikası](../../packaging/README.md) |
+| Windows | 49. etap kabul ortamı, VirtualBox üzerindeki Windows 11 Enterprise LTSC 2024 Evaluation x64, `10.0.26100.1742`. Yerel paketler Windows x64 hedefler. Diğer işletim sistemi ve işlemci mimarileri bu adayın doğrulama kapsamı dışındadır. [Kabul kaydı](STAGES/49.json) · [Uyumluluk matrisi](COMPATIBILITY_MATRIX.md) |
+| CPU ve GPU | Decision, CPU ML ve CPU MLP, seçilen Server özellikleri ve sunucunun bildirdiği yeteneklere bağlıdır. GPU eğitim backend’i paket manifestinde kullanılamaz. GPU eğitimi bu VM’nin kabul kapsamı dışındadır. Kullanılan `hardware.backend` değerini worker sonucundan oku. [Model sözleşmesi](../../MODELS.md) |
+| Windows çalışma zamanı | MSI’lar gerekli MSVC çalışma zamanı dosyalarını uygulama dizinlerine kurar. Temiz VM’de tek başına kopyalanan 0.3.0 ve 0.4.0 Server EXE’leri Windows’un varsayılan arama yolunda eksik DLL nedeniyle başlatılamadı. Güncelleme deneyi doğrulanmış CRT dosyalarıyla tamamlandı. Ürün için MSI kurulumunu ya da çalışma zamanı dosyalarıyla eksiksiz binary paketi kullan. [Lisans ve runtime envanteri](../../packaging/THIRD-PARTY.md) |
+| Windows yol uzunluğu | İlk güncelleme denemesinde geçici WAL yolu 261 karaktere ulaştı ve depolama açılışı durdu. VM’de `LongPathsEnabled` kapalıydı. Aynı paket, kısa test kökünde kesinti ve iş boşaltma senaryolarını tamamladı. Kurulum, kaynak veri, `temp_dir`, hedef ve günlüğü kısa mutlak yollarda tut. Örneğin `C:\SDP\lab` ve `C:\SDP\update` altında ayrı dizinler kullan. Geçici klasör ve WAL adları için pay bırak. [Win32 yol sınırı](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation) |
+| Kurtarma kapsamı | Backup, doğrulanmış fiziksel snapshot ve aynı revizyonun tipli SQL export’unu sağlar. PITR capability kapalıdır. History okuması retention sınırı ve izinlere tabidir. [Backup](../../BACKUP.md) · [History](../../HISTORY.md) |
+| Java dışa aktarma | Standalone JDK 17 çıktısı desteklenen saf yordamları çalıştırır. SQL host çağrıları ve cursor işlemleri için bağlı export ve uygun JDBC paketi gerekir. [Java export](../../JAVA_EXPORT.md) |
+
+Kurulum, kaldırma, kurtarma ve güncelleme adımları [Türkçe hızlı başlangıçta](S50_QUICKSTART.md) yer alır. Doğrulanan aday dosyalarını ve test durumunu teslim manifestinden ve [50. etap kaydından](STAGES/50.json) denetle.

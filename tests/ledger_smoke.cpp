@@ -3,6 +3,7 @@
 #include <chrono>
 #include <filesystem>
 #include <iostream>
+#include <string_view>
 
 namespace
 {
@@ -37,12 +38,42 @@ wire::Json call(sql::Session& session, std::string_view op, wire::Json body)
     if (!response.at("ok").get<bool>()) throw std::runtime_error(response.at("error").dump());
     return response.at("body");
 }
+
+void seed_sdk_expiry(const std::filesystem::path& path)
+{
+    require(path.filename() == "store.sdp" && !std::filesystem::exists(path),
+        "Expiry fixture requires a fresh store.sdp");
+    disk::Store::initialize(path);
+    const auto recorded = std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::system_clock::now().time_since_epoch() - 48h).count();
+    const auto clock = [&] { return recorded; };
+    const wire::Json::string_t token = "2ad57e0bc4aac915a1ed08953f7b6024";
+    const wire::Json outcome{{"request_token", token}};
+    {
+        disk::Engine engine(path);
+        sql::Session writer(engine, 1, "local-admin", 5s, clock);
+        call(writer, "tx_begin", wire::Json::object());
+        require(call(writer, "tx_commit", outcome).at("lsn") == "1", "Fixture ledger commit failed");
+    }
+    {
+        disk::Engine engine(path);
+        sql::Session owner(engine, 1, "local-admin", 5s, clock);
+        require(call(owner, "tx_outcome", outcome).at("status") == "committed",
+            "Expected a persisted outcome before the fixture expiry");
+    }
+    std::cout << token << '\n';
+}
 }
 
 int main(int argc, char** argv)
 {
     try
     {
+        if (argc == 3 && std::string_view(argv[1]) == "--seed-sdk-expiry")
+        {
+            seed_sdk_expiry(argv[2]);
+            return 0;
+        }
         if (argc != 2) return 2;
         const auto path = isolated_store(argv[1]);
         int64_t now = 2'000'000'000;

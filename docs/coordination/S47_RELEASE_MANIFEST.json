@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "stage": 47,
+  "platform": "windows-x64",
+  "channel": "unsigned-development",
+  "wire": {
+    "version": 1,
+    "contract": {
+      "file": "StarDataParadiseServer/out/sdp-m10/stage47/server-wire-v1.zip",
+      "sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    }
+  },
+  "sources": {
+    "StarDataParadise": {
+      "head": "7db3733ce149bce79974099b0f1a3d74a1576196",
+      "dirty_before": true
+    },
+    "StarDataParadiseCli": {
+      "head": "06f300eb2f2940d9f0503e49e90dfc1224d16e78",
+      "dirty_before": true
+    },
+    "StarDataParadiseDLLler": {
+      "head": "d9171db05cd5f4ead93328f9e0982d2379b087f9",
+      "dirty_before": false
+    },
+    "StarDataParadiseServer": {
+      "head": "ac96e44f90ad2894bb1bd095adbfdb24449bf062",
+      "dirty_before": true
+    },
+    "StarDataParadise.SDK.NET": {
+      "head": "c944fb42ff8bd9d0bec405e1bb2d65bfb2d38b47",
+      "dirty_before": false
+    },
+    "StarDataParadise.SDK.Java": {
+      "head": "0284e227d27a127a063e885cff0ed2740ac6714b",
+      "dirty_before": false
+    },
+    "StarDataParadise.SDK.Python": {
+      "head": "47020bc86ab69d5ed138eb4e15b8cd5cbcd5f324",
+      "dirty_before": false
+    }
+  },
+  "source_checkpoint": {
+    "file": "StarDataParadiseServer/out/sdp-m10/stage47/workspace-before.zip",
+    "sha256": "c5ecf0c71174c6b7498f7bc2fc5cd86227204984f88e43b284e71e0178e736b2"
+  },
+  "product_components": {
+    "file": "StarDataParadiseServer/out/sdp-m10/stage47/components/components.json",
+    "sha256": "a7ab63df1ccd15fe774cce5dcdcfec67f0e888e99733f098f3fed042f28ec7ee"
+  },
+  "products": {
+    "server": {
+      "version": "0.4.0",
+      "app": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/product/s/b/Release/StarDataParadiseServer.exe",
+        "sha256": "351d7bf57af6ff6cb4195afab781744d637f521d29cfda5a7ce049dd38960dfd"
+      },
+      "msi": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/components/server-0.4.0-win-x64.msi",
+        "sha256": "f0655d6513889fb45faac11a1e63d318278c8bf8ad89a542db2cf4d265a2e446"
+      }
+    },
+    "cli": {
+      "version": "0.2.0",
+      "app": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/product/c/b/Release/StarDataParadiseCLI.exe",
+        "sha256": "c4a39973513adef816a842a0360500bf62be8b992168d0802990d60932a325f5"
+      },
+      "msi": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/components/cli-0.2.0-win-x64.msi",
+        "sha256": "b3f3d8a177f8e9bde8526c138332bf012407385bd9d296078129e03f5320bc29"
+      },
+      "build_native": {
+        "file": "StarDataParadiseDLLler/out/sdp-m7/stage31/release/package/StarDataParadiseDLLler-0.4.0-win-x64.zip",
+        "sha256": "4ee15b8fa50c94c5ee012245d8ed8e3c16259df64fc154ca15fb286cb6a8ad25",
+        "version": "0.4.0",
+        "abi": 1,
+        "dll_sha256": "1e03e6adb86d8b19153f7d9ddd0c22003c4560cfcb6e1441bfd81a841ba5c731"
+      },
+      "msi_native": {
+        "file": "StarDataParadiseDLLler/out/sdp-m9/stage42/release/package/StarDataParadiseDLLler-0.4.1-win-x64.zip",
+        "sha256": "8073941b68c6c037ea646d4cc3f2bcc31445462356c9bd0db513b35cc2378041",
+        "version": "0.4.1",
+        "abi": 1,
+        "dll_sha256": "4889efe9fbff4ec53f8c01afde4e35478fbb8a64e3006ddd2b21690a4457a27b"
+      }
+    },
+    "workbench": {
+      "version": "0.1.0",
+      "app": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/product/w/b/Release/StarDataParadise.exe",
+        "sha256": "18a3964d6ce1eddb6cfe2491ff39244ae3c6e6762bee673dc8f0818cffba3bbd"
+      },
+      "msi": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/components/workbench-0.1.0-win-x64.msi",
+        "sha256": "3131bb5fd193c20e23bd1ba3d81dc47a538289a633a5d5ed718d6e697cf67860"
+      },
+      "build_native": {
+        "file": "StarDataParadiseDLLler/out/sdp-m9/stage42/release/package/StarDataParadiseDLLler-0.4.1-win-x64.zip",
+        "sha256": "8073941b68c6c037ea646d4cc3f2bcc31445462356c9bd0db513b35cc2378041",
+        "version": "0.4.1",
+        "abi": 1,
+        "dll_sha256": "4889efe9fbff4ec53f8c01afde4e35478fbb8a64e3006ddd2b21690a4457a27b"
+      },
+      "msi_native": {
+        "file": "StarDataParadiseDLLler/out/sdp-m9/stage42/release/package/StarDataParadiseDLLler-0.4.1-win-x64.zip",
+        "sha256": "8073941b68c6c037ea646d4cc3f2bcc31445462356c9bd0db513b35cc2378041",
+        "version": "0.4.1",
+        "abi": 1,
+        "dll_sha256": "4889efe9fbff4ec53f8c01afde4e35478fbb8a64e3006ddd2b21690a4457a27b"
+      },
+      "qt_runtime": "6.11.3"
+    }
+  },
+  "sdks": {
+    "native": {
+      "file": "StarDataParadiseServer/out/sdp-m10/stage47/n/pkg/StarDataParadiseDLLler-0.4.1-win-x64.zip",
+      "sha256": "83c2c840fd0560f2b4571496e49b8505eb2aa60c9cbadba3cc24e7dcd4222de9",
+      "version": "0.4.1",
+      "abi": 1,
+      "dll_sha256": "7f6366ad4635dadb48c55663c4d12d54f8829080a6ccd8c614005aa36e8ec60e"
+    },
+    "dotnet": {
+      "StarDataParadiseDrive": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/managed/dotnet-clean/source/out/packages/StarDataParadiseDrive.2.0.0-preview.1.nupkg",
+        "sha256": "e181e877abca6a9af9c7460f0586372b80bb993628be8f143f4190f3bba7f0b4"
+      },
+      "StarDataParadiseNetFramework": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/managed/dotnet-clean/source/out/packages/StarDataParadiseNetFramework.2.0.0-preview.1.nupkg",
+        "sha256": "b1f23eb5a630a426a6f5934f9d1883250c7c0f2cf8453c11c993ca7274ccf6f6"
+      }
+    },
+    "jdbc": {
+      "version": "0.2.0",
+      "package": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/managed/java-clean/source/out/maven/com/stardataparadise/stardataparadise-jdbc/0.2.0/stardataparadise-jdbc-0.2.0.jar",
+        "sha256": "acf4325cd6ef2d4b9c2affeeae29a53ebf8d8c174e2140413eee60d1accf3482"
+      },
+      "contract_sha256": "e6500900a3fa34910781ea92d5e41fe8716511fac6f6d6c689ff9cce15d578ab"
+    },
+    "python": {
+      "version": "0.2.0",
+      "wheel": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/py/pkg/stardataparadise_sdk-0.2.0-py3-none-any.whl",
+        "sha256": "290440c75c7b9466bd2a29cb50f942f3288f40b3e3428c4902ca636f4d66a0b1"
+      },
+      "sdist": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage47/py/pkg/stardataparadise_sdk-0.2.0.tar.gz",
+        "sha256": "cae678637744f4a43913e88c76f6b27ca0222b1b323c925dba53c4901c237663"
+      }
+    }
+  }
+}

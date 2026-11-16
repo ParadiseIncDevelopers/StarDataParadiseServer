@@ -758,4 +758,26 @@ std::vector<ObjectId> routine_dependencies(const Object& object)
     for (const auto& [id, version] : revisions(record(object))) ids.push_back(id);
     return ids;
 }
+
+size_t verify_routines(Catalog& catalog)
+{
+    const auto objects = catalog.list();
+    size_t count{};
+    for (const auto& item : objects)
+    {
+        if (item.kind != ObjectKind::routine) continue;
+        const auto definition = record(item);
+        const Object* table{};
+        if (definition.contains("trigger"))
+        {
+            const auto target = definition.at("trigger").at("table").get<ObjectId>();
+            const auto found = std::ranges::find(objects, target, &Object::id);
+            if (found == objects.end() || found->kind != ObjectKind::table) damaged();
+            table = &*found;
+        }
+        load_program(catalog, item, table);
+        ++count;
+    }
+    return count;
+}
 }

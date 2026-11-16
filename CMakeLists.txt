@@ -14,6 +14,7 @@ add_executable(StarDataParadiseServer
 
     StarDataParadiseServer/service.cpp
     StarDataParadiseServer/storage_admin.cpp
+    StarDataParadiseServer/update_snapshot.cpp
     StarDataParadiseServer/operations.cpp StarDataParadiseServer/support_bundle.cpp
     StarDataParadiseServer/windows_service.cpp)
 

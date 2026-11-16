@@ -1,0 +1,51 @@
+    private static void observeStage47(SdpConnection connection, String ownerPassword) throws Exception {
+        var observed = new com.google.gson.JsonObject();
+        try (var statement = connection.createStatement()) {
+            statement.executeUpdate("INSERT INTO sdk_guard VALUES (1,-1)");
+            throw new AssertionError("Active Decision rule accepted a denied write");
+        } catch (SdpException error) {
+            require(error.getErrorCode() == 1006 && "42501".equals(error.getSQLState())
+                    && !error.isOutcomeUnknown(), "Decision denial SQLSTATE");
+            observed.addProperty("decision_denied", error.getErrorCode());
+        }
+        var history = connection.historyRead("sdk_seed", env("SEED_LSN"), null);
+        int rowCount = history.details().getAsJsonArray("rows").size();
+        require(rowCount == 2, "Shared History row count");
+        observed.addProperty("history_rows", rowCount);
+        double prediction = connection.predict(env("MODEL"), Map.of("reading", 17)).value().getAsDouble();
+        require(Math.abs(prediction - 58) < .0001, "Shared model prediction");
+        observed.addProperty("prediction", Math.round(prediction));
+        var expiredToken = System.getenv("SDP_SDK_EXPIRED_TOKEN");
+        if (expiredToken != null) {
+            var expired = connection.transactionOutcome(expiredToken);
+            require(expired.status() == SdpConnection.OutcomeStatus.UNKNOWN && expired.lsn() == null,
+                    "Expired durable outcome remains unresolved");
+            observed.addProperty("expired_outcome", expired.status().name().toLowerCase(java.util.Locale.ROOT));
+        }
+        connection.setAutoCommit(false);
+        insert(connection, 92);
+        require(count(connection, "jdbc_write") == 2, "Uncommitted JDBC row exists");
+        connection.resetSession();
+        require(connection.getAutoCommit() && count(connection, "jdbc_write") == 1,
+                "Explicit JDBC session reset reverted the uncommitted row");
+        System.out.println("SDP_STAGE47_RESET verified_explicit_session");
+        var readFaultPort = System.getenv("SDP_SDK_READ_FAULT_PORT");
+        if (readFaultPort != null) {
+            var faultOptions = properties(env("USER"), ownerPassword);
+            faultOptions.setProperty("connectTimeoutMs", "12000");
+            try (var disconnected = DriverManager.getConnection(url(readFaultPort), faultOptions)) {
+                try {
+                    count(disconnected, "sdk_seed");
+                    throw new AssertionError("JDBC unexpectedly replayed an interrupted read");
+                } catch (SdpException error) {
+                    require(error.getErrorCode() == 1010 && "08006".equals(error.getSQLState())
+                            && !error.isOutcomeUnknown(), "Definite read disconnect");
+                }
+            }
+            try (var recovered = connect(env("PORT"), env("USER"), ownerPassword)) {
+                require(count(recovered, "sdk_seed") == 2, "Fresh stream read after lost response");
+            }
+            System.out.println("SDP_STAGE47_READ_RECOVERY caller_reconnect");
+        }
+        System.out.println("SDP_STAGE47_RESULT " + observed);
+    }

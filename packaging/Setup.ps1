@@ -154,7 +154,18 @@ function Install-SdpPortable([hashtable]$Options) {
     try {
         Expand-Archive -LiteralPath $archive -DestinationPath $temporary
         [void](Invoke-SdpBinaryCheck (Join-Path $temporary 'StarDataParadise.exe') '--smoke-test')
-        [IO.Directory]::Move($temporary, $destination)
+        for ($attempt = 1; ; $attempt++) {
+            try {
+                [IO.Directory]::Move($temporary, $destination)
+                break
+            } catch {
+                # Windows can deny a directory rename while a verified file is still open.
+                $win32Error = $_.Exception.GetBaseException().HResult -band 0xffff
+                if ($attempt -ge 5 -or $win32Error -notin @(5, 32, 33) -or
+                    (Test-Path -LiteralPath $destination)) { throw }
+                Start-Sleep -Milliseconds (250 * $attempt)
+            }
+        }
     } finally {
         if (Test-Path -LiteralPath $temporary -PathType Container) {
             $created = Get-Item -LiteralPath $temporary

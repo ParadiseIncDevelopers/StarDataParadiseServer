@@ -11,6 +11,8 @@ namespace sdp::sql { class Security; }
 
 namespace sdp::jobs
 {
+wire::Json update_job_state(disk::Transaction& tx, disk::Owner owner);
+
 struct Reply
 {
     wire::Json body;

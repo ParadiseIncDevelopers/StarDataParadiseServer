@@ -44,6 +44,9 @@
 | Workbench Compare/Migration Etap 43 | İki TLS Server ile DDL revizyon koruması ve PostgreSQL 18.1 / MySQL 8.0.43 ile kesintiden sonra doğrulanmış aktarım. [Kanıt](STAGES/43.json) |
 | Bağımsız Windows x64 MSI Etap 44 | Server, Workbench ve CLI paketleri, ayrı uygulama yerel DLL sahipliği ve manifest çözümleyicisi doğrulandı. İmzasız geliştirme çıktıları. [Kanıt](STAGES/44.json) |
 | Ortak Setup ve M9 Etap 45 | Çevrimdışı MSI yaşam döngüsü, uzak ve taşınabilir Workbench, veri ve etkin Decision koruması. Yönetici oturumunda sanal Windows hizmet hesabı ve kapsamı doğrulanmış firewall kuralı geçti. [Etap 45](STAGES/45.json) · [Yönetici kabulü](M9_ADMIN_ACCEPTANCE.md) |
+| Güncelleme ve format Etap 46 | Ayrı kaynak ve hedefte doğrulanmış Windows x64 güncellemesi. Gerçek 0.3.0 verisi, pinli CMS, kesinti sonrası devam ve yeni yazmada geri dönüşün durması doğrulandı. [Kanıt](STAGES/46.json) |
+| SDK uyumluluğu Etap 47 | Yedi bağımsız Windows x64 derlemesi, üç MSI ve dört SDK ortak TLS testi geçti. Native ABI 1, wire v1, gerçek eski paketler ve işlem defteri süresi doğrulandı. [Rapor](S47_SDK_CONTRACT.md) · [Manifest](S47_RELEASE_MANIFEST.json) |
+| Dayanıklılık ve kaynak kullanımı Etap 48 | Windows x64 Release ve MSVC ASan, History onarımı, gerçek kesinti ve izin testleri, benchmark ve SPDX. [Rapor](S48_RELIABILITY.md) · [Kanıt](STAGES/48.json) |
 | Linux, macOS ve diğer Windows mimarileri | NOT_RUN. |
 
 Wire v1 kaynakları [contracts/v1](../../contracts/v1/PROTOCOL.md) altında. Etap kanıtları [M1](M1_REPORT.md) , [M2](M2_REPORT.md), [M3](M3_REPORT.md) , [M4](M4_REPORT.md) ve [M5](M5_REPORT.md) raporlarında.

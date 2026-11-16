@@ -33,6 +33,7 @@ bool routine_writes(const RoutineSelection& plan);
 wire::Json routine_export_snapshot(Catalog& catalog, const Name& name, bool standalone,
     const std::function<void(const Object&, std::string_view)>& check_access, const WorkCheck& check);
 std::vector<ObjectId> routine_dependencies(const Object& object);
+size_t verify_routines(Catalog& catalog);
 bool has_trigger_dependency(Catalog& catalog, ObjectId table);
 void fire_triggers(disk::Transaction& transaction, disk::Owner owner, const Object& table,
     std::string_view timing, std::string_view event, const RowValues* before, const RowValues* after,

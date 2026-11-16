@@ -21,6 +21,9 @@
     <ClCompile Include="storage_admin.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="update_snapshot.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
     <ClCompile Include="..\storage\disk.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>

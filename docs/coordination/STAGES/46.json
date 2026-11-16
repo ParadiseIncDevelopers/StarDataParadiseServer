@@ -1,0 +1,291 @@
+{
+  "stage_id": 46,
+  "status": "PASSED",
+  "started_at": "2026-11-16T09:44:58.5793485+03:00",
+  "finished_at": "2026-11-16T10:09:12.4883209+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 45,
+      "file": "STAGES/45.json",
+      "sha256": "499925f66d0c85a2af34a49783e39b9037a7e53110dc7ff925538e2d16a12e04"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "v145",
+    "qt": "6.11.3",
+    "native_abi": 1,
+    "protocol": 1,
+    "legacy_server": "0.3.0",
+    "candidate": "0.4.0",
+    "powershell": "7 / Windows PowerShell 5.1"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "ac96e44f90ad2894bb1bd095adbfdb24449bf062",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "CMakeLists.txt",
+        "jobs/manager.cpp",
+        "jobs/manager.hpp",
+        "packaging/Test-UpdateTrust.ps1",
+        "packaging/UPDATE.md",
+        "packaging/Update.ps1",
+        "packaging/UpdateTrust.psm1",
+        "sql/routines.cpp",
+        "sql/routines.hpp",
+        "StarDataParadiseServer/server.hpp",
+        "StarDataParadiseServer/service.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.cpp",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj",
+        "StarDataParadiseServer/StarDataParadiseServer.vcxproj.filters",
+        "StarDataParadiseServer/update_snapshot.cpp",
+        "StarDataParadiseServer/update_snapshot.hpp",
+        "tests/update_snapshot_rpc.py",
+        "tests/update_workflow.py"
+      ],
+      "source_manifest": "out/sdp-m10/stage46/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "64bf9504171b20ef3d4b6a97a94a2329b2a6dde576758815013af4b04c0599c3"
+    },
+    {
+      "name": "StarDataParadise",
+      "head": "7db3733ce149bce79974099b0f1a3d74a1576196",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "BUILD.md",
+        "CMakeLists.txt",
+        "StarDataParadise/StarDataParadise.vcxproj",
+        "StarDataParadise/update_status.cpp",
+        "StarDataParadise/update_status.hpp",
+        "StarDataParadise/workbench.cpp",
+        "tests/update_status.cpp"
+      ],
+      "source_manifest": "out/sdp-m10/stage46/StarDataParadise.changed.sha256",
+      "source_manifest_sha256": "0807b441c4ea16d5bdb7adc5a3df1930c8d1a9fdce693cf5e2cdd544f2d3f29e"
+    },
+    {
+      "name": "StarDataParadiseCli",
+      "head": "06f300eb2f2940d9f0503e49e90dfc1224d16e78",
+      "branch": "master",
+      "dirty_before": false,
+      "changed_files": [
+        "CLI.md",
+        "CMakeLists.txt",
+        "StarDataParadiseCli/StarDataParadiseCli.cpp",
+        "tests/update_status.cmake"
+      ],
+      "source_manifest": "out/sdp-m10/stage46/StarDataParadiseCli.changed.sha256",
+      "source_manifest_sha256": "e86dee1185146f37949670099c38fa0cb77ae124fd67c5f0ef7a8a36d42f74ee"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m10/stage46/workspace-before.zip",
+    "manifest": "out/sdp-m10/stage46/workspace-before.json",
+    "archive_sha256": "75339ebe29477f15d755fbb0ab14894372f6616f913f4b333c66f10e0fae3992",
+    "repo": "StarDataParadiseServer"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "workspace.py .. out/sdp-m10/stage46/workspace-before.json --checkpoint",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/checkpoint.log",
+      "log_sha256": "ff67e4b1e8918cc771dbf513dcaed749be1f6758f47a4d99b31dca8a2aae9804",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CMake VS18 x64 Release with pinned sources",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/native-server-configure-accepted.log",
+      "log_sha256": "76d10200a6194bed90fbdee143fe65f24759fe6944e94e10ad950612953b9a51",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CMake build StarDataParadiseServer /m:1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/native-server-release-serial.log",
+      "log_sha256": "f6dc39cb631c7de73afced6c33595ce98f0781bdba42502f61c6ff92dd0113f2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python -B tests/update_snapshot_rpc.py using released Server 0.3.0 and candidate",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/native-snapshot-proof.log",
+      "log_sha256": "e251fa3dfbbfc20465071a3e376bdada8cdd066774b48967b1c3ec358bf1d06a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "python -B tests/update_workflow.py using released Server 0.3.0 and candidate",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/integration.log",
+      "log_sha256": "8fe7903fac3adbcd30054bf1b3cfe90d00cf06f84c41f7214e28528ac56c982a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "PowerShell 7 Test-UpdateTrust.ps1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/update-trust/verify.log",
+      "log_sha256": "7237e054411c43ec59da1e50e8cbb46313c751ae4ca599d9ede7f814472f8cac",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Windows PowerShell 5.1 Test-UpdateTrust.ps1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/update-trust/verify-windows-powershell.log",
+      "log_sha256": "823461eb9c44885e0fa79dd3c6b1d34605f73cbf33bdf114bfd8737b42f8d7ec",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Windows PowerShell 5.1 Update.ps1 Apply verified portable CLI ZIP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/cli-update-check.log",
+      "log_sha256": "014dabcca6b51f33d7c554b7cc16bb599abee4d122f0862687f2ccbcdfa1e9cc",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Windows PowerShell 5.1 Update.ps1 Apply verified portable Workbench ZIP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/workbench-update-check.log",
+      "log_sha256": "9547bec7d800cd537cbb4b7667aca022582d26b6d4c673e107e45480f5156478",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "CTest Workbench Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/ctest-accepted.log",
+      "log_sha256": "6c65bcc82c5d198cb0d599a135dd41af0e3a5b167325d8520120cbac90803275",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "command": "CTest CLI Release",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/ctest-accepted.log",
+      "log_sha256": "e179dbeb729bc66f2c400fbb0fe518dcba7b2d7f7dbadce6a7e29f00ca8c9ac3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadise",
+      "command": "Compare Workbench and CLI status on an actual completed journal",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/compare-actual-status.log",
+      "log_sha256": "18712eac742b019ec32aa8d6c1d9360196638c5439b4baf59808c2bef9396f8f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify original source bytes in five untouched repositories and two user Workbench files",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/isolation.log",
+      "log_sha256": "3ca3b0aa25b8a98056c7573fa62a003969f151eab4147e6eaffab61b11d3e85a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial Server CTest focused selection; 9/11 passed",
+      "exit_code": 8,
+      "expected_exit_code": 8,
+      "log_path": "out/sdp-m10/stage46/native-focused-regression.log",
+      "log_sha256": "67ba1c6045064624e9d8eb5e35b68b5e1007e80563ba7ede570dd5a819a2aaec",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Restricted retry; Windows local socket WinError 10013",
+      "exit_code": 8,
+      "expected_exit_code": 8,
+      "log_path": "out/sdp-m10/stage46/native-focused-retry.log",
+      "log_sha256": "b30c63998344ab7404a3012f42152c57c120da1ac2ec5b9068f9198befa160b5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Host loopback retry of history_rpc and sql_rpc",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage46/native-focused-retry-host.log",
+      "log_sha256": "850bb224b413cb34d15b88a76a04b17500580a19606482727f15da820ce2eba6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial parallel MSVC build hit C1060; single node build passed",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage46/native-server-release-accepted.log",
+      "log_sha256": "934f498ea2859c0bf7ed9eb9f3b1632b30a2aad11de1ad112314c1d0165dc956",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S46-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Gerçek 0.3.0 TLS örneğinden DECIMAL, NULL, BLOB, PL/SQL, History ve eğitilmiş model korundu. Etkin kaynak kilidi reddedildi. Eski binary geçerli CRC ile üretilen bilinmeyen v99 başlığı açmadı. Source DB ve WAL SHA-256 değerleri değişmedi."
+    },
+    {
+      "id": "S46-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "İmzalı güncelleme süreci altı kalıcı adım sonrasında sonlandırıldı. Yeni süreç aynı günlüğü sürdürdü. Kaynak, staging ve korunan kopya kimlikleri ile gerçek TLS/History denetlendi."
+    },
+    {
+      "id": "S46-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Bozuk CMS, yanlış sertifika pini, değişmiş manifest ve SHA uyuşmayan artifact reddedildi. Tamamlanan adayın yeni yazmaları gerçek TLS üzerinden doğrulandı. Rollback has_new_writes ile durdu."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage46/native-server-accepted/Release/StarDataParadiseServer.exe",
+      "sha256": "34db6326e9ba65918ac959fbd1a758944bc0b25bec458ce0db37ee84617de742"
+    },
+    {
+      "repo": "StarDataParadise",
+      "file": "out/sdp-m10/stage46/build/Release/StarDataParadise.exe",
+      "sha256": "a48da9bf3d99a0cea75d0c7ddeba2afaed4f7ad9c3aa75a0307bcc67c12cf848"
+    },
+    {
+      "repo": "StarDataParadiseCli",
+      "file": "out/sdp-m10/stage46/build/Release/StarDataParadiseCLI.exe",
+      "sha256": "0335451e54ea8b165847a919e1ae5d14a708273db34970ff9ffac50375dec13a"
+    }
+  ],
+  "remaining_issues": [
+    "Güncelleme, yan yana hazırlanan Windows x64 hedefini doğrular. Operatör hedefe geçişi seçer.",
+    "Canlı online yayın ucu testi çalıştırılmadı. Çevrimdışı pinli CMS ve güvensiz URL reddi doğrulandı.",
+    "Kesinti kanıtı altı kalıcı adım sınırını kapsar. Hedef sahipliği kanıtlanamadığında temiz hedef istenir.",
+    "Windows hizmeti için isteğe bağlı durdurma ve geri alma dalı bu etapta çalıştırılmadı. Çalışan örnekler korunarak bağımsız TLS aday doğrulaması çalıştı."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 47
+}

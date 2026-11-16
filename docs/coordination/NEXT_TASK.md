@@ -1,7 +1,7 @@
 # Sıradaki etap
 
-**46 Güncelleme, format ve geri dönüş**
+**50 etap tamamlandı.**
 
-Etap 45 kabulü tamamlandı. Güncelleme ve veri formatına ilişkin Etap 46 iş akışı sıradadır.
+M10 Windows x64 geliştirme adayı yerel teslim için doğrulandı.
 
-[Etap 45 kabul kanıtı](STAGES/45.json)
+[M10 raporu](M10_REPORT.md) · [50. etap kaydı](STAGES/50.json)

@@ -1,0 +1,305 @@
+{
+  "stage_id": 50,
+  "status": "PASSED",
+  "started_at": "2026-11-16T14:58:38.6823375+03:00",
+  "finished_at": "2026-11-16T15:48:05.211176+03:00",
+  "prerequisite_evidence": [
+    {
+      "sha256": "b96e3a264dfd423b73d888eb22b9acfe98510668328d4727ec90155ef8501615",
+      "file": "STAGES/49.json",
+      "stage_id": 49
+    }
+  ],
+  "toolchain": {
+    "configuration": "Release",
+    "architecture": "x64",
+    "generator": "Visual Studio 18 2026",
+    "compiler_toolset": "v145",
+    "windows_sdk": "10.0.26100.0",
+    "cmake": "4.2.2",
+    "wix": "5.0.2",
+    "qt": "6.11.3",
+    "protocol": 1,
+    "native_abi": 1
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseDLLler",
+      "head": "d9171db05cd5f4ead93328f9e0982d2379b087f9",
+      "dirty": false,
+      "source_archive": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage50/p/n/source.zip",
+        "sha256": "185220d14b6a903852cd7c74f082fd51f42061fe64620652b9c725415fba454e"
+      }
+    },
+    {
+      "name": "StarDataParadiseServer",
+      "head": "ac96e44f90ad2894bb1bd095adbfdb24449bf062",
+      "dirty": true,
+      "source_archive": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage50/p/s/source.zip",
+        "sha256": "c67089acdb2b77be503393ea8db8b872152d3674da7026495c37d5bcc90f3b73"
+      }
+    },
+    {
+      "name": "StarDataParadiseCli",
+      "head": "06f300eb2f2940d9f0503e49e90dfc1224d16e78",
+      "dirty": true,
+      "source_archive": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage50/p/c/source.zip",
+        "sha256": "f3a181f65227b9a1eac22398b41fa99426b5b5240b21cd93cf1360eaf16964b4"
+      }
+    },
+    {
+      "name": "StarDataParadise",
+      "head": "7db3733ce149bce79974099b0f1a3d74a1576196",
+      "dirty": true,
+      "source_archive": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage50/p/w/source.zip",
+        "sha256": "e0862e61f4a694c73deb2fb346d3615cac61e148c2d6fe78773370e979aa451b"
+      }
+    },
+    {
+      "name": "StarDataParadise.SDK.NET",
+      "head": "c944fb42ff8bd9d0bec405e1bb2d65bfb2d38b47",
+      "dirty": false,
+      "source_archive": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage50/managed/r5c3d1b8a/dn/source.zip",
+        "sha256": "83e07af2c4e0ef492ba412a73456d6d701014e6cc433978a96dfe7bbff066e05"
+      }
+    },
+    {
+      "name": "StarDataParadise.SDK.Java",
+      "head": "0284e227d27a127a063e885cff0ed2740ac6714b",
+      "dirty": false,
+      "source_archive": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage50/managed/r5c3d1b8b/j/source.zip",
+        "sha256": "7e8db3c2f09853640d46108dde55e4364a3e83d3a5c5b1bb5da907857492c985"
+      }
+    },
+    {
+      "name": "StarDataParadise.SDK.Python",
+      "head": "47020bc86ab69d5ed138eb4e15b8cd5cbcd5f324",
+      "dirty": false,
+      "source_archive": {
+        "file": "StarDataParadiseServer/out/sdp-m10/stage50/managed/r5c3d1b8a/py/source.zip",
+        "sha256": "c7c9158570bd23f69c64a04dce41830737a55116c7db07d4ab8acb6c37695212"
+      }
+    }
+  ],
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify mandatory gate evidence 01-49",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/prior-stages-audit.json",
+      "log_sha256": "f6ef2337890965135031d056c55ed1a95844a002bacb3c918e2c3e7fa26d493c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Clean serial Release build, all 76 Native/Server/CLI/Workbench CTest and installed Native consumers",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/p/native-products-artifacts.json",
+      "log_sha256": "97bb1e3762be781e3d184f23629df8d833de80a3555c7d8641229b26920ed896",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Clean rebuilt MSI and Portable extraction tests",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/dist/msi-audit.log",
+      "log_sha256": "a6c73c322a2521024521cdd7f237896618d2337587ca73a8e76a3c83cbc0b24d",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build-SetupBundle.ps1 from clean products",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/dist/offline-build.log",
+      "log_sha256": "bd5d38f5a9c91881beb93594d770bff8738610e4327014caa32e7e8934296152",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "SDK packages live TLS verification against the final Server and wire v1",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/managed/verify-first-exit.json",
+      "log_sha256": "8124928573ef70b336b38ce343431143ef1665a2f961a43db7404a2caed9f9d7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Audit final product hashes, source scan, runtime dependencies and SPDX",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/release-audit.log",
+      "log_sha256": "8266415c24a1c4ddecf7e9fec332ae3713f66f6eeb0748a418bfab70e44c2ffc",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Clean Windows guest Matrix + S50-T02",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/final-guest-evidence.zip",
+      "log_sha256": "3fd13131815bb5013d19d206f8836ccfd8947b050d9957d433ce4abffff7c6b2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify final guest payloads in the restored VM",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/final-guest-stage.log",
+      "log_sha256": "d23f21857adfe51ab4eab32ca64d48cae6877e87ab7225576712418aff9551d6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify both isolated host TLS endpoints from the VM",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/final-guest-remote-preflight.log",
+      "log_sha256": "ce1abfac038333ee33c542596a256bdaf7a4fdb339261781d92ae4d7555a3f9f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Collect and verify guest evidence bytes and installed hashes",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/final-guest-collect.log",
+      "log_sha256": "4f043f3d5e6b1d700f7566c76b3d21b9190a58db41fe3fdd533eaaca53192d0c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "First assembly, before distinguishing Setup channel from signature policy",
+      "exit_code": 1,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/final-assembly-attempt1.log",
+      "log_sha256": "0ac2ce358b226c565710cc08723f5a0d90e77cb419d0107179b1bae4127eadc8",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Assemble-Stage50Release.py with validated Setup channel and component signature policy",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/final-assembly.log",
+      "log_sha256": "2f23e8f70762839519eaba679ec050e4644709efc60c85f43c97103acac8aa89",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Independently verify ZIP members against SHA256SUMS and hash the ZIP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/final-delivery-verify.log",
+      "log_sha256": "f129af0a4950ed67b713f562fcfec55366435d10498c5a42d816e4d138f1a10a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify M10 release manifest, folder, ZIP, checksums and offline documents",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage50/final-record-verify.log",
+      "log_sha256": "8434d5a7becff9f26560d5efe1ccf24375be3e4ea86bbe284d9a25e83b3e7d7d",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S50-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "01-49 arasındaki 162 zorunlu test, önkoşul karmaları, yedi kaynak arşivi, final paket ve MSI karmaları denetlendi. 37 artefakt ve 26 SPDX paket kaydı, kimlik bilgisi bulgusu 0."
+    },
+    {
+      "id": "S50-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Son Setup ve üç EXE’nin SHA-256 değerleri temiz Windows konukta eşleşti. Kurulum matrisi ve S50-T02 uçtan uca testi çıkış kodu 0 verdi. SQL, PL/SQL, History, Decision, CPU ML, Java export ve yedek geri yükleme doğrulandı."
+    },
+    {
+      "id": "S50-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Standart kullanıcı ve yönetici kurulum/kaldırma akışları geçti. MSI özellikleri kendi ürününe bağlı; GPU bileşeni manifestte kullanılamaz."
+    },
+    {
+      "id": "S50-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Yerel teslim ve ZIP içindeki 121 dosya tek tek karşılaştırıldı. SHA256SUMS, SPDX, Türkçe çevrimdışı yardım ve geri dönüş belgeleri doğrulandı."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "out/sdp-m10/stage50/dist/audit-inputs.json",
+      "sha256": "893c9e9c25105e395a4546731609898d870646efd2c3f2896bcb2c69ba1d5992"
+    },
+    {
+      "path": "out/sdp-m10/stage50/dist/release.spdx.json",
+      "sha256": "9ca767b45b55620a4421a8ff1a60f19cb96681eb633834e1dba27cf0325c7e7e"
+    },
+    {
+      "path": "out/sdp-m10/stage50/dist/release-audit.json",
+      "sha256": "1ab116d82eeae0331c8bf35b312787886d395fe319e0d06aef058fe7a6679552"
+    },
+    {
+      "path": "out/sdp-m10/stage50/dist/package-receipt.json",
+      "sha256": "3772cb8c014d075f4aeb6ea587b9386b273901b43307a9218cf530c3a238c34e"
+    },
+    {
+      "path": "out/sdp-m10/stage50/guest/guest-inputs.json",
+      "sha256": "ee2f40bffa8bc20aeb959157ae399ff89b53b9ce39efa4a2e508100432bad34c"
+    },
+    {
+      "path": "out/sdp-m10/stage50/final-guest-evidence.zip",
+      "sha256": "3fd13131815bb5013d19d206f8836ccfd8947b050d9957d433ce4abffff7c6b2"
+    },
+    {
+      "path": "out/sdp-m10/stage50/final-guest-receipt.json",
+      "sha256": "5d72beab57ad51c920abd0e316531969659c0fff551a45279b8e1c68b239689b"
+    },
+    {
+      "path": "out/sdp-m10/stage50/delivery/StarDataParadise-M10/release-manifest.json",
+      "sha256": "9b545d24e183ea0ddef74a0ec06ff2af8b536f268ab5b0b4eea95555095f242f"
+    },
+    {
+      "path": "out/sdp-m10/stage50/delivery/StarDataParadise-M10/SHA256SUMS.txt",
+      "sha256": "b1e305bfc503614fdcf1594effef3a68ec3fa6929b307ee083fd6c3ccff4f27e"
+    },
+    {
+      "path": "out/sdp-m10/stage50/delivery/StarDataParadise-M10/evidence/summary.json",
+      "sha256": "e17f1d71ea815b956d9bd3011df107a70714f7c7da3dcb98e8301259f2129a0f"
+    },
+    {
+      "path": "out/sdp-m10/stage50/delivery/StarDataParadise-M10-win-x64.zip",
+      "sha256": "4c21bdd3533bc0f444d799702099e08fdfd5b73556b7d3a89eab3f68c698f790"
+    },
+    {
+      "path": "out/sdp-m10/stage50/delivery/StarDataParadise-M10-win-x64.zip.sha256",
+      "sha256": "d0c660b03544934aa96a4cb9b5e9885056ff6efcb398e59eb4806dff44e93732"
+    },
+    {
+      "path": "out/sdp-m10/stage50/final-vm-snapshot.log",
+      "sha256": "bc1992de5d2ccf1b8a9826527519fab1a66f05f034d80fa981ede5902b7b953f"
+    }
+  ],
+  "remaining_issues": [
+    "Aday imzasız Windows x64 geliştirme teslimidir. GPU eğitimi, diğer işletim sistemleri ve üretim imzası doğrulama kapsamı dışındadır.",
+    "49. etapta Windows uzun yol desteği kapalıyken 261 karakterlik WAL yolu açılışı durdurdu. Doğrulanan güncellemede kısa mutlak test yolları ve uygulama yerel VC çalışma zamanı kullanıldı.",
+    "Yedi kaynak arşivi temiz derleme için daha önce alınan görüntüleri taşır. M10 raporu ve nihai sonuç kaydı daha sonra tamamlandı."
+  ],
+  "next_stage_allowed": false,
+  "next_stage_id": null
+}

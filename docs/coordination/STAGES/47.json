@@ -1,0 +1,626 @@
+{
+  "stage_id": 47,
+  "status": "PASSED",
+  "started_at": "2026-11-16T10:09:12.7066228+03:00",
+  "finished_at": "2026-11-16T10:33:35.8859700+03:00",
+  "prerequisite_evidence": [
+    {
+      "stage_id": 46,
+      "file": "STAGES/46.json",
+      "sha256": "d7e8df863c9014759b292686feb5799da91afe757edec105ed9a19a9a710ee75"
+    }
+  ],
+  "toolchain": {
+    "platform": "Windows x64",
+    "cmake": "4.2.2",
+    "msvc": "v145",
+    "qt": "6.11.3",
+    "native_abi": 1,
+    "wire": 1,
+    "dotnet": "10.0.402 / net48",
+    "java": "17 / Gradle 9.3.1",
+    "python": "3.12.4",
+    "wix": "5.0.2"
+  },
+  "repositories": [
+    {
+      "name": "StarDataParadiseServer",
+      "head": "ac96e44f90ad2894bb1bd095adbfdb24449bf062",
+      "branch": "master",
+      "dirty_before": true,
+      "changed_files": [
+        "tests/cross_sdk_fixture.py",
+        "tests/ledger_smoke.cpp",
+        "tests/sdk_contract/build_managed.ps1",
+        "tests/sdk_contract/dotnet-observations.txt",
+        "tests/sdk_contract/java-observations.txt",
+        "tests/sdk_contract/managed_evidence.ps1",
+        "tests/sdk_contract/managed.md",
+        "tests/sdk_contract/native.py",
+        "tests/sdk_contract/prepare_managed_adapter.py",
+        "tests/sdk_contract/python.py",
+        "tests/sdk_contract/run_managed.ps1",
+        "tests/sdk_contract/run_native_python.ps1"
+      ],
+      "source_manifest": "out/sdp-m10/stage47/StarDataParadiseServer.changed.sha256",
+      "source_manifest_sha256": "159e24eaed4e5fd5b06944bd22e94261216b050274fac14d9cf3cd24d4d7dbc9"
+    }
+  ],
+  "checkpoint": {
+    "archive_path": "out/sdp-m10/stage47/workspace-before.zip",
+    "repo": "StarDataParadiseServer",
+    "manifest": "out/sdp-m10/stage47/workspace-before.json",
+    "archive_sha256": "c5ecf0c71174c6b7498f7bc2fc5cd86227204984f88e43b284e71e0178e736b2"
+  },
+  "commands": [
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify pre-stage recovery archive",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/checkpoint.log",
+      "log_sha256": "8ad5546c4470b461013888ce009978dd176d24f41a03dea5638e907afb7f58ba",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Extract verified separate source trees (three product repos)",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/products-extract.log",
+      "log_sha256": "fad183bd85320af14980ad48253cb4af62efbac920a587fb639b604c23cb78c8",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Server fresh CMake Release configure",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/s-configure.log",
+      "log_sha256": "dab2bbe2867c76796dd4ad5b22ae0139a3979ccd72c4f110d4264e3d42c4777c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Server fresh CMake Release build",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/s-build.log",
+      "log_sha256": "08b808590e7cac40db98d526c4affdea87d09adc328dd6a166c3b954f54e698e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Server fresh CMake Release ctest",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/s-ctest.log",
+      "log_sha256": "9a8552883bcd05c481d1cef734b5834b974296f84b4b90cdea923c7b55638150",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CLI fresh CMake Release configure",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/c-configure.log",
+      "log_sha256": "d358d92148ddd932d086fde902524f01e5accf4389e50f4078cff720da4be99c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CLI fresh CMake Release build",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/c-build.log",
+      "log_sha256": "06c9bdcf83d03c7d761bf7a16c9d6ad39a414eedaf87072eea8241e3c2185938",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CLI fresh CMake Release ctest",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/c-ctest.log",
+      "log_sha256": "9d18212a7f7053dd6dffb5f351351022ce4ef4ec05ecd8a54f765f01bc87525e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Workbench fresh CMake Release configure",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/w-configure.log",
+      "log_sha256": "3f98f1aa3ac0b45ee8abeb36b608116c09380bdac573816f46cc73a5c2242bab",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Workbench fresh CMake Release build",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/w-build.log",
+      "log_sha256": "adfb9d496a2a61f27a12f74fc77d368ce422b018e20ff2a42aa154ea7b189060",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Workbench fresh CMake Release ctest",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/w-ctest.log",
+      "log_sha256": "83eaef64a91a3c14fb37f9272c821f7a8cfb3aba9800a62f346947a34f5e7497",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Server wire archive, real TLS version/auth, storage and outcome ledger CTest",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/s-contract-ctest.log",
+      "log_sha256": "1b08d80ec109db7d628fa9199f926bc9e848b306f257c5d3433d8c524305f28f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build and consume three independent MSIs with verified Qt and Native runtime",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/package-products-final.log",
+      "log_sha256": "9e8f9da9cd1c05bb3b64934cabd6492b2778433200e2cd8786eb0217f82c6cc0",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial manifest SHA pin contained a transcription error; rejected",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage47/release-manifest.log",
+      "log_sha256": "6d674cc654f31b1fe2309c5110ff717ae88e5a7ae45fa1182880ab47a8f20aa5",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial isolation inventory counted copied ignored Visual Studio settings inside scratch",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage47/source-isolation.log",
+      "log_sha256": "138682b2fd11eaeeef7ce9fad574a65e04d98cd806ab866a431db56d7f9eb3d3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Check source bytes for seven unchanged repositories and Stage47 Server change scope",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/source-isolation-final.log",
+      "log_sha256": "4b3daca6261b435354e2f05428de845aec598fb98c82441ad72471e8aa1a2460",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Prove expired persisted token, TLS protocol rejection and seeded common observations",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/fixture-probe.log",
+      "log_sha256": "13896b8a73b9eea86dbf68452e20804cb7609b2b886085282e1242256b9d66a6",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build test-only ledger seed helper",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/ledger-fixture-build.log",
+      "log_sha256": "8e4cb0340257cf38fb615a11562e1c6e0a620417e4fbe8ec5c19ad4ef80061f3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Ledger regression with test-only helper",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/ledger-ctest.log",
+      "log_sha256": "cb02f4bcb60a10bd0d1fd427400bb39da1f24d550f2d9c9eaf206676e66b3e74",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial released CLI test arguments required explicit DLL",
+      "exit_code": 2,
+      "expected_exit_code": 2,
+      "log_path": "out/sdp-m10/stage47/frozen-cli.log",
+      "log_sha256": "4f7cde8f0d0292b5370b6fec8c7c4e7074e402d324bb529b850fc0a83ddebb92",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run released CLI TLS/SQL regression against current Server",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/frozen-cli-final.log",
+      "log_sha256": "3ef92013554702b99c4a93d51c44f76cbbc9119d8100cae225ef38a16c9edab4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Configure clean Native SDK checkout",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/n/configure.log",
+      "log_sha256": "591ea073d2a1091ed8c9bf6f4f0d53095dffd4eaf44975734d48cedba3ffbcd3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Compile current Native SDK",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/n/build.log",
+      "log_sha256": "07ced4e35c1caada88089e7aa7369d795a7d05b26bbea537bd1a919a7775f29f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CTest SDK version and pinned contract",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/n/ctest.log",
+      "log_sha256": "b4c21ab975980b19a67e9fdcdde3f42ffc66b8e950284ff39c94f1065904eeb9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "CPack Native SDK ZIP",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/n/package.log",
+      "log_sha256": "da76713f7631d1bf51d7e3358a02bef2d85087ffe893da4c4d2284d3514ad30e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "C and C++ installed Native SDK consumer including bad ABI",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/n/installed-package.log",
+      "log_sha256": "00b3202b7e188d4120f249e937b53659bccacd375cd0c416726ad449b5a5c2cc",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial Windows long temp-path Python packaging failure",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage47/py/build.log",
+      "log_sha256": "39dd585ec652fe75906acfc99a8868d6973bb20bb5bb3955fe28c07e4f5586fe",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Short temp path; clean Python wheel/sdist build and independent install test",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/py/build-host.log",
+      "log_sha256": "d44cae5fbc99346fd81261fdf87ff0796a8843ecc8007e32fc1df531c4b172c7",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Frozen, clean and foundation Native and Python consumer runs",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/native-python.log",
+      "log_sha256": "7093419213144fb13edc7c947521950c422e190ee137de578cbedb945496ea22",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run native installed package against the clean Stage47 Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/np-clean-server/native.log",
+      "log_sha256": "b11727f8be3f5f49dcb9913051d6a2fd8601704cf045f8d303248be088b8bc57",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run native-frozen installed package against the clean Stage47 Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/np-clean-server/native-frozen.log",
+      "log_sha256": "b11727f8be3f5f49dcb9913051d6a2fd8601704cf045f8d303248be088b8bc57",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run python installed package against the clean Stage47 Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/np-clean-server/python.log",
+      "log_sha256": "1fdf7e07f4c825bc0dffbb60986449b8cc06cb682559052088129943bbb60a0c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Run python-frozen installed package against the clean Stage47 Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/np-clean-server/python-frozen.log",
+      "log_sha256": "1fdf7e07f4c825bc0dffbb60986449b8cc06cb682559052088129943bbb60a0c",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build both NuGet packages and smoke installed consumers",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/dotnet-clean-baseline.log",
+      "log_sha256": "2a1da8370626038f4612146f0cdd42c375a1e796da27af7c656eba7e51deeddb",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Build and package JDBC with Gradle and test",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/java-clean-baseline.log",
+      "log_sha256": "c1a90876761b132c2cf48bed7a250603761da55a6773d50023bf22e7ac32595a",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify tracked managed .NET build wrapper",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/dotnet-script-build.log",
+      "log_sha256": "ff4cd96e1c787dfff24c752ed07142a7727cbce5817e0d0dcbc36f578fcd52a1",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify tracked managed JDBC build wrapper",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/java-script-build.log",
+      "log_sha256": "3f2610d0f604ea1871c6b28611a1e14c94ee1236963b227822922f7aaa651af4",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Test dotnet-final-expiry net10 package against same clean Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/dotnet-final-expiry/net10-tls.log",
+      "log_sha256": "9a362ee232115af4eaaeca45407050faafe0c52a68c59f332a746dc430d5c231",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Test dotnet-final-expiry net48 package against same clean Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/dotnet-final-expiry/net48-tls.log",
+      "log_sha256": "5fa925ddc44ebf07bc5df294fdbf947a0c804dc987d851c26bc64e3f15604526",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Test dotnet-final-public net10 package against same clean Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/dotnet-final-public/net10-tls.log",
+      "log_sha256": "af9cecaa53873dcf802cd58c23d1a2c6ae20adfc6c65fe4afcb78d15a0eeb4e9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Test dotnet-final-public net48 package against same clean Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/dotnet-final-public/net48-tls.log",
+      "log_sha256": "1d8b2a41490a73281cacfa459e61ffc0a6b5ebb84c4b8c6bfd7a99ec07a60b64",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Test dotnet-final-m9 net10 package against same clean Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/dotnet-final-m9/net10-tls.log",
+      "log_sha256": "ed0168a3b46690513598f4b969a440d6b129bfc4ce5d3b86f10c13077c0d75d9",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Test dotnet-final-m9 net48 package against same clean Server fixture",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/dotnet-final-m9/net48-tls.log",
+      "log_sha256": "47679ed19031a6aa8998a698de8ce62f8f233a624995476d394591a74834d17b",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Current installed JDBC, real ledger expiry",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/java-final-expiry/jdbc-tls.log",
+      "log_sha256": "d19bf7d1e7740061886645b14df4efa90b67ac97c875269c0a571ad5561f2d1e",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Older published JDBC, real clean Server",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/java-final-published/jdbc-tls.log",
+      "log_sha256": "73d953a61b7787d12aaaad359a1f88f6a17dcd84808bf85eae526634566b9202",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify NuGet repository signature for Drive",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/nuget-public/stardataparadisedrive.2.0.0-preview.1-nuget-verify.log",
+      "log_sha256": "ea384e013dfe82a1e369f39eb400d474bfee9fe77c7887a610666a7e1ada8962",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify NuGet repository signature for Framework",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/managed/nuget-public/stardataparadisenetframework.2.0.0-preview.1-nuget-verify.log",
+      "log_sha256": "109e77780c4e82a9b5bb14b5aed62c891681759a4b32fc1a90dfdcad0bbe26a3",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Verify package hashes, application-local DLLs and common wire pin",
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "log_path": "out/sdp-m10/stage47/release-manifest-final.log",
+      "log_sha256": "ac5d7afeb5c2f9b9f51ef19ed7c0666db5282d64afe96a5ef8db85df6238f78f",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial Python OUT label assertion before fetching",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage47/py/cross-old.log",
+      "log_sha256": "171d55eb6078e4d2201a2fc067b635906bcb40b3ced443ba8190bbf16096edba",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial Java fixture relay authentication timeout",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage47/managed/java-current-first.log",
+      "log_sha256": "f0ce0f853900e5f68873314bb3122fd98667ef64b9e09d2c56ec7b938d98b1d2",
+      "actually_executed": true
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "command": "Initial Native read fixture expected wrong local reset handle code",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "log_path": "out/sdp-m10/stage47/n/cross-current.log",
+      "log_sha256": "d2dca98cedfdac2bb32a40b64d9ddf57ef9e0f81870544e4fd171510f2ae7ae2",
+      "actually_executed": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "S47-T01",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Üç uygulama ve dört SDK ayrı kaynak kopyalarından derlendi. Üç MSI payload’ı ayrı dizinde açıldı. Native C/C++ tüketici, iki NuGet hedefi, önceki ve güncel JDBC, Python wheel ve sdist kurulumları geçti."
+    },
+    {
+      "id": "S47-T02",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Aynı TLS Server/fixture üzerinde tipli CRUD, DECIMAL/NULL/zaman/BLOB, PL/SQL OUT, setler, transaction/savepoint, kimlik doğrulama, Decision 1006/42501, History 2, model 58, kopma sonrası kalıcı commit sonucu ve süresi geçmiş ledger girdisi dört SDK’da doğrulandı."
+    },
+    {
+      "id": "S47-T03",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Native 0.4.0, Native 0.1.0 temel API, önceki CLI, önceki JDBC, önceki Python ve iki NuGet yayını ayrı paketlerle denendi. Wire 2 hata 1003, uyuşmayan Native ABI ayrı hata verdi."
+    },
+    {
+      "id": "S47-T04",
+      "mandatory": true,
+      "result": "PASS",
+      "evidence": "Manifestte çalışma zamanı, paket, kaynak ve wire SHA-256 değerleri mevcut. Python OUT ve geçici yol ile JDBC proxy adaptör düzeltmelerinin önceki ve sonraki kanıtları kaydedildi."
+    }
+  ],
+  "artifacts": [
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/product/s/b/Release/StarDataParadiseServer.exe",
+      "sha256": "351d7bf57af6ff6cb4195afab781744d637f521d29cfda5a7ce049dd38960dfd"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/product/c/b/Release/StarDataParadiseCLI.exe",
+      "sha256": "c4a39973513adef816a842a0360500bf62be8b992168d0802990d60932a325f5"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/product/w/b/Release/StarDataParadise.exe",
+      "sha256": "18a3964d6ce1eddb6cfe2491ff39244ae3c6e6762bee673dc8f0818cffba3bbd"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/components/components.json",
+      "sha256": "a7ab63df1ccd15fe774cce5dcdcfec67f0e888e99733f098f3fed042f28ec7ee"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/components/server-0.4.0-win-x64.msi",
+      "sha256": "f0655d6513889fb45faac11a1e63d318278c8bf8ad89a542db2cf4d265a2e446"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/components/workbench-0.1.0-win-x64.msi",
+      "sha256": "3131bb5fd193c20e23bd1ba3d81dc47a538289a633a5d5ed718d6e697cf67860"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/components/cli-0.2.0-win-x64.msi",
+      "sha256": "b3f3d8a177f8e9bde8526c138332bf012407385bd9d296078129e03f5320bc29"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/n/pkg/StarDataParadiseDLLler-0.4.1-win-x64.zip",
+      "sha256": "83c2c840fd0560f2b4571496e49b8505eb2aa60c9cbadba3cc24e7dcd4222de9"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/py/pkg/stardataparadise_sdk-0.2.0-py3-none-any.whl",
+      "sha256": "290440c75c7b9466bd2a29cb50f942f3288f40b3e3428c4902ca636f4d66a0b1"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/py/pkg/stardataparadise_sdk-0.2.0.tar.gz",
+      "sha256": "cae678637744f4a43913e88c76f6b27ca0222b1b323c925dba53c4901c237663"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/managed/dotnet-clean/source/out/packages/StarDataParadiseDrive.2.0.0-preview.1.nupkg",
+      "sha256": "e181e877abca6a9af9c7460f0586372b80bb993628be8f143f4190f3bba7f0b4"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/managed/dotnet-clean/source/out/packages/StarDataParadiseNetFramework.2.0.0-preview.1.nupkg",
+      "sha256": "b1f23eb5a630a426a6f5934f9d1883250c7c0f2cf8453c11c993ca7274ccf6f6"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "out/sdp-m10/stage47/managed/java-clean/source/out/maven/com/stardataparadise/stardataparadise-jdbc/0.2.0/stardataparadise-jdbc-0.2.0.jar",
+      "sha256": "acf4325cd6ef2d4b9c2affeeae29a53ebf8d8c174e2140413eee60d1accf3482"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "docs/coordination/S47_RELEASE_MANIFEST.json",
+      "sha256": "8ec40e9c647512480fdef713505e90bc251e5ad19504a10e93548f54d99c9cdd"
+    },
+    {
+      "repo": "StarDataParadiseServer",
+      "file": "docs/coordination/S47_SDK_CONTRACT.md",
+      "sha256": "e79b94a57fca399479d66e0702a4d62087cdc34efff2fc37c756fa926633016f"
+    }
+  ],
+  "remaining_issues": [
+    "Eski .NET ve Java 0.1.0 paketleri sürüm bilgisi tabanıdır. Python 0.1.0 kurulum ve sürüm testiyle kapsandı.",
+    "CMake CLI Native 0.4.0, MSI CLI ile Workbench Native 0.4.1. Taşınabilir ve MSI sürüm bağları manifestte ayrı.",
+    "Windows x64 paketler unsigned-development kanalında. Linux, macOS ve diğer mimariler test edilmedi."
+  ],
+  "next_stage_allowed": true,
+  "next_stage_id": 48
+}
