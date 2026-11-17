@@ -260,6 +260,7 @@ Backup*/
 !/backup/
 !/backup/archive.cpp
 !/backup/archive.hpp
+!/compatibility/backup/
 UpgradeLog*.XML
 UpgradeLog*.htm
 ServiceFabricBackup/

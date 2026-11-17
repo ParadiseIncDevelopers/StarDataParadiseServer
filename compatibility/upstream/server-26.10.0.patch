@@ -1,0 +1,524 @@
+diff --git a/mysql-test/r/sdp_compatibility.result b/mysql-test/r/sdp_compatibility.result
+new file mode 100644
+index 0000000000000000000000000000000000000000..be84d03daba54d76b1d5fc122cb471b335358568
+--- /dev/null
++++ b/mysql-test/r/sdp_compatibility.result
+@@ -0,0 +1,38 @@
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
++mode
++mysql
++version	mode	features_pending
++1	mysql	1
++EXECUTE sdp_probe;
++mode
++mysql
++SET SESSION sdp_compatibility_mode = 'legacy';
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
++mode
++legacy
++EXECUTE sdp_probe;
++mode
++legacy
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
++mode
++mysql
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
++mode
++legacy
++CREATE TABLE sdp_mode_smoke (id INT PRIMARY KEY) ENGINE=InnoDB;
++START TRANSACTION;
++INSERT INTO sdp_mode_smoke VALUES (1);
++ROLLBACK;
++SELECT COUNT(*) AS rows_after_rollback FROM sdp_mode_smoke;
++rows_after_rollback
++0
++DROP TABLE sdp_mode_smoke;
++SET SESSION sdp_compatibility_mode = 'mysql';
++EXECUTE sdp_probe;
++mode
++mysql
++DEALLOCATE PREPARE sdp_probe;
++SET SESSION sdp_compatibility_mode = 'legacy';
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
++mode
++mysql
+diff --git a/mysql-test/r/sdp_legacy_analyze.result b/mysql-test/r/sdp_legacy_analyze.result
+new file mode 100644
+index 0000000000000000000000000000000000000000..0d1cfe1f776324c282b3616712aacd0ff29767f7
+--- /dev/null
++++ b/mysql-test/r/sdp_legacy_analyze.result
+@@ -0,0 +1,33 @@
++CREATE TABLE sdp_analyze_stats (id INT PRIMARY KEY) ENGINE=InnoDB STATS_PERSISTENT=1 STATS_AUTO_RECALC=0;
++INSERT INTO sdp_analyze_stats VALUES (1), (2), (3), (4);
++SELECT JSON_LENGTH(STARDATAPARADISE_CAPABILITIES(), '$.commands') AS commands;
++commands
++0
++SET SESSION sdp_compatibility_mode = 'legacy';
++advertised
++1
++ANALYZE test.sdp_analyze_stats;
++Table	Op	Msg_type	Msg_text
++test.sdp_analyze_stats	analyze	status	OK
++stats_updated
++1
++PREPARE sdp_stats FROM 'ANALYZE sdp_analyze_stats';
++EXECUTE sdp_stats;
++Table	Op	Msg_type	Msg_text
++test.sdp_analyze_stats	analyze	status	OK
++START TRANSACTION;
++INSERT INTO sdp_analyze_stats VALUES (5);
++ROLLBACK;
++SELECT COUNT(*) AS rows_after_rollback FROM sdp_analyze_stats;
++rows_after_rollback
++4
++SET SESSION sdp_compatibility_mode = 'mysql';
++DEALLOCATE PREPARE sdp_stats;
++ANALYZE TABLE test.sdp_analyze_stats;
++Table	Op	Msg_type	Msg_text
++test.sdp_analyze_stats	analyze	status	OK
++CREATE USER 'sdp_stats_reader'@'localhost';
++GRANT SELECT ON test.sdp_analyze_stats TO 'sdp_stats_reader'@'localhost';
++SET SESSION sdp_compatibility_mode = 'legacy';
++DROP USER 'sdp_stats_reader'@'localhost';
++DROP TABLE sdp_analyze_stats;
+diff --git a/mysql-test/t/sdp_compatibility.test b/mysql-test/t/sdp_compatibility.test
+new file mode 100644
+index 0000000000000000000000000000000000000000..7cc0b1ec75ae1a246a522328642ea5cb5deb7956
+--- /dev/null
++++ b/mysql-test/t/sdp_compatibility.test
+@@ -0,0 +1,52 @@
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
++--disable_query_log
++SET @caps = STARDATAPARADISE_CAPABILITIES();
++SELECT JSON_EXTRACT(@caps, '$.version') AS version,
++       JSON_UNQUOTE(JSON_EXTRACT(@caps, '$.mode')) AS mode,
++       JSON_CONTAINS(@caps,
++         '{"history":false,"decision":false,"plsql":false,"ml":false,"jobs":false,"backup":false,"admin":false}',
++         '$.features') AS features_pending;
++
++PREPARE sdp_probe FROM
++  'SELECT JSON_UNQUOTE(JSON_EXTRACT(STARDATAPARADISE_CAPABILITIES(), "$.mode")) AS mode';
++--enable_query_log
++EXECUTE sdp_probe;
++SET SESSION sdp_compatibility_mode = 'legacy';
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
++EXECUTE sdp_probe;
++
++--disable_connect_log
++connect (other, localhost, root, , test);
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
++connection default;
++disconnect other;
++
++--disable_query_log
++--disable_result_log
++--error ER_WRONG_VALUE_FOR_VAR
++SET SESSION sdp_compatibility_mode = 'invalid';
++--error ER_LOCAL_VARIABLE
++SET GLOBAL sdp_compatibility_mode = 'legacy';
++--enable_result_log
++--enable_query_log
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
++
++CREATE TABLE sdp_mode_smoke (id INT PRIMARY KEY) ENGINE=InnoDB;
++START TRANSACTION;
++INSERT INTO sdp_mode_smoke VALUES (1);
++--disable_query_log
++--disable_result_log
++--error ER_VARIABLE_NOT_SETTABLE_IN_TRANSACTION
++SET SESSION sdp_compatibility_mode = 'mysql';
++--enable_result_log
++--enable_query_log
++ROLLBACK;
++SELECT COUNT(*) AS rows_after_rollback FROM sdp_mode_smoke;
++DROP TABLE sdp_mode_smoke;
++
++SET SESSION sdp_compatibility_mode = 'mysql';
++EXECUTE sdp_probe;
++DEALLOCATE PREPARE sdp_probe;
++SET SESSION sdp_compatibility_mode = 'legacy';
++--reset_connection
++SELECT @@SESSION.sdp_compatibility_mode AS mode;
+diff --git a/mysql-test/t/sdp_legacy_analyze.test b/mysql-test/t/sdp_legacy_analyze.test
+new file mode 100644
+index 0000000000000000000000000000000000000000..8924c6be4fda1ce494c2728dd047a9c8bf33149f
+--- /dev/null
++++ b/mysql-test/t/sdp_legacy_analyze.test
+@@ -0,0 +1,62 @@
++CREATE TABLE sdp_analyze_stats (id INT PRIMARY KEY) ENGINE=InnoDB STATS_PERSISTENT=1 STATS_AUTO_RECALC=0;
++INSERT INTO sdp_analyze_stats VALUES (1), (2), (3), (4);
++--disable_query_log
++--disable_result_log
++--error ER_PARSE_ERROR
++ANALYZE sdp_analyze_stats;
++--enable_result_log
++--enable_query_log
++SELECT JSON_LENGTH(STARDATAPARADISE_CAPABILITIES(), '$.commands') AS commands;
++SET SESSION sdp_compatibility_mode = 'legacy';
++--disable_query_log
++SELECT JSON_CONTAINS(STARDATAPARADISE_CAPABILITIES(),
++                     '"analyze_shorthand"', '$.commands') AS advertised;
++--enable_query_log
++ANALYZE test.sdp_analyze_stats;
++--disable_query_log
++SELECT n_rows > 0 AS stats_updated
++FROM mysql.innodb_table_stats
++WHERE database_name = 'test' AND table_name = 'sdp_analyze_stats';
++--enable_query_log
++
++PREPARE sdp_stats FROM 'ANALYZE sdp_analyze_stats';
++EXECUTE sdp_stats;
++
++START TRANSACTION;
++INSERT INTO sdp_analyze_stats VALUES (5);
++--disable_query_log
++--disable_result_log
++--error ER_NOT_SUPPORTED_YET
++ANALYZE sdp_analyze_stats;
++--error ER_NOT_SUPPORTED_YET
++EXECUTE sdp_stats;
++--enable_result_log
++--enable_query_log
++ROLLBACK;
++SELECT COUNT(*) AS rows_after_rollback FROM sdp_analyze_stats;
++
++SET SESSION sdp_compatibility_mode = 'mysql';
++--disable_query_log
++--disable_result_log
++--error ER_NOT_SUPPORTED_YET
++EXECUTE sdp_stats;
++--enable_result_log
++--enable_query_log
++DEALLOCATE PREPARE sdp_stats;
++ANALYZE TABLE test.sdp_analyze_stats;
++
++CREATE USER 'sdp_stats_reader'@'localhost';
++GRANT SELECT ON test.sdp_analyze_stats TO 'sdp_stats_reader'@'localhost';
++--disable_connect_log
++connect (reader, localhost, sdp_stats_reader, , test);
++SET SESSION sdp_compatibility_mode = 'legacy';
++--disable_query_log
++--disable_result_log
++--error ER_TABLEACCESS_DENIED_ERROR
++ANALYZE sdp_analyze_stats;
++--enable_result_log
++--enable_query_log
++connection default;
++disconnect reader;
++DROP USER 'sdp_stats_reader'@'localhost';
++DROP TABLE sdp_analyze_stats;
+diff --git a/sql/item_create.cc b/sql/item_create.cc
+index e4383c20070658b28e192a341b391df515249d78..17a95f8617894ed68f7320c651f63ea737f1bfae 100644
+--- a/sql/item_create.cc
++++ b/sql/item_create.cc
+@@ -1538,6 +1538,8 @@ static const std::pair<const char *, Create_func *> func_array[] = {
+     {"SOUNDEX", SQL_FN(Item_func_soundex, 1)},
+     {"SOURCE_POS_WAIT", SQL_FN_V(Item_source_pos_wait, 2, 4)},
+     {"SPACE", SQL_FN(Item_func_space, 1)},
++    {"STARDATAPARADISE_CAPABILITIES",
++     SQL_FN(Item_func_sdp_capabilities, 0)},
+     {"STATEMENT_DIGEST", SQL_FN(Item_func_statement_digest, 1)},
+     {"STATEMENT_DIGEST_TEXT", SQL_FN(Item_func_statement_digest_text, 1)},
+     {"WAIT_FOR_EXECUTED_GTID_SET",
+diff --git a/sql/item_strfunc.cc b/sql/item_strfunc.cc
+index 6643bca2b2c399b512b60da5c459e6a17602a75b..8084f241233def15ed009d53a41d43ef20b414ce 100644
+--- a/sql/item_strfunc.cc
++++ b/sql/item_strfunc.cc
+@@ -1981,6 +1981,38 @@ void Item_func_trim::print(const THD *thd, String *str,
+   str->append(')');
+ }
+ 
++bool Item_func_sdp_capabilities::do_itemize(Parse_context *pc, Item **res) {
++  if (skip_itemize(res)) return false;
++  if (super::do_itemize(pc, res)) return true;
++
++  LEX *lex = pc->thd->lex;
++  lex->set_stmt_unsafe(LEX::BINLOG_STMT_UNSAFE_SYSTEM_FUNCTION);
++  lex->safe_to_cache_query = false;
++  return false;
++}
++
++String *Item_func_sdp_capabilities::val_str(String *str) {
++  assert(fixed);
++  const bool legacy =
++      current_thd->variables.sdp_compatibility_mode == SDP_COMPATIBILITY_LEGACY;
++  const char *mode_name = legacy ? "legacy" : "mysql";
++
++  str->set_charset(collation.collation);
++  str->length(0);
++  // Advertise a capability only after implementing its command family.
++  if (str->append(STRING_WITH_LEN("{\"version\":1,\"mode\":\"")) ||
++      str->append(mode_name, strlen(mode_name)) ||
++      str->append(STRING_WITH_LEN(
++          "\",\"features\":{\"history\":false,\"decision\":false,\"plsql\":false,"
++          "\"ml\":false,\"jobs\":false,\"backup\":false,\"admin\":false},"
++          "\"commands\":[")) ||
++      (legacy && str->append(STRING_WITH_LEN("\"analyze_shorthand\""))) ||
++      str->append(STRING_WITH_LEN("]}"))) {
++    return error_str();
++  }
++  return str;
++}
++
+ bool Item_func_database::do_itemize(Parse_context *pc, Item **res) {
+   if (skip_itemize(res)) return false;
+   if (super::do_itemize(pc, res)) return true;
+diff --git a/sql/item_strfunc.h b/sql/item_strfunc.h
+index 1d1becf202455451717fc816a96a607b5cea20d9..c9eaa5e602c9304c68fe6fab246e70f7e32fce15 100644
+--- a/sql/item_strfunc.h
++++ b/sql/item_strfunc.h
+@@ -646,6 +646,23 @@ class Item_func_sysconst : public Item_str_func {
+   }
+ };
+ 
++class Item_func_sdp_capabilities final : public Item_func_sysconst {
++  using super = Item_func_sysconst;
++
++ public:
++  explicit Item_func_sdp_capabilities(const POS &pos) : super(pos) {}
++  bool do_itemize(Parse_context *pc, Item **res) override;
++  String *val_str(String *str) override;
++  bool resolve_type(THD *) override {
++    set_data_type_string(192U);
++    return false;
++  }
++  const char *func_name() const override { return "stardataparadise_capabilities"; }
++  const Name_string fully_qualified_func_name() const override {
++    return NAME_STRING("stardataparadise_capabilities()");
++  }
++};
++
+ class Item_func_database : public Item_func_sysconst {
+   typedef Item_func_sysconst super;
+ 
+diff --git a/sql/parse_tree_nodes.cc b/sql/parse_tree_nodes.cc
+index 327208cc60f4e74938f77e9c76da0cf9eb134135..2ed967bf33a622d8ca72c8f35c22eddaf598e5bd 100644
+--- a/sql/parse_tree_nodes.cc
++++ b/sql/parse_tree_nodes.cc
+@@ -3854,7 +3854,8 @@ Sql_cmd *PT_analyze_table_stmt::make_cmd(THD *thd) {
+ 
+   thd->lex->alter_info = &m_alter_info;
+   auto cmd = new (thd->mem_root) Sql_cmd_analyze_table(
+-      thd, &m_alter_info, m_command, m_num_buckets, m_data, m_auto_update);
++      thd, &m_alter_info, m_command, m_num_buckets, m_data, m_auto_update,
++      m_legacy_shorthand);
+   if (cmd == nullptr) return nullptr;
+   if (m_command == Sql_cmd_analyze_table::Histogram_command::UPDATE_HISTOGRAM ||
+       m_command == Sql_cmd_analyze_table::Histogram_command::DROP_HISTOGRAM) {
+diff --git a/sql/parse_tree_nodes.h b/sql/parse_tree_nodes.h
+index f0451a7015ffd6c3f2ee110c63ee302a5360f407..c49bbcad38cc205dea58132b25a364cfcf1607e0 100644
+--- a/sql/parse_tree_nodes.h
++++ b/sql/parse_tree_nodes.h
+@@ -5246,7 +5246,7 @@ class PT_analyze_table_stmt final : public PT_table_ddl_stmt_base {
+                         Mem_root_array<Table_ident *> *table_list,
+                         Sql_cmd_analyze_table::Histogram_command command,
+                         int num_buckets, List<String> *columns, LEX_STRING data,
+-                        bool auto_update)
++                        bool auto_update, bool legacy_shorthand = false)
+       : PT_table_ddl_stmt_base(pos, mem_root),
+         m_no_write_to_binlog(no_write_to_binlog),
+         m_table_list(table_list),
+@@ -5254,7 +5254,8 @@ class PT_analyze_table_stmt final : public PT_table_ddl_stmt_base {
+         m_num_buckets(num_buckets),
+         m_columns(columns),
+         m_data{data},
+-        m_auto_update(auto_update) {}
++        m_auto_update(auto_update),
++        m_legacy_shorthand(legacy_shorthand) {}
+ 
+   Sql_cmd *make_cmd(THD *thd) override;
+ 
+@@ -5266,6 +5267,7 @@ class PT_analyze_table_stmt final : public PT_table_ddl_stmt_base {
+   List<String> *m_columns;
+   const LEX_STRING m_data;
+   const bool m_auto_update;
++  const bool m_legacy_shorthand;
+ };
+ 
+ class PT_check_table_stmt final : public PT_table_ddl_stmt_base {
+diff --git a/sql/sql_admin.cc b/sql/sql_admin.cc
+index fbccede51d16bcbcdd6fbcaf96c29dc80958b9c0..89d0a1b05d111b9eb826a8f7b14a7c0e7e82fedb 100644
+--- a/sql/sql_admin.cc
++++ b/sql/sql_admin.cc
+@@ -305,14 +305,16 @@ static inline bool table_not_corrupt_error(uint sql_errno) {
+ 
+ Sql_cmd_analyze_table::Sql_cmd_analyze_table(
+     THD *thd, Alter_info *alter_info, Histogram_command histogram_command,
+-    int histogram_buckets, LEX_STRING data, bool histogram_auto_update)
++    int histogram_buckets, LEX_STRING data, bool histogram_auto_update,
++    bool legacy_shorthand)
+     : Sql_cmd_ddl_table(alter_info),
+       m_histogram_command(histogram_command),
+       m_histogram_fields(Column_name_comparator(),
+                          Mem_root_allocator<String>(thd->mem_root)),
+       m_histogram_buckets(histogram_buckets),
+       m_data{data},
+-      m_histogram_auto_update(histogram_auto_update) {}
++      m_histogram_auto_update(histogram_auto_update),
++      m_legacy_shorthand(legacy_shorthand) {}
+ 
+ bool Sql_cmd_analyze_table::drop_histogram(THD *thd, Table_ref *table,
+                                            histograms::results_map &results) {
+diff --git a/sql/sql_admin.h b/sql/sql_admin.h
+index 7bb344375ea603f4bbef58236f354646d90d7b2b..33297d27ee9fba4f7ec5d587270e522b3b48061b 100644
+--- a/sql/sql_admin.h
++++ b/sql/sql_admin.h
+@@ -76,10 +76,13 @@ class Sql_cmd_analyze_table : public Sql_cmd_ddl_table {
+   Sql_cmd_analyze_table(THD *thd, Alter_info *alter_info,
+                         Histogram_command histogram_command,
+                         int histogram_buckets, LEX_STRING data,
+-                        bool histogram_auto_update);
++                        bool histogram_auto_update,
++                        bool legacy_shorthand = false);
+ 
+   bool execute(THD *thd) override;
+ 
++  bool is_legacy_shorthand() const { return m_legacy_shorthand; }
++
+   enum_sql_command sql_command_code() const override { return SQLCOM_ANALYZE; }
+ 
+   /**
+@@ -106,6 +109,7 @@ class Sql_cmd_analyze_table : public Sql_cmd_ddl_table {
+ 
+   /// True if AUTO UPDATE was specified by the user in UPDATE HISTOGRAM.
+   bool m_histogram_auto_update;
++  const bool m_legacy_shorthand;
+ 
+   /// @return The histogram command specified, if any.
+   Histogram_command get_histogram_command() const {
+diff --git a/sql/sql_parse.cc b/sql/sql_parse.cc
+index ea63ed114d1e3ebb9e984bf00bd8a2f44e9f06db..fb28ee52abdc0dd2244792b692e7a68ea16379ae 100644
+--- a/sql/sql_parse.cc
++++ b/sql/sql_parse.cc
+@@ -3331,6 +3331,23 @@ int mysql_execute_command(THD *thd, bool first_level) {
+   assert(thd->get_transaction()->cannot_safely_rollback(
+              Transaction_ctx::STMT) == false);
+ 
++  // Validate the legacy shorthand before ANALYZE can implicitly commit.
++  // A prepared statement may have been parsed in a different session mode.
++  if (lex->sql_command == SQLCOM_ANALYZE && lex->m_sql_cmd != nullptr &&
++      static_cast<const Sql_cmd_analyze_table *>(lex->m_sql_cmd)
++          ->is_legacy_shorthand()) {
++    if (thd->variables.sdp_compatibility_mode != SDP_COMPATIBILITY_LEGACY) {
++      my_error(ER_NOT_SUPPORTED_YET, MYF(0),
++               "ANALYZE without TABLE outside legacy mode");
++      return -1;
++    }
++    if (thd->in_multi_stmt_transaction_mode()) {
++      my_error(ER_NOT_SUPPORTED_YET, MYF(0),
++               "ANALYZE without TABLE in a multi-statement transaction");
++      return -1;
++    }
++  }
++
+   switch (gtid_pre_statement_checks(thd)) {
+     case GTID_STATEMENT_EXECUTE:
+       break;
+diff --git a/sql/sql_yacc.yy b/sql/sql_yacc.yy
+index ce76add84d391f78be6f672be7e70bd4efcf671c..5f9f4f6eccc9ebfe968330403fc42d454ba39c57 100644
+--- a/sql/sql_yacc.yy
++++ b/sql/sql_yacc.yy
+@@ -1608,6 +1608,7 @@ CHARSET_INFO *warn_on_deprecated_user_defined_collation(
+         lock_option
+         udf_type if_exists
+         opt_no_write_to_binlog
++        analyze_table_head
+         all_or_any opt_distinct
+         fulltext_options union_option
+         transaction_access_mode_types
+@@ -9741,19 +9742,41 @@ mi_repair_type:
+         | USE_FRM      { $$.flags= 0;        $$.sql_flags= TT_USEFRM; }
+         ;
+ 
++analyze_table_head:
++          ANALYZE_SYM table_or_tables                         { $$= 0; }
++        | ANALYZE_SYM NO_WRITE_TO_BINLOG table_or_tables      { $$= 1; }
++        | ANALYZE_SYM LOCAL_SYM table_or_tables               { $$= 1; }
++        ;
++
+ analyze_table_stmt:
+-          ANALYZE_SYM opt_no_write_to_binlog table_or_tables table_list
+-          opt_histogram
++          analyze_table_head table_list opt_histogram
+           {
+-            if ($5.param) {
+-              $$= NEW_PTN PT_analyze_table_stmt(@$, YYMEM_ROOT, $2, $4,
+-                                                $5.command, $5.param->num_buckets,
+-                                                $5.columns, $5.param->data, $5.param->auto_update);
++            if ($3.param) {
++              $$= NEW_PTN PT_analyze_table_stmt(@$, YYMEM_ROOT, $1, $2,
++                                                $3.command, $3.param->num_buckets,
++                                                $3.columns, $3.param->data, $3.param->auto_update);
+             } else {
+-              $$= NEW_PTN PT_analyze_table_stmt(@$, YYMEM_ROOT, $2, $4,
+-                                                $5.command, 0,
+-                                                $5.columns, {nullptr, 0}, false);
++              $$= NEW_PTN PT_analyze_table_stmt(@$, YYMEM_ROOT, $1, $2,
++                                                $3.command, 0,
++                                                $3.columns, {nullptr, 0}, false);
++            }
++          }
++        | ANALYZE_SYM table_ident
++          {
++            if (YYTHD->variables.sdp_compatibility_mode !=
++                SDP_COMPATIBILITY_LEGACY) {
++              YYTHD->syntax_error_at(@2);
++              MYSQL_YYABORT;
+             }
++            auto *tables= NEW_PTN Mem_root_array<Table_ident *>(YYMEM_ROOT);
++            if (tables == nullptr || tables->push_back($2))
++              MYSQL_YYABORT;  // OOM
++            // Statistics are local. Do not log syntax unknown to replicas.
++            $$= NEW_PTN PT_analyze_table_stmt(
++                @$, YYMEM_ROOT, true, tables,
++                Sql_cmd_analyze_table::Histogram_command::NONE, 0, nullptr,
++                {nullptr, 0}, false, true);
++            if ($$ == nullptr) MYSQL_YYABORT;
+           }
+         ;
+ 
+diff --git a/sql/sys_vars.cc b/sql/sys_vars.cc
+index 2e475e7e38d8540c1678838fc2c7e0836705608e..20d05e43eb338b7f9587c4a898a0157770e83fb4 100644
+--- a/sql/sys_vars.cc
++++ b/sql/sys_vars.cc
+@@ -1982,6 +1982,15 @@ static Sys_var_struct<CHARSET_INFO, Get_csname> Sys_character_set_filesystem(
+     DEFAULT(&character_set_filesystem), NO_MUTEX_GUARD, NOT_IN_BINLOG,
+     ON_CHECK(check_cs_filesystem), ON_UPDATE(fix_thd_charset));
+ 
++static const char *sdp_compatibility_mode_names[] = {
++    "mysql", "legacy", nullptr};
++static Sys_var_enum Sys_sdp_compatibility_mode(
++    "sdp_compatibility_mode",
++    "Selects the SQL compatibility mode for this connection",
++    SESSION_ONLY(sdp_compatibility_mode), NO_CMD_LINE,
++    sdp_compatibility_mode_names, DEFAULT(SDP_COMPATIBILITY_MYSQL),
++    NO_MUTEX_GUARD, NOT_IN_BINLOG, ON_CHECK(check_outside_trx));
++
+ static const char *completion_type_names[] = {"NO_CHAIN", "CHAIN", "RELEASE",
+                                               nullptr};
+ static Sys_var_enum Sys_completion_type(
+diff --git a/sql/system_variables.h b/sql/system_variables.h
+index 2271656a9384d02d4dc21a0514a96a35fc842060..114f51134350b5e47962465a076cf8782c3bce88 100644
+--- a/sql/system_variables.h
++++ b/sql/system_variables.h
+@@ -51,6 +51,12 @@ enum enum_binlog_format {
+       3  ///< thd_binlog_format() returns it when binlog is closed
+ };
+ 
++// Values for the session-only sdp_compatibility_mode system variable.
++enum enum_sdp_compatibility_mode {
++  SDP_COMPATIBILITY_MYSQL,
++  SDP_COMPATIBILITY_LEGACY
++};
++
+ // Values for rbr_exec_mode_options sysvar
+ enum enum_rbr_exec_mode {
+   RBR_EXEC_MODE_STRICT,
+@@ -283,6 +289,7 @@ struct System_variables {
+   uint binlog_trx_compression_level_zstd;
+   ulonglong binlog_row_value_options;
+   bool sql_log_bin;
++  ulong sdp_compatibility_mode;
+   ulong completion_type;
+   ulong transaction_isolation;
+   ulong updatable_views_with_limit;

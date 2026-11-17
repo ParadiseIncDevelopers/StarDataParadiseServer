@@ -32,6 +32,15 @@ add_library(sdp_wire INTERFACE)
 target_include_directories(sdp_wire INTERFACE contracts/v1/cpp)
 target_link_libraries(sdp_wire INTERFACE nlohmann_json::nlohmann_json)
 
+add_executable(sdp_mysql_model_runner EXCLUDE_FROM_ALL
+    compatibility/ml/cpu_runner.cpp ml/linear_models.cpp ml/tree_models.cpp ml/clustering.cpp ml/pca.cpp)
+target_link_libraries(sdp_mysql_model_runner PRIVATE sdp_wire)
+target_compile_options(sdp_mysql_model_runner PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/utf-8>)
+if(SDP_WITH_CPU_MLP)
+    target_sources(sdp_mysql_model_runner PRIVATE ml/mlp.cpp)
+    target_compile_definitions(sdp_mysql_model_runner PRIVATE SDP_WITH_CPU_MLP=1)
+endif()
+
 if(BUILD_TESTING)
     find_package(Python3 3.12 REQUIRED COMPONENTS Interpreter)
     add_executable(wire_smoke contracts/v1/tests/wire_smoke.cpp)

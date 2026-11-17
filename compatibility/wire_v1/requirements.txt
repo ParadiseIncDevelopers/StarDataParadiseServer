@@ -1,0 +1,2 @@
+# Oracle MySQL Connector/Python 26.10.0, platform-independent wheel.
+mysql-connector-python @ https://files.pythonhosted.org/packages/91/24/7b2f91476ae6c182f69854dd8d12c51c2e11c5b887b8f85b48b1c9394159/mysql_connector_python-26.10.0-py2.py3-none-any.whl --hash=sha256:85643c8a38b7d089ed30b270d842b96a2529354eebea4aa4d8e4755a630487e8
