@@ -129,7 +129,7 @@ class Fixture:
         return env
 
     @contextmanager
-    def disposable(self, root, *, plugin_dir=None, tls_dir=None):
+    def disposable(self, root, *, plugin_dir=None, tls_dir=None, server_options=()):
         require(root.parent.parent == OUT / "compatibility-tests", "unexpected test Server directory")
         root.mkdir()
         env = self.environment(root)
@@ -156,6 +156,7 @@ class Fixture:
         if tls_dir is not None:
             command.extend([f"--ssl-ca={ca}", f"--ssl-cert={tls_dir / 'server.pem'}",
                             f"--ssl-key={tls_dir / 'server.key'}"])
+        command.extend(server_options)
         log = root / "mysqld.log"
         try:
             with log.open("wb") as output:

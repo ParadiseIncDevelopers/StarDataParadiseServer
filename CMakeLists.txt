@@ -8,6 +8,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 include(CTest)
 option(SDP_WITH_CPU_MLP "Build the CPU MLP training module" ON)
+set(SDP_MYSQL_UDF_INCLUDE_DIR "" CACHE PATH "MySQL include directory containing mysql/udf_registration_types.h")
 
 add_executable(StarDataParadiseServer
     StarDataParadiseServer/StarDataParadiseServer.cpp
@@ -32,13 +33,27 @@ add_library(sdp_wire INTERFACE)
 target_include_directories(sdp_wire INTERFACE contracts/v1/cpp)
 target_link_libraries(sdp_wire INTERFACE nlohmann_json::nlohmann_json)
 
-add_executable(sdp_mysql_model_runner EXCLUDE_FROM_ALL
-    compatibility/ml/cpu_runner.cpp ml/linear_models.cpp ml/tree_models.cpp ml/clustering.cpp ml/pca.cpp)
-target_link_libraries(sdp_mysql_model_runner PRIVATE sdp_wire)
-target_compile_options(sdp_mysql_model_runner PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/utf-8>)
+add_library(sdp_mysql_model_compute STATIC EXCLUDE_FROM_ALL
+    compatibility/ml/cpu_compute.cpp ml/linear_models.cpp ml/tree_models.cpp ml/clustering.cpp ml/pca.cpp)
+target_link_libraries(sdp_mysql_model_compute PUBLIC sdp_wire)
+target_compile_options(sdp_mysql_model_compute PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/utf-8>)
+set_target_properties(sdp_mysql_model_compute PROPERTIES POSITION_INDEPENDENT_CODE ON)
 if(SDP_WITH_CPU_MLP)
-    target_sources(sdp_mysql_model_runner PRIVATE ml/mlp.cpp)
-    target_compile_definitions(sdp_mysql_model_runner PRIVATE SDP_WITH_CPU_MLP=1)
+    target_sources(sdp_mysql_model_compute PRIVATE ml/mlp.cpp)
+    target_compile_definitions(sdp_mysql_model_compute PRIVATE SDP_WITH_CPU_MLP=1)
+endif()
+
+add_executable(sdp_mysql_model_runner EXCLUDE_FROM_ALL compatibility/ml/cpu_runner.cpp)
+target_link_libraries(sdp_mysql_model_runner PRIVATE sdp_mysql_model_compute)
+
+if(SDP_MYSQL_UDF_INCLUDE_DIR)
+    if(NOT EXISTS "${SDP_MYSQL_UDF_INCLUDE_DIR}/mysql/udf_registration_types.h")
+        message(FATAL_ERROR "SDP_MYSQL_UDF_INCLUDE_DIR must contain mysql/udf_registration_types.h")
+    endif()
+    add_library(sdp_mysql_model_udf MODULE EXCLUDE_FROM_ALL compatibility/ml/cpu_udf.cpp)
+    target_include_directories(sdp_mysql_model_udf PRIVATE "${SDP_MYSQL_UDF_INCLUDE_DIR}")
+    target_link_libraries(sdp_mysql_model_udf PRIVATE sdp_mysql_model_compute)
+    set_target_properties(sdp_mysql_model_udf PROPERTIES PREFIX "")
 endif()
 
 if(BUILD_TESTING)

@@ -1,4 +1,4 @@
-"""Serve the supported StarDataParadise wire v1 operations over loopback TLS."""
+"""Serve StarDataParadise wire v1 operations on loopback, using TLS by default."""
 
 import argparse
 from contextlib import suppress
@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import re
 import secrets
+from select import select
+import socket
 import socketserver
 import ssl
 import struct
@@ -32,7 +34,7 @@ SQL_MODE = "STRICT_ALL_TABLES,NO_ENGINE_SUBSTITUTION,NO_BACKSLASH_ESCAPES"
 SAVEPOINT_OPERATIONS = {"tx_savepoint": "SAVEPOINT", "tx_rollback_to": "ROLLBACK TO SAVEPOINT",
                         "tx_release": "RELEASE SAVEPOINT"}
 TRANSACTION_OPERATIONS = {*SAVEPOINT_OPERATIONS, "tx_begin", "tx_rollback", "tx_commit"}
-FEATURES = {key: key in {"tls", "auth", "health", "wire_sql_basic_v1"} for key in (
+FEATURES = {key: key in {"auth", "health", "wire_sql_basic_v1"} for key in (
     "tls", "auth", "health", "metadata", "sql", "transactions", "server_cancel", "jobs", "admin", "history",
     "decision", "ml", "wire_sql_basic_v1", "sql_crud_v1", "sql_security_v1", "plsql_results_v1", "history_v1",
     "decision_v1", "decision_explain_v1", "jobs_v1", "dataset_v1", "supervised_ml_v1", "backup_v1", "admin_v1",
@@ -93,8 +95,10 @@ def validate_json(value, depth=0):
                 validate_json(item, depth + 1)
 
 
-def read_request(sock, previous):
-    length, = struct.unpack("!I", receive(sock, 4, time.monotonic() + 120))
+def read_request(sock, previous, header=None):
+    if header is None:
+        header = receive(sock, 4, time.monotonic() + 120)
+    length, = struct.unpack("!I", header)
     if not 1 <= length <= LIMIT:
         raise Fault(1002 if length else 1001, close=True)
     data = receive(sock, length, time.monotonic() + 10)
@@ -225,7 +229,8 @@ class Session:
                 self.receipts = ledger
 
     def features(self):
-        return {**FEATURES, "wire_sql_transactions_v1": self.receipts is not None}
+        return {**FEATURES, "tls": not self.config.plaintext_loopback,
+                "wire_sql_transactions_v1": self.receipts is not None}
 
     def close(self):
         if self.db is not None:
@@ -487,23 +492,76 @@ class Session:
 class Handler(socketserver.BaseRequestHandler):
     def handle(self):
         self.request.settimeout(10)
-        session = Session(self.server.config)
         try:
-            with self.server.tls.wrap_socket(self.request, server_side=True) as sock:
-                self.serve(sock, session)
+            if self.server.config.share_classic_loopback:
+                self.serve_shared()
+            elif self.server.tls is None:
+                self.serve(self.request)
+            else:
+                with self.server.tls.wrap_socket(self.request, server_side=True) as sock:
+                    self.serve(sock)
         except (EOFError, OSError):
             pass
+
+    def serve_shared(self):
+        config = self.server.config
+        deadline = time.monotonic() + 5
+        with socket.create_connection((config.mysql_host, config.mysql_port), timeout=5) as classic:
+            header = receive(classic, 4, deadline)
+            size = int.from_bytes(header[:3], "little")
+            if header[3] != 0 or not 2 <= size <= 255:
+                return
+            greeting = receive(classic, size, deadline)
+            version, separator, _ = greeting[1:].partition(b"\0")
+            if greeting[0] != 10 or not separator or version != (config.product_version + "-StarDataParadise").encode():
+                return
+            self.request.sendall(header + greeting)
+
+            first_header = receive(self.request, 4, time.monotonic() + 10)
+            # A wire hello fits in one byte of big-endian length. A Classic login has a nonzero
+            # little-endian length and sequence number 1.
+            if first_header[:3] != b"\0\0\0":
+                if first_header[3] != 1 or int.from_bytes(first_header[:3], "little") < 32:
+                    return
+                classic.sendall(first_header)
+                self.relay_classic(classic)
+                return
+
+        self.serve(self.request, first_header)
+
+    def relay_classic(self, classic):
+        self.request.settimeout(15)
+        classic.settimeout(15)
+        peers = {classic: self.request, self.request: classic}
+        readers = list(peers)
+        while readers:
+            readable, _, _ = select(readers, [], [])
+            for source in readable:
+                destination = peers[source]
+                data = source.recv(65536)
+                if data:
+                    destination.sendall(data)
+                else:
+                    with suppress(OSError):
+                        destination.shutdown(socket.SHUT_WR)
+                    readers.remove(source)
+
+    def serve(self, sock, first_header=None):
+        session = Session(self.server.config)
+        try:
+            self.serve_session(sock, session, first_header)
         finally:
             session.close()
 
-    def serve(self, sock, session):
+    def serve_session(self, sock, session, header):
         state, previous = "hello", 0
         while True:
             try:
-                request = read_request(sock, previous)
+                request = read_request(sock, previous, header)
             except Fault as fault:
                 send(sock, 0, fault=fault)
                 return
+            header = None
             previous = request["id"]
             operation, body = request["op"], request["body"]
             try:
@@ -572,8 +630,11 @@ class Server(socketserver.ThreadingTCPServer):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, required=True)
-    parser.add_argument("--cert", type=Path, required=True)
-    parser.add_argument("--key", type=Path, required=True)
+    parser.add_argument("--cert", type=Path)
+    parser.add_argument("--key", type=Path)
+    parser.add_argument("--plaintext-loopback", action="store_true", help="accept unencrypted wire v1 on 127.0.0.1")
+    parser.add_argument("--share-classic-loopback", action="store_true",
+                        help="accept Classic TCP and plaintext wire v1 on the same local port")
     parser.add_argument("--mysql-host", choices=("localhost", "127.0.0.1", "::1"), default="127.0.0.1")
     parser.add_argument("--mysql-port", type=int, required=True)
     parser.add_argument("--mysql-ca", type=Path, required=True)
@@ -587,6 +648,13 @@ def main():
     parser.add_argument("--legacy-decision-operator", action="append", default=[])
     parser.add_argument("--max-sessions", type=int, default=8)
     args = parser.parse_args()
+    if args.share_classic_loopback and (not args.plaintext_loopback or args.port == args.mysql_port):
+        parser.error("--share-classic-loopback requires --plaintext-loopback and a separate internal Classic port")
+    if args.plaintext_loopback:
+        if args.cert is not None or args.key is not None:
+            parser.error("--plaintext-loopback cannot be combined with --cert or --key")
+    elif args.cert is None or args.key is None:
+        parser.error("--cert and --key are required unless --plaintext-loopback is set")
     if not (0 <= args.port <= 65535 and 1 <= args.mysql_port <= 65535 and 1 <= args.max_sessions <= 32
             and re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", args.product_version)
             and re.fullmatch(r"[A-Za-z0-9_]{1,64}", args.schema)):
@@ -609,9 +677,11 @@ def main():
            for actor in args.legacy_decision_operator):
         parser.error("invalid legacy Decision operator")
 
-    tls = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    tls.minimum_version = ssl.TLSVersion.TLSv1_2
-    tls.load_cert_chain(args.cert, args.key)
+    tls = None
+    if not args.plaintext_loopback:
+        tls = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        tls.minimum_version = ssl.TLSVersion.TLSv1_2
+        tls.load_cert_chain(args.cert, args.key)
     with Server(args, tls) as server:
         print(f"SDP_WIRE_V1_READY {server.server_address[1]}", flush=True)
         try:

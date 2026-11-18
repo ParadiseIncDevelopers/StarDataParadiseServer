@@ -1,6 +1,6 @@
 # Yerel wire v1 servisi
 
-`service.py`, StarDataParadise SDK’larının TLS wire v1 bağlantılarını MySQL tabanlı Server’ın Classic uç noktasına iletir. İstemci, Server’da yetkilendirilmiş hesabını kullanır. Her wire bağlantısı kendi MySQL oturumuna sahiptir. Arka uç sertifikası ve sunucu adı TLS ile, `@@server_uuid` ve Server sürümü oturum açılışında doğrulanır. Servis yalnızca `127.0.0.1` üzerinde dinler.
+`service.py`, StarDataParadise SDK’larının wire v1 bağlantılarını Server’ın Classic uç noktasına iletir. İstemci, Server’da yetkilendirilmiş hesabını kullanır. Her wire bağlantısı kendi Classic oturumuna sahiptir. Arka uç sertifikası ve sunucu adı TLS ile, `@@server_uuid` ve Server sürümü oturum açılışında doğrulanır. Servis yalnızca `127.0.0.1` üzerinde dinler ve varsayılan olarak SDK bağlantılarında da TLS ister.
 
 Python 3.12 ile bağımlılığı ayrı bir sanal ortamda kurun. `--mysql-uuid` için hedef Server’da `SELECT @@server_uuid` çıktısını, `--schema` için uygulamanın InnoDB şemasını kullanın. Arka uç sertifikasının SAN alanı `--mysql-host` ile eşleşmelidir. SDK, yerel servisin sertifikasını imzalayan CA’yı ve sertifikada bulunan sunucu adını kullanır.
 
@@ -8,6 +8,12 @@ Python 3.12 ile bağımlılığı ayrı bir sanal ortamda kurun. `--mysql-uuid` 
 python -m venv out/wire-v1-env
 out/wire-v1-env/Scripts/python.exe -m pip install --require-hashes -r compatibility/wire_v1/requirements.txt
 out/wire-v1-env/Scripts/python.exe -B compatibility/wire_v1/service.py --port 7401 --cert wire-server.pem --key wire-server.key --mysql-port 3306 --mysql-ca mysql-ca.pem --mysql-uuid 'server-uuid' --schema 'schema'
+```
+
+Yerel .NET geliştirme bağlantısı ve Workbench için `3197` portunu `--plaintext-loopback --share-classic-loopback` ile açın. StarDataParadiseDrive 2.0.2, `TLS Mode=Disabled` ile ortak portta wire v1 kullanır. Bu kipte SDK parolayı şifresiz iletir. Workbench **Standard (TCP/IP)** ve **Require** ile bağlanır. Classic oturumunun TLS ve kimlik doğrulama ayarlarını arka uç belirler. Örnek komuttaki `--mysql-ca` yalnızca servisin arka uca bağlanırken kullandığı CA’dır.
+
+```powershell
+out/wire-v1-env/Scripts/python.exe -B compatibility/wire_v1/service.py --port 3197 --plaintext-loopback --share-classic-loopback --mysql-port 41754 --mysql-ca mysql-ca.pem --mysql-uuid 'server-uuid' --schema 'schema' --ledger-key-file ledger.key
 ```
 
 `wire_sql_basic_v1` yeteneği `query.prepare`, `execute`, `fetch`, `statement_close`, `result_cancel`, `session_reset` ve temel `tx_*` işlemlerini bildirir. Servis `SELECT` ve açık işlemlerde `INSERT`, `UPDATE`, `DELETE` kabul eder. `:name` biçimindeki bağlar yerel MySQL binary prepared statement protokolüne aktarılır. Desteklenen değerler NULL, 64 bit işaretli tamsayı, metin, binary ve 38 basamak sınırında exact decimal değerleridir. Eski `BOOLEAN` parametresi MySQL tamsayısına bağlanır. Sonuçlar, MySQL tür eşleşmesine göre paketlenir. İşlem garantileri için InnoDB tabloları kullanın.

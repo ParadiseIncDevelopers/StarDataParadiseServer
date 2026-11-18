@@ -221,10 +221,10 @@ index e4383c20070658b28e192a341b391df515249d78..17a95f8617894ed68f7320c651f63ea7
      {"STATEMENT_DIGEST_TEXT", SQL_FN(Item_func_statement_digest_text, 1)},
      {"WAIT_FOR_EXECUTED_GTID_SET",
 diff --git a/sql/item_strfunc.cc b/sql/item_strfunc.cc
-index 6643bca2b2c399b512b60da5c459e6a17602a75b..8084f241233def15ed009d53a41d43ef20b414ce 100644
+index 6643bca2..4813a6f7 100644
 --- a/sql/item_strfunc.cc
 +++ b/sql/item_strfunc.cc
-@@ -1981,6 +1981,38 @@ void Item_func_trim::print(const THD *thd, String *str,
+@@ -1981,6 +1981,42 @@ void Item_func_trim::print(const THD *thd, String *str,
    str->append(')');
  }
  
@@ -242,6 +242,7 @@ index 6643bca2b2c399b512b60da5c459e6a17602a75b..8084f241233def15ed009d53a41d43ef
 +  assert(fixed);
 +  const bool legacy =
 +      current_thd->variables.sdp_compatibility_mode == SDP_COMPATIBILITY_LEGACY;
++  const bool model_sql = global_system_variables.sdp_model_sql;
 +  const char *mode_name = legacy ? "legacy" : "mysql";
 +
 +  str->set_charset(collation.collation);
@@ -254,6 +255,9 @@ index 6643bca2b2c399b512b60da5c459e6a17602a75b..8084f241233def15ed009d53a41d43ef
 +          "\"ml\":false,\"jobs\":false,\"backup\":false,\"admin\":false},"
 +          "\"commands\":[")) ||
 +      (legacy && str->append(STRING_WITH_LEN("\"analyze_shorthand\""))) ||
++      (legacy && model_sql && str->append(STRING_WITH_LEN(","))) ||
++      (model_sql && str->append(STRING_WITH_LEN(
++                        "\"create_model\",\"train_model\",\"predict_model\""))) ||
 +      str->append(STRING_WITH_LEN("]}"))) {
 +    return error_str();
 +  }
@@ -291,6 +295,34 @@ index 1d1becf202455451717fc816a96a607b5cea20d9..c9eaa5e602c9304c68fe6fab246e70f7
  class Item_func_database : public Item_func_sysconst {
    typedef Item_func_sysconst super;
  
+diff --git a/sql/lex.h b/sql/lex.h
+index eb3986b9..ee718080 100644
+--- a/sql/lex.h
++++ b/sql/lex.h
+@@ -445,6 +445,7 @@ static const SYMBOL symbols[] = {
+     {SYM("MIN_ROWS", MIN_ROWS)},
+     {SYM("MOD", MOD_SYM)},
+     {SYM("MODE", MODE_SYM)},
++    {SYM("MODEL", MODEL_SYM)},
+     {SYM("MODIFIES", MODIFIES_SYM)},
+     {SYM("MODIFY", MODIFY_SYM)},
+     {SYM("MONTH", MONTH_SYM)},
+@@ -531,6 +532,7 @@ static const SYMBOL symbols[] = {
+     {SYM("PRECEDES", PRECEDES_SYM)},
+     {SYM("PRECEDING", PRECEDING_SYM)},
+     {SYM("PRECISION", PRECISION)},
++    {SYM("PREDICT", PREDICT_SYM)},
+     {SYM("PREPARE", PREPARE_SYM)},
+     {SYM("PRESERVE", PRESERVE_SYM)},
+     {SYM("PREV", PREV_SYM)},
+@@ -763,6 +765,7 @@ static const SYMBOL symbols[] = {
+     {SYM("TLS", TLS_SYM)},
+     {SYM("TO", TO_SYM)},
+     {SYM("TRAILING", TRAILING)},
++    {SYM("TRAIN", TRAIN_SYM)},
+     {SYM("TRANSACTION", TRANSACTION_SYM)},
+     {SYM("TRIGGER", TRIGGER_SYM)},
+     {SYM("TRIGGERS", TRIGGERS_SYM)},
 diff --git a/sql/parse_tree_nodes.cc b/sql/parse_tree_nodes.cc
 index 327208cc60f4e74938f77e9c76da0cf9eb134135..2ed967bf33a622d8ca72c8f35c22eddaf598e5bd 100644
 --- a/sql/parse_tree_nodes.cc
@@ -415,10 +447,28 @@ index ea63ed114d1e3ebb9e984bf00bd8a2f44e9f06db..fb28ee52abdc0dd2244792b692e7a68e
      case GTID_STATEMENT_EXECUTE:
        break;
 diff --git a/sql/sql_yacc.yy b/sql/sql_yacc.yy
-index ce76add84d391f78be6f672be7e70bd4efcf671c..5f9f4f6eccc9ebfe968330403fc42d454ba39c57 100644
+index ce76add8..7c186bc6 100644
 --- a/sql/sql_yacc.yy
 +++ b/sql/sql_yacc.yy
-@@ -1608,6 +1608,7 @@ CHARSET_INFO *warn_on_deprecated_user_defined_collation(
+@@ -1496,6 +1496,9 @@ CHARSET_INFO *warn_on_deprecated_user_defined_collation(
+ %token<lexer.keyword> APPLIER_VERSION_SYM            1243     /* MYSQL */
+ %token<lexer.keyword> APPLIER_WORKER_COUNT_SYM       1244     /* MYSQL */
+ %token<lexer.keyword> APPLIER_EVENT_MEMORY_LIMIT_SYM 1245     /* MYSQL */
++%token<lexer.keyword> MODEL_SYM                     1246     /* StarDataParadise */
++%token<lexer.keyword> PREDICT_SYM                   1247     /* StarDataParadise */
++%token<lexer.keyword> TRAIN_SYM                     1248     /* StarDataParadise */
+ 
+ /*
+   NOTE! When adding new non-standard keywords, make sure they are added to the
+@@ -1581,6 +1584,7 @@ CHARSET_INFO *warn_on_deprecated_user_defined_collation(
+         opt_explain_into
+         opt_library_alias
+ 
++%type <lex_cstr> sdp_model_procedure
+ %type <lex_cstr>
+         key_cache_name
+         label_ident
+@@ -1608,6 +1612,7 @@ CHARSET_INFO *warn_on_deprecated_user_defined_collation(
          lock_option
          udf_type if_exists
          opt_no_write_to_binlog
@@ -426,7 +476,56 @@ index ce76add84d391f78be6f672be7e70bd4efcf671c..5f9f4f6eccc9ebfe968330403fc42d45
          all_or_any opt_distinct
          fulltext_options union_option
          transaction_access_mode_types
-@@ -9741,19 +9742,41 @@ mi_repair_type:
+@@ -2012,6 +2017,7 @@ CHARSET_INFO *warn_on_deprecated_user_defined_collation(
+         alter_table_stmt
+         analyze_table_stmt
+         call_stmt
++        sdp_model_stmt
+         check_table_stmt
+         create_index_stmt
+         create_library_stmt
+@@ -2508,6 +2514,7 @@ simple_statement:
+         | analyze_table_stmt
+         | binlog_base64_event           { $$= nullptr; }
+         | call_stmt
++        | sdp_model_stmt
+         | change_replication_stmt       { $$= nullptr; }
+         | check_table_stmt
+         | checksum                      { $$= nullptr; }
+@@ -3995,6 +4002,32 @@ call_stmt:
+           }
+         ;
+ 
++sdp_model_stmt:
++          sdp_model_procedure MODEL_SYM USING TEXT_STRING_sys
++          {
++            if (!global_system_variables.sdp_model_sql)
++              MYSQL_YYABORT_ERROR(ER_OPTION_PREVENTS_STATEMENT, MYF(0),
++                                  "--sdp-model-sql=OFF");
++
++            // Preserve CALL's routine access checks and transaction behavior.
++            const LEX_CSTRING schema{STRING_WITH_LEN("sdp_models")};
++            auto *name= NEW_PTN sp_name(schema, to_lex_string($1), true);
++            auto *args= NEW_PTN PT_item_list(@4);
++            auto *payload= NEW_PTN Item_string(@4, $4.str, $4.length,
++                                              system_charset_info);
++            if (name == nullptr || args == nullptr || args->push_back(payload))
++              MYSQL_YYABORT;
++            name->init_qname(YYTHD);
++            $$= NEW_PTN PT_call(@$, name, args);
++          }
++        ;
++
++sdp_model_procedure:
++          CREATE      { $$= {STRING_WITH_LEN("create_model")}; }
++        | TRAIN_SYM   { $$= {STRING_WITH_LEN("train_model")}; }
++        | PREDICT_SYM { $$= {STRING_WITH_LEN("predict_model")}; }
++        ;
++
+ opt_paren_expr_list:
+             %empty { $$= nullptr; }
+           | '(' opt_expr_list ')'
+@@ -9741,19 +9774,41 @@ mi_repair_type:
          | USE_FRM      { $$.flags= 0;        $$.sql_flags= TT_USEFRM; }
          ;
  
@@ -477,11 +576,35 @@ index ce76add84d391f78be6f672be7e70bd4efcf671c..5f9f4f6eccc9ebfe968330403fc42d45
            }
          ;
  
+@@ -16058,6 +16113,7 @@ ident_keywords_ambiguous_2_labels:
+         | LANGUAGE_SYM
+         | NO_SYM
+         | PRECEDES_SYM
++        | PREDICT_SYM
+         | PREPARE_SYM
+         | REPAIR
+         | RESET_SYM
+@@ -16067,6 +16123,7 @@ ident_keywords_ambiguous_2_labels:
+         | SLAVE
+         | START_SYM
+         | STOP_SYM
++        | TRAIN_SYM
+         | TRUNCATE_SYM
+         | UNICODE_SYM
+         | UNINSTALL_SYM
+@@ -16311,6 +16368,7 @@ ident_keywords_unambiguous:
+         | MINUTE_SYM
+         | MIN_ROWS
+         | MODE_SYM
++        | MODEL_SYM
+         | MODIFY_SYM
+         | MONTH_SYM
+         | MULTILINESTRING_SYM
 diff --git a/sql/sys_vars.cc b/sql/sys_vars.cc
-index 2e475e7e38d8540c1678838fc2c7e0836705608e..20d05e43eb338b7f9587c4a898a0157770e83fb4 100644
+index 2e475e7e..a25f6422 100644
 --- a/sql/sys_vars.cc
 +++ b/sql/sys_vars.cc
-@@ -1982,6 +1982,15 @@ static Sys_var_struct<CHARSET_INFO, Get_csname> Sys_character_set_filesystem(
+@@ -1982,6 +1982,21 @@ static Sys_var_struct<CHARSET_INFO, Get_csname> Sys_character_set_filesystem(
      DEFAULT(&character_set_filesystem), NO_MUTEX_GUARD, NOT_IN_BINLOG,
      ON_CHECK(check_cs_filesystem), ON_UPDATE(fix_thd_charset));
  
@@ -494,11 +617,17 @@ index 2e475e7e38d8540c1678838fc2c7e0836705608e..20d05e43eb338b7f9587c4a898a01577
 +    sdp_compatibility_mode_names, DEFAULT(SDP_COMPATIBILITY_MYSQL),
 +    NO_MUTEX_GUARD, NOT_IN_BINLOG, ON_CHECK(check_outside_trx));
 +
++static Sys_var_bool Sys_sdp_model_sql(
++    "sdp_model_sql",
++    "Enables the StarDataParadise SQL commands for installed model routines",
++    READ_ONLY NON_PERSIST GLOBAL_VAR(global_system_variables.sdp_model_sql),
++    CMD_LINE(OPT_ARG), DEFAULT(false));
++
  static const char *completion_type_names[] = {"NO_CHAIN", "CHAIN", "RELEASE",
                                                nullptr};
  static Sys_var_enum Sys_completion_type(
 diff --git a/sql/system_variables.h b/sql/system_variables.h
-index 2271656a9384d02d4dc21a0514a96a35fc842060..114f51134350b5e47962465a076cf8782c3bce88 100644
+index 2271656a..ad009985 100644
 --- a/sql/system_variables.h
 +++ b/sql/system_variables.h
 @@ -51,6 +51,12 @@ enum enum_binlog_format {
@@ -514,10 +643,11 @@ index 2271656a9384d02d4dc21a0514a96a35fc842060..114f51134350b5e47962465a076cf878
  // Values for rbr_exec_mode_options sysvar
  enum enum_rbr_exec_mode {
    RBR_EXEC_MODE_STRICT,
-@@ -283,6 +289,7 @@ struct System_variables {
+@@ -283,6 +289,8 @@ struct System_variables {
    uint binlog_trx_compression_level_zstd;
    ulonglong binlog_row_value_options;
    bool sql_log_bin;
++  bool sdp_model_sql;
 +  ulong sdp_compatibility_mode;
    ulong completion_type;
    ulong transaction_isolation;

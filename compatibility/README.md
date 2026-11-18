@@ -63,6 +63,34 @@ END;
 
 ### CPU model araçları
 
+#### Classic SQL ve Workbench Query 1
+
+`CREATE MODEL`, `TRAIN MODEL` ve `PREDICT MODEL`, yamalı 26.10 Classic sunucuda isteğe bağlıdır. Sunucu `--sdp-model-sql=ON` ile başlatıldığında `STARDATAPARADISE_CAPABILITIES()` bu üç komutu bildirir. Workbench 8.0.47’nin güncel paketinde bağlantıyı yeniden açın. Query 1’de `CREATE MO`, `TRAI` veya `PRED` yazıp `Ctrl+Space` ile önerileri görebilirsiniz.
+
+Kurulum için sunucu yamasını derleyin. Server deposunu yapılandırırken `-DSDP_MYSQL_UDF_INCLUDE_DIR=<26.10-kaynak-dizini>/include` verin ve Release yapılandırmasında `sdp_mysql_model_udf` hedefini derleyin. `sdp_mysql_model_udf.dll` dosyasını `SELECT @@plugin_dir;` ile gösterilen dizine koyun. Yönetici hesabıyla DLL’i kaydedin ve [classic_model.sql](ml/classic_model.sql) dosyasını Classic `mysql` istemcisiyle yükleyin.
+
+```sql
+CREATE FUNCTION sdp_model_compute RETURNS STRING SONAME 'sdp_mysql_model_udf.dll';
+```
+
+Sunucu yapılandırmasına `[mysqld]` altında `sdp-model-sql=ON` ekleyip sunucuyu yeniden başlatın. `registry` yazılmazsa varsayılan kayıt şeması `sdp_models` kullanılır. Ayrı hesaplar için ayrı kayıt şemaları oluşturun. Yönetici `CALL sdp_models.install_model_registry('model_lab');` ile mevcut bir şemayı hazırlar. Hesaba `sdp_models.*` için `EXECUTE`, kendi şemasındaki `sdp_model_definitions` ve `sdp_model_versions` tabloları için `SELECT, INSERT`, eğitim kaynağındaki ilgili sütunlar için `SELECT` verin. Aynı kayıt şemasını paylaşan hesaplar o şemadaki modelleri paylaşır.
+
+Örnekte `model_lab` hazırdır ve `training.samples(id, amount, revenue)` sayısal eğitim verileri içerir.
+
+```sql
+CREATE MODEL USING '{"registry":"model_lab","name":"sales","algorithm":"linear"}';
+
+TRAIN MODEL USING '{"registry":"model_lab","name":"sales","request_token":"0123456789abcdef0123456789abcdef","schema":"training","table":"samples","order_key":"id","features":["amount"],"label":"revenue"}';
+
+PREDICT MODEL USING '{"registry":"model_lab","name":"sales","features":{"amount":120}}';
+```
+
+`TRAIN MODEL` en fazla 1.024 satır ve 64 özellik sütunuyla senkron çalışır. Sıralama sütunu benzersiz ve `NULL` içermeyen değerler taşımalıdır. Aynı model, eğitim girdisi ve `request_token` aynı kayıtlı sürümü döndürür. Yeni eğitim isteğinde yeni token kullanın. `PREDICT MODEL` bir `version` verilmediyse son sürümü seçer ve eğitim sütunları için güncel `SELECT` yetkisini tekrar denetler. `mlp`, `split_column` içinde `train` ve `validation` bölümlerini ister. `kmeans`, `dbscan` ve `pca` için `label` kullanılmaz. DBSCAN eğitim satırlarını kümeler, yeni satır tahmini yapmaz. Classic eğitim gövdesi eski `dataset_id` yerine kaynak tabloyu tarif eder. Yordamlar `sdp_classic_model_stmt` ve `@sdp_classic_model_*` oturum adlarını kullanır.
+
+Yerel kabul için `python -B -m compatibility.tests.classic_models_acceptance --help` geçici TLS örneklerinde kullanılan sunucu, istemci ve DLL parametrelerini gösterir.
+
+#### MySQL Shell yardımcı aracı
+
 CMake’de `sdp_mysql_model_runner` hedefini derle. Bu hedef eski C++ lineer, lojistik, CART, random forest, K-Means, DBSCAN, PCA ve CPU MLP eğitim kodunu kullanır. `train` tek MySQL sorgusunda en fazla 1024 satırı ve 64 özellik sütununu okur. Sıralama anahtarı benzersiz olmalıdır. Denetimli algoritmalar `--label` ister. `--options` eski algoritma seçeneklerini JSON nesnesi olarak alır. `mlp`, mevcut `SDP_WITH_CPU_MLP` seçeneğini ve `train` ile `validation` değerlerini taşıyan `--split-column` sütununu gerektirir. DBSCAN mevcut eğitim satırlarını kümeleyip artifaktı kaydeder. `predict` diğer algoritmalarda MySQL sürümünün artifakt checksum’ını ve özellik adlarını doğrular.
 
 Sürümler hesap bazında saklanır. `status` sürümleri ve etkin işaretçiyi gösterir. `activate` doğrulanmış bir sürüm seçer, `rollback` etkin sürümden eski bir sürüme geçer, `deactivate` işaretçiyi temizler. `predict` sürüm sayısı yerine `active` alabilir. Etkin sürümle farklı sıralanmış özellikler reddedilir. Etkinleştirme ve tahminde kaynak MySQL sütunlarına güncel SELECT izni denetlenir. Dataset kataloğu, eğitim checkpoint’i ve eski model RPC’leri bekliyor.
