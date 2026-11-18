@@ -89,6 +89,25 @@ PREDICT MODEL USING '{"registry":"model_lab","name":"sales","features":{"amount"
 
 Yerel kabul için `python -B -m compatibility.tests.classic_models_acceptance --help` geçici TLS örneklerinde kullanılan sunucu, istemci ve DLL parametrelerini gösterir.
 
+#### Model yordamlarını geri kurma
+
+`CREATE MODEL` komutu `1305` hatasıyla `sdp_models.create_model` yordamının bulunamadığını söylüyorsa yönetici hesabıyla `sdp_models` kurulumunu denetleyin. `DROP DATABASE sdp_models` yordamları ve varsayılan kayıt tablolarını birlikte siler.
+
+```sql
+SELECT ROUTINE_NAME
+FROM information_schema.ROUTINES
+WHERE ROUTINE_SCHEMA = 'sdp_models'
+  AND ROUTINE_NAME IN ('create_model', 'train_model', 'predict_model');
+
+SELECT UDF_LIBRARY
+FROM performance_schema.user_defined_functions
+WHERE UDF_NAME = 'sdp_model_compute';
+```
+
+DLL kaydı eksikse yukarıdaki `CREATE FUNCTION` komutunu kullanın. Ardından yönetici olarak Classic `mysql` istemcisinden `SOURCE compatibility/ml/classic_model.sql` çalıştırın. Taşınabilir Windows paketindeki dosya yolu `sql/classic_model.sql` olur. Aynı kurulum komutu eksik yordamları ve kayıt tablolarını oluşturur. Kayıt tabloları silindiyse model sürümlerini yedekten geri yükleyin veya modelleri tekrar eğitin.
+
+Kurulum bir yordamın metadata kilidini bekliyorsa ilgili oturumdaki açık işlemi tamamlayın ve kurulumu yeniden deneyin. Eğitim tablolarını ayrı bir uygulama şemasına koyun ve `TRAIN MODEL` gövdesindeki `schema` alanına o şemayı yazın. Workbench’te komutun tamamını seçip çalıştırın.
+
 #### MySQL Shell yardımcı aracı
 
 CMake’de `sdp_mysql_model_runner` hedefini derle. Bu hedef eski C++ lineer, lojistik, CART, random forest, K-Means, DBSCAN, PCA ve CPU MLP eğitim kodunu kullanır. `train` tek MySQL sorgusunda en fazla 1024 satırı ve 64 özellik sütununu okur. Sıralama anahtarı benzersiz olmalıdır. Denetimli algoritmalar `--label` ister. `--options` eski algoritma seçeneklerini JSON nesnesi olarak alır. `mlp`, mevcut `SDP_WITH_CPU_MLP` seçeneğini ve `train` ile `validation` değerlerini taşıyan `--split-column` sütununu gerektirir. DBSCAN mevcut eğitim satırlarını kümeleyip artifaktı kaydeder. `predict` diğer algoritmalarda MySQL sürümünün artifakt checksum’ını ve özellik adlarını doğrular.

@@ -1,4 +1,4 @@
-# StarDataParadise Server `v0.5.0-preview.2`
+# StarDataParadise Server `v0.5.0-preview.3`
 
 `server-26.10.0.patch`, MySQL Server tabanına uygulanan kaynak değişikliklerini ve iki `mysqltest` senaryosunu içerir. Kaynak tabanı `mysql/mysql-server` deposunun `mysql-26.10.0` etiketi ve `561753af986c3c006c4b6c7caa8359748fb55b22` commit’idir.
 
