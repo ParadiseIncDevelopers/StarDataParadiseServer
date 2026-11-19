@@ -221,3 +221,28 @@ Workbench `v0.3.0-preview.3`, Classic ana sayfa, bağlantı/profil ekranları, S
 - Yama SHA-256 değeri `845cb26ccc8e11f3206f13ab0d7b77d5338c29c76e22ec7f958f51b8b5d6c799` ile eşleşti. Doğrulama çıktıları Workbench `out/release-preview3/` altındadır.
 - Bu yayın kontrolünde tam native derleme ve canlı GUI/migration kabulü tekrar çalıştırılmadı. Yukarıdaki tamamlanmış kabul kayıtları kullanıldı. Canlı SSH, MySQL dışı ODBC kaynakları ve tam DPI/yüksek kontrast kabulü açık kapsam sınırlarıdır.
 - Dış depo diff boşluk denetimi, patch içindeki upstream bağlam satırları için uyarı verdi. Patch baytları ve SHA-256 korundu. Patch dışındaki izlenen yayın dosyalarının boşluk denetimi geçti.
+
+### Classic SQL çalışma alanı araştırması ve sayfa taslakları · 19 Kasım 2026
+
+Kullanıcı ana sekmeler için 3. taslağı, bağlantı beklemesi için 1. taslağı seçti. Bağlı SQL arayüzündeki menü, araç çubuğu ve doğrudan açılan sayfaların amacı incelendi. Help menüsünden MySQL sayfalarına yönlendiren dış bağlantı hedefleri kullanıcının son isteğiyle sonraki aşamaya bırakıldı. Bu etap araştırma ve görsel tasarım kapsamındadır.
+
+| Durum | Kontrol ve kanıt |
+| --- | --- |
+| PASS | 24 canlı ekran kaydı ve şema/tablo bağlam menüsü metinleri alındı. 130 menü kaydı, 14 oturum araç çubuğu ve 12 editör araç çubuğu tanımı kaynak komutuyla eşleştirildi. 31 Python modülünden 220 etiket/callback adayı, canlı ağaçlardan 110 kontrol adayı çıkarıldı. Aday sayıları benzersiz düğme sayısı değildir. Workbench `packaging/classic-workbench/tasarim/sql-calisma-alani/KOMUTLAR.md`. |
+| PASS | 41 ayrı sayfa/durum görseli üretildi ve sayfa amacı, giriş yolu, kontroller, ana eylem, durumlar ve kaynak başvurularıyla kalıcı galeriye yazıldı. SQL/Veri/Şema/Performans/Yönetim/Araçlar gezinmesi, renk, tipografi, DIP ölçüleri, sekmeler ve bağlantı beklemesi davranışı belgelendi. Workbench `packaging/classic-workbench/tasarim/sql-calisma-alani/README.md`, `KURALLAR.md`, `SAYFALAR.md`. |
+| PASS | Canlı arayüzden yalnız sabit SELECT/UNION ile iki sentetik satır ve bunun EXPLAIN sonucu çalıştırıldı. Yönetim ve nesne yüzeyleri okundu. Hesap/yetki, hizmet, oturum sonlandırma, tablo yazma ve aktarım eylemleri çalıştırılmadı. İnceleme SQL tamponu oturumda bırakıldı. Workbench `packaging/classic-workbench/tasarim/sql-calisma-alani/INCELEME.md`. |
+| PASS | Paket denetiminin 18 kontrolü geçti. 41 farklı PNG, galeri ve detay bölümleri, kaynak yolları, 156 komutun amaç/hedef alanları ve 331 yerel belge bağlantısı doğrulandı. Windows System.Drawing 41 taslak, 24 JPEG ve 3 referans olmak üzere 68 görüntüyü açtı. Workbench `out/classic-workspace-audit/package-verification.json`, `image-decoding.json`; kalıcı özet `packaging/classic-workbench/tasarim/sql-calisma-alani/DOGRULAMA.md`. |
+| NOTE / önkoşul | Sunucu günlükleri ve seçenek dosyası sayfaları eksik profil yapılandırma yolu nedeniyle içerik açamadı. Performance Schema ölçüm ayarları içeriği boş kaldı, neden teşhis edilmedi. İlgili taslaklar kaynak kodundan çıkarıldı. İki bağlam menüsü kaydı ve bu sayfaların gerçek görüntüleri kalıcı pakete alındı. |
+| NOTE / entegrasyon | Veri geçmişi, Decision, CPU modelleri, Compute ve yedek ekranları güncel `compatibility/` araçları için Classic adaptör önerileridir. Eski Qt/wire-v1 kapsamı varsayılmadı. Yeni adaptör, bağlantı bekleme yaşam döngüsü ve ortak SQL inceleme bağları bu etapta uygulanmadı. |
+| NOTE / doğrulama sınırı | Yeni UI uygulanmadığı için native build çalıştırılmadı. Tam DPI, yüksek kontrast, ekran okuyucu ve tüm sayfalarda klavye kabulü yapılmadı. İlk eski UI indeksleri yeniden gözlemle düzeltildi; Codex penceresini gösteren bir görüntü kanıt olarak kullanılmadı. |
+| PASS | Üretim patch'i değiştirilmedi. SHA-256 `845cb26ccc8e11f3206f13ab0d7b77d5338c29c76e22ec7f958f51b8b5d6c799`. Mevcut Workbench kullanıcı kaynak değişiklikleri korundu. |
+
+### Tam Classic kaynaklarının master yayını · 19 Kasım 2026
+
+Workbench `v0.3.0-preview.4` ile tam Classic kaynak ağacı ürün deposunun `master` dalında `classic-workbench/` klasörüne alınır. Yerel native çalışma ağacındaki 104 değişiklik `master` dalında `b201ed14d7624571975db6a9dfa6dd077d712bf5` commit'ine kaydedildi. 5.667 dosyalık yayın ağacı native commit'in `f5cc48642e67bed877a57164d6f88bff09a3f655` Git tree kimliğiyle birebir doğrulandı. Upstream 8.0.47 kaynak ve telif bildirimleri ağaçta bulunur.
+
+- Native ağacın değişen 16 Python dosyası AST denetimini geçti. En büyük kaynak dosyası 100 MiB altında.
+- SQL çalışma alanı tasarım paketinin 18 denetimi ve 331 yerel bağlantı kontrolü yeniden geçti. Son tasarım belgeleri ve görselleri aynı master yayınına dahil edildi.
+- Native build betiğinin kaynak önkoşulu, 8.0.47 tabanından türetilmiş commit'leri kabul eder. PowerShell sözdizimi denetimi geçti.
+- Tam native derleme ve canlı GUI kabulü bu yayın aktarımında tekrar çalıştırılmadı. Önceki kabul kanıtları ve yeni kaynak ağacı eşitlik denetimi kullanıldı.
+- Server `v0.5.0-preview.5` bu ortak yayın kaydını ve son SQL çalışma alanı araştırma notlarını içerir.
