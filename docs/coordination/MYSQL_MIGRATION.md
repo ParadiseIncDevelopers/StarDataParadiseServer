@@ -322,3 +322,43 @@ Kalıcı ayrıntı ve 21 gerçek native görüntü Workbench `packaging/classic-
 Kullanıcının tamamlanan çalışmaların tümünü master'a commit/push etme isteğiyle Workbench `v0.3.0-preview.5 - Classic Birleşik Çalışma Alanı` master'a gönderildi. `3c3887e06e2fdb7ef19e007c552cea473e708dcc` commit'i bütün 409 dosyalık kaynak, test, ikon, tasarım ve kabul görseli değişikliklerini içerir. Açıklamalı sürüm etiketi ve master aynı atomik Git push ile yayımlandı. Server `v0.5.0-preview.6 - Classic Arayüz Kabul ve Eşgüdüm Kaydı` bu çalışmanın ortak kabul ve yayın kaydını içerir. CLI ve DLLler depoları temizdir ve mevcut sürümlerini korur.
 
 Her sürümün amacı, yayımlanan özellikler, test sonuçları ve kapsam sınırları [Classic kaynak yayını kaydında](CLASSIC_UI_RELEASE_2026_11_20.md) tek tek açıklanır. Derleme çıktıları, bağımlılıklar ve yerel test/kullanıcı ayarları deponun ignore kurallarıyla korunur.
+
+### İlk SQL sekmesi ve kutusuz açılış düzeltmesi - 20 Kasım 2026
+
+Kullanıcı ilk SQL sekmesinin açılışta eksik boyanmasını ve eski “Opening SQL Editor” kutusunun kaldırılmasını istedi. Workbench'in ilk sekmesi 19 px ölçüsünü önbellekte tutabiliyordu; ölçü değişiminde geometri yenilenir ve nihai 32 DIP yükseklik ilk belge eklenmeden atanır. SQL bağlantısının bütün Windows girişleri ana pencere içindeki profil/ilerleme/Vazgeç satırını kullanır. İptal worker tamamlanana kadar “Vazgeçiliyor…” olarak görünür; bitince önceki komut durumları geri yüklenir.
+
+| Durum | Kanıt |
+| --- | --- |
+| PASS | Başlangıç ve son 66 Python regresyonu, 11 gerçek C# kaydırma kontrolü; dönüş kodları 0. |
+| FAIL / başlangıç kanıtı | Yeni geometri kontrolü eski teslim DLL'inde ilk sekmenin yükseklik değişimini yakaladı; dönüş kodu 1. |
+| PASS | WBControls, mforms.wr ve MySQLWorkbench üç hedefli native derleme tamamlandı. Kaynak/native altı dosyanın SHA-256 değerleri eşleşti. Son Robocopy kodu 2 yalnız başarılı kaynak sahnelemesinin betik çıkışına taşınmasıdır. |
+| PASS | Yeni paketlenmiş gerçek denetimlerde 13 C# kontrolü Türkçe ve İngilizcede ayrı ayrı geçti; dönüş kodları 0. Tam ilk sekme boyaması, iki sekme ölçüleri, pencere içi durum, dil, tek iptal, komut geri yükleme ve sonraki bağlantı sıfırlaması doğrulandı. |
+| PASS | Ayrı profilli gerçek `--query` açılışı yalnız geçici loopback TCP fixture'ına bağlandı. Yeni satır ve Escape sonrası iptal native görüntülerde görüldü; günlük `cancelled by user: canceled` kaydetti. SQL handshake'i/veri yazması yoktur. |
+| PASS | Çevrimdışı soğuk SQL açılışı, Ctrl+T ve Ctrl+Tab ile ilk/ikinci sekme görünümü doğrulandı. QA normal kapandı; açık kullanıcı uygulaması korundu. Üç native PNG kalıcı kayda alındı. |
+| FAIL / giderildi | Sandbox ilk `subst` takma adını reddetti; izinli tekrar üç hedefi tamamladı. Test hazırlığındaki Windows yol ayraçları ve native çocuk yüzeyini ölçen `DrawToBitmap` deneyi düzeltildi; son test gerçek üretim `DrawControl` metodunu sınar. |
+| NOT_RUN | Tam DPI/yüksek kontrast/ekran okuyucu matrisi, canlı SSH ve MSI yaşam döngüsü tekrar çalıştırılmadı. |
+
+Yeni yerel uygulama Workbench `out/classic-startup-ui/StarDataParadise.exe`; ham kanıt `out/classic-startup-acceptance/startup-ui-validation.json`. Ayrıntılı kabul ve görseller Workbench `packaging/classic-workbench/tasarim/sql-calisma-alani/ACILIS-DUZELTMELERI.md` içindedir. Server ürün kodu, CLI, DLL, protokol ve sürüm numaraları değişmedi; commit/push veya yayın yapılmadı.
+
+### SDP dosya adları ve bağlı yüklemeler - 20 Kasım 2026
+
+Kullanıcı Workbench paketindeki `mysql` dosya adlarını `sdp` olarak değiştirmeyi ve başvuruları buna göre bağlamayı istedi. `db.sdp.*`, `sdp.canvas`, `sdp.forms`, `sdp.utilities`, yardımcı çalıştırılabilirler, yönetim betikleri, Python modülleri, profil/ikon/şablon dosyaları ve üretilen DLL/LIB/EXP/ILK/PDB adları güncellendi. Solution `StarDataParadiseClassic.sln` olur. Native/CLR importları, eklenti kayıtları, GRT dosya yolları, proje/kurulum listeleri ve derleme/sahneleme aynı adları kullanır.
+
+| Durum | Kanıt |
+| --- | --- |
+| PASS | 40 x64 Release_OSS hedefi yeni adlarla derlendi; son üç hedefin tekrarı ve final betik çıkışı 0. `build.log`, `build-retry.log`. |
+| FAIL / giderildi | İlk SWIG köprüsü komut yolunda araç bulamadı, MSB8066/9009. İki wrapper projesi ve native build betikleri SWIG'in açık yoluna bağlandı; iki köprü ve ana uygulama tekrar geçti. |
+| PASS | 126 gerçek PE dosyası/1.318 native import ve 19 CLR assembly/146 assembly başvurusu denetlendi. Eski ürün DLL importu veya eski ürün assembly kimliği yok; 12 yeni adlı DLL mevcut. `artifact-bindings.json`, `assembly-bindings.log`. |
+| PASS | Önceki paket yeni ad denetiminde beklenen çıkış 1 ile reddedildi. 66 mevcut Python regresyonu ve üç yeni istemci/eşleme davranış testi geçti. Gerçek UI'de 13 kontrol Türkçe/İngilizcede ayrı ayrı geçti. |
+| PASS | Yedi gerçek GRT modülü yeni DLL/Python dosya yollarını bildirdi. 26 profil şablonu bulundu; önceki QA `.mwb` modeli, bellekte SQL ayrıştırıcı ve native tablo editörü doğrulandı. Bağlantı/sunucu yazması/model kaydı yok; QA normal kapandı, kullanıcı uygulaması açık kaldı. |
+| PASS | `sdp.exe`/`sdpdump.exe` sürüm çağrıları 0; üretici ikilileriyle hash eşliği korundu. Kaynak/native eşliği, 62 proje dosyasının Release_OSS başvuruları, 14 Python AST ve 32 XML kontrolü geçti. Eksik ticari validation başvurusu bu yapılandırmada koşulla dışarıdadır. |
+| PASS | Korumalı `-SyncOnly` kaynak aktarımı seed gerektirmeden tamamlandı; native solution build betiği bu yolu kullanır. Ayrı staging çıktısı, iki GDAL sürüm çağrısı ve eski ad denetimi geçti. `sync-only.log`, `stage.log`. |
+| NOT_RUN | Canlı DB/SSH, MSI kur/kaldır ve Linux/macOS derlemesi bu kabulde çalıştırılmadı. |
+
+`mysqlcppconn-10-vs14.dll` native import sözleşmesi, `mysql_native_password.dll` ise kimlik doğrulama protokolü nedeniyle üretici adıyla korunur; vendor dosyaları/lisansları değiştirilmedi. Kayıtlı model ve bağlantı uyumu için GRT türleri, sürücü/API kimlikleri ve SQL/wire değerleri korunur; dosya yolları yenidir. Yeni çıktı Workbench `out/classic-sdp-names-ui/StarDataParadise.exe`, ayrı staging `out/classic-sdp-staged-ui`; ayrıntılı kayıt `packaging/classic-workbench/tasarim/sql-calisma-alani/DOSYA-ADLARI.md`, ana kanıt `out/classic-sdp-names-acceptance/sdp-names-validation.json`. Önceki UI düzeltmesi, eski çalışma zamanları ve kullanıcı kaynakları korunur. Server/CLI/DLL ürün kodu veya sürüm numarası değiştirilmedi; commit/push ve yayın yapılmadı.
+
+### Önceki düzeltmelerin sürüm artırmadan yayını - 20 Kasım 2026
+
+Kullanıcı yeni AI SQL/Knowledge/HIST çalışmasına geçmeden önce dosya adı ve açılış düzeltmelerinin commit/push edilmesini istedi. Workbench `a98eb36cdbd35846e953f380d975d1389da2ec90` commit'i master dalına gönderildi. Sürüm alanı değiştirilmedi, yeni etiket veya release oluşturulmadı. Yeni tasarım galerisi ve ortak modal stil değişikliği bu commit'e dahil edilmedi.
+
+Son kontrolde 66 mevcut Python regresyonu, üç dosya adı testi, 126 PE/1.318 native import, 19 CLR assembly/146 başvuru ve paketlenmiş gerçek UI'de Türkçe/İngilizce 13'er açılış kontrolü geçti. Rename ile yeni dosya sayılan altı dosyadaki kalıtılmış satır sonu boşlukları giderildi; `git -c core.whitespace=cr-at-eol diff --cached --check` geçti. MSI kur/kaldır, canlı DB/SSH ve yeni özellik kabulü bu yayın kapsamında çalıştırılmadı.
