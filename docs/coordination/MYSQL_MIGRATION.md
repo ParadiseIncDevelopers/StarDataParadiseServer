@@ -362,3 +362,19 @@ Kullanıcı Workbench paketindeki `mysql` dosya adlarını `sdp` olarak değişt
 Kullanıcı yeni AI SQL/Knowledge/HIST çalışmasına geçmeden önce dosya adı ve açılış düzeltmelerinin commit/push edilmesini istedi. Workbench `a98eb36cdbd35846e953f380d975d1389da2ec90` commit'i master dalına gönderildi. Sürüm alanı değiştirilmedi, yeni etiket veya release oluşturulmadı. Yeni tasarım galerisi ve ortak modal stil değişikliği bu commit'e dahil edilmedi.
 
 Son kontrolde 66 mevcut Python regresyonu, üç dosya adı testi, 126 PE/1.318 native import, 19 CLR assembly/146 başvuru ve paketlenmiş gerçek UI'de Türkçe/İngilizce 13'er açılış kontrolü geçti. Rename ile yeni dosya sayılan altı dosyadaki kalıtılmış satır sonu boşlukları giderildi; `git -c core.whitespace=cr-at-eol diff --cached --check` geçti. MSI kur/kaldır, canlı DB/SSH ve yeni özellik kabulü bu yayın kapsamında çalıştırılmadı.
+
+### AI SQL/Knowledge/HIST başlangıcı - ortak modal stili
+
+Önceki düzeltmeler Workbench `a98eb36` ve Server `b309a79` ile master'a sürüm artırmadan gönderildikten sonra yeni çalışma `codex/ai-sql-hist-release` dalında başladı. Workbench `e4bfb53` ortak modal düğme stilini ve kalıcı tasarım kuralını içerir; özellik dalına gönderildi. Sürüm numarası, release ve etiket oluşturulmadı.
+
+Workbench'in kendi WinForms/mforms modal düğmeleri ilk çizim/gösterim öncesinde `#043133` ve beyaz yazıyla hazırlanır. Dinamik denetimler, enabled değişimleri, klavye/default/cancel kimlikleri, yüksek kontrast ve açık native sistem çizimi korunur. Ayrı Windows TaskDialog/dosya/güvenlik pencereleri OS çizimindedir.
+
+| Durum | Kabul |
+| --- | --- |
+| PASS | WBControls, mforms.wr, StarDataParadise üç native hedefi ayrı `out/classic-ai-hist-ui` paketinde derlendi. Son ortak stil güncellemesi WBControls'de yeniden derlendi; iki betik de 0 döndürdü. |
+| PASS | Gerçek paketlenmiş WBControls ile 10 modal kontrolü; normal/iptal renkleri, disabled/reenabled, dinamik düğme, native güvenlik çizimi, odak/tab sırası, pixel dolgu ve modal dönüş sonucu. |
+| PASS | Yeni pakette önceki 13 açılış kontrolü Türkçe ve İngilizcede ayrı ayrı geçti. 126 PE/1.318 import ve 19 CLR/146 başvuru denetimi geçti. |
+| FAIL / giderildi | C# yol ayracı ve test callback ayracı düzeltildi. EnterThreadModal'ın form kaydından önce gelebileceğini yakalayan ilk test sonrası stil ilk queued paint öncesine taşındı. Son kaynak ve paket testleri geçti. |
+| NOT_RUN | Gerçek yüksek kontrast/DPI/ekran okuyucu matrisi ve MSI yaşam döngüsü. |
+
+Ayrıntı Workbench `packaging/classic-workbench/tasarim/sql-calisma-alani/MODAL-DUGMELERI.md`, loglar `out/classic-modal-acceptance/` içindedir. Bu başlangıç, 35 tasarım ekranının tamamının veya yeni native AI SQL/Knowledge/kısa SQL/HIST motorunun uygulanması değildir. Mevcut MySQL patch'i AI Conversation/Stored Knowledge ve transaction çapında HIST branch/merge desteğini henüz içermez; mevcut satır History adaptörü bu sözleşmenin yerine geçmez. SDK değişiklikleri, yeni motor kabulü, stable release ve son installation wizard adımı henüz tamamlanmadı.
