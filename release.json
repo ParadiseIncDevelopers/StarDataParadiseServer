@@ -1,6 +1,6 @@
 {
   "product": "StarDataParadise Server",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "channel": "stable",
   "prerelease": false,
   "classic_base": "26.10.0",

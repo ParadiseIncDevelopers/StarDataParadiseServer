@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Reflection;
 
 [assembly: AssemblyTitle("StarDataParadise AI Worker Launcher")]
-[assembly: AssemblyVersion("0.5.1.0")]
-[assembly: AssemblyFileVersion("0.5.1.0")]
+[assembly: AssemblyVersion("0.5.2.0")]
+[assembly: AssemblyFileVersion("0.5.2.0")]
 
 internal static class WorkerLauncher {
     private static string Quote(string value) {
@@ -32,6 +32,12 @@ internal static class WorkerLauncher {
             start.UseShellExecute = false;
             start.CreateNoWindow = true;
             start.WorkingDirectory = directory;
+            // A Workbench plugin runs inside its own embedded Python. Its
+            // PYTHONHOME/PYTHONPATH must not select that Python for mysqlsh.
+            var inheritedPython = new List<string>();
+            foreach (string key in start.EnvironmentVariables.Keys)
+                if (key.StartsWith("PYTHON", StringComparison.OrdinalIgnoreCase)) inheritedPython.Add(key);
+            foreach (string key in inheritedPython) start.EnvironmentVariables.Remove(key);
             start.EnvironmentVariables["MYSQLSH_USER_CONFIG_HOME"] = Path.Combine(directory, "cli-profile");
             Directory.CreateDirectory(start.EnvironmentVariables["MYSQLSH_USER_CONFIG_HOME"]);
             start.RedirectStandardOutput = true;

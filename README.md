@@ -2,7 +2,8 @@
 
 StarDataParadise Workbench, CLI ve uygulama SDK’larının bağlandığı veritabanı sunucusu. Bu depo, Windows x64 wire v1 motorunu ve MySQL 26.10.0 tabanlı Classic motorunun kaynak yamasını, uyumluluk servislerini ve kabul testlerini içerir.
 
-Güncel ürün sürümü **0.5.1**, kanal **stable** olur. Yerel AI worker supervisor,
+Güncel ürün sürümü **0.5.2**, kanal **stable** olur. Workbench içinden worker
+başlatılırken embedded Python ortamı MySQL Shell'den yalıtılır. Yerel AI worker supervisor,
 güvenilir kullanıcı/sağlayıcı bağları ve kullanıcı onayıyla Windows oturum
 başlangıcı desteği içerir. Classic taban sürümü
 26.10.0 olarak korunur. AI/Knowledge, kullanıcıya ait OpenAI/Claude anahtarı
