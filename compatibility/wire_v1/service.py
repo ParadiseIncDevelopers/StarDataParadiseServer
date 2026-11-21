@@ -24,6 +24,7 @@ from ledger import Receipts, read_key, request_token
 from legacy_backup import OPERATIONS as BACKUP_OPERATIONS, dispatch as dispatch_backup, load_config as load_backup
 from legacy_decision import validate as validate_decision
 from legacy_model import OPERATIONS as MODEL_OPERATIONS, dispatch as dispatch_model
+from native_sql import NativeFault, NativeSession
 from legacy_rpc import OPERATIONS as LEGACY_OPERATIONS, dispatch as dispatch_legacy, load_config as load_legacy
 from sql import (Fault, binding_values, column_type, integer_field, name_field, object_field,
                  prepare_sql, require, wire_value)
@@ -120,11 +121,14 @@ def send(sock, request_id, *, body=None, fault=None):
     if fault is None:
         response["body"] = body
     else:
-        sqlstate, message = ERRORS[fault.code]
-        response["error"] = {
-            "code": fault.code, "sqlstate": sqlstate, "message": message, "line": None, "column": None,
-            "retryable": False, "unknown_outcome": fault.uncertain, "correlation_id": None,
-        }
+        if isinstance(fault, NativeFault):
+            response["error"] = fault.document
+        else:
+            sqlstate, message = ERRORS[fault.code]
+            response["error"] = {
+                "code": fault.code, "sqlstate": sqlstate, "message": message, "line": None, "column": None,
+                "retryable": False, "unknown_outcome": fault.uncertain, "correlation_id": None,
+            }
     payload = encode(response)
     if len(payload) > LIMIT:
         raise Fault(1002, close=True)
@@ -180,6 +184,8 @@ class Session:
         self.anchor = None
         self.statements = {}
         self.result = None
+        self.native_sql = None
+        self.default_schema_ready = not bool(getattr(config,'native_sql',False))
 
     def identity_setup(self, username):
         with self.db.cursor(buffered=True) as cursor:
@@ -202,14 +208,16 @@ class Session:
                 or not isinstance(password, str) or not 1 <= len(password) <= 1024 or "\0" in password):
             raise Fault(1005, close=True)
         try:
-            multiple_results = self.config.legacy_rpc and self.config.legacy_rpc.history
+            multiple_results = (self.config.legacy_rpc and self.config.legacy_rpc.history) or getattr(self.config,'native_sql',False)
             self.db = connector.connect(
                 host=self.config.mysql_host, port=self.config.mysql_port, user=username, password=password,
-                database=self.config.schema, use_pure=True, autocommit=True, charset="utf8mb4",
+                database=None if getattr(self.config,'native_sql',False) else self.config.schema,
+                use_pure=True, autocommit=True, charset="utf8mb4",
                 sql_mode=SQL_MODE, ssl_verify_cert=True, ssl_verify_identity=True, ssl_ca=str(self.config.mysql_ca),
                 tls_versions=["TLSv1.2", "TLSv1.3"], allow_local_infile=False,
                 client_flags=[-ClientFlag.MULTI_STATEMENTS,
-                              ClientFlag.MULTI_RESULTS if multiple_results else -ClientFlag.MULTI_RESULTS],
+                              ClientFlag.MULTI_RESULTS if multiple_results else -ClientFlag.MULTI_RESULTS,
+                              ClientFlag.PS_MULTI_RESULTS if getattr(self.config,'native_sql',False) else -ClientFlag.PS_MULTI_RESULTS],
                 connection_timeout=5, read_timeout=20, write_timeout=20,
                 conn_attrs={"sdp_wire_nonce": self.nonce} if self.config.ledger_key else None,
             )
@@ -230,6 +238,7 @@ class Session:
 
     def features(self):
         return {**FEATURES, "tls": not self.config.plaintext_loopback,
+                "native_sql_v1": bool(getattr(self.config,'native_sql',False)),
                 "wire_sql_transactions_v1": self.receipts is not None}
 
     def close(self):
@@ -441,6 +450,36 @@ class Session:
     def dispatch(self, operation, body):
         if operation == "capabilities":
             return {"features": self.features()}
+        if operation == "native.open":
+            require(getattr(self.config,'native_sql',False),1004)
+            require(self.native_sql is None and self.result is None and not self.statements and
+                    self.anchor is None and not self.db.in_transaction,1013)
+            auto=body.get('autocommit',True)
+            require(type(auto) is bool)
+            if not self.default_schema_ready:
+                try:
+                    self.db.database=self.config.schema
+                    self.default_schema_ready=True
+                except Error as error:
+                    # An RPC worker can authenticate and execute fully-qualified
+                    # native catalog commands without access to the bridge's
+                    # legacy application schema. No schema grant is invented.
+                    if error.errno!=1044:raise
+            self.db.autocommit=auto
+            self.native_sql=NativeSession(self.db,auto)
+            return {'native_sql_v1':True,'autocommit':auto}
+        if operation == "native.execute":
+            require(self.native_sql is not None,1013)
+            return self.native_sql.execute(body)
+        if operation == "native.fetch":
+            require(self.native_sql is not None,1013)
+            return self.native_sql.fetch(body)
+        # Native SQL controls its own transaction/session lifecycle. The legacy
+        # CRUD receipt API cannot implicitly commit an active AI scope.
+        require(self.native_sql is None,1013)
+        if not self.default_schema_ready:
+            self.db.database=self.config.schema
+            self.default_schema_ready=True
         if operation == "fetch":
             return self.fetch(body)
         if operation == "result_cancel":
@@ -454,6 +493,7 @@ class Session:
             self.db.autocommit = True
             self.db.sql_mode = SQL_MODE
             self.db.database = self.config.schema
+            self.default_schema_ready=True
             identity = self.identity_setup(self.identity[1].rpartition("@")[0])
             if identity != self.identity:
                 raise Fault(1010, close=True)
@@ -646,6 +686,7 @@ def main():
     parser.add_argument("--legacy-backup-config", type=Path)
     parser.add_argument("--legacy-model-worker", type=Path)
     parser.add_argument("--legacy-decision-operator", action="append", default=[])
+    parser.add_argument("--native-sql",action="store_true",help="enable versioned native SQL sessions and typed JSON results")
     parser.add_argument("--max-sessions", type=int, default=8)
     args = parser.parse_args()
     if args.share_classic_loopback and (not args.plaintext_loopback or args.port == args.mysql_port):

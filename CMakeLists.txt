@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.2)
-project(StarDataParadiseServer VERSION 0.4.0 LANGUAGES CXX)
+project(StarDataParadiseServer VERSION 0.5.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -23,7 +23,7 @@ if(BUILD_TESTING)
     add_test(NAME help COMMAND StarDataParadiseServer --help)
     set_tests_properties(help PROPERTIES PASS_REGULAR_EXPRESSION "Usage: StarDataParadiseServer")
     add_test(NAME version COMMAND StarDataParadiseServer --version)
-    set_tests_properties(version PROPERTIES PASS_REGULAR_EXPRESSION "^StarDataParadiseServer 0[.]4[.]0")
+    set_tests_properties(version PROPERTIES PASS_REGULAR_EXPRESSION "^StarDataParadiseServer 0[.]5[.]0")
     add_test(NAME invalid_option COMMAND ${CMAKE_COMMAND}
         "-DPROGRAM=$<TARGET_FILE:StarDataParadiseServer>" -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/invalid_option.cmake")
 endif()

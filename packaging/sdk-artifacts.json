@@ -1,27 +1,27 @@
 [
   {
     "repo": "StarDataParadise.SDK.NET",
-    "file": "out/packages/StarDataParadiseDrive.2.0.0-preview.1.nupkg",
-    "sha256": "bdfca7e3e2c117916095eb4289cb06dc3fb85e537b27ed8a6f2185f533ac5063"
+    "file": "out/packages/StarDataParadiseDrive.2.1.0.nupkg",
+    "sha256": "8e259760b6705791f8dbf7a6615fde26e844c1bc02b5c4a34881b0a3f5ad4654"
   },
   {
     "repo": "StarDataParadise.SDK.NET",
-    "file": "out/packages/StarDataParadiseNetFramework.2.0.0-preview.1.nupkg",
-    "sha256": "606c612fc4d3cbc8acfff6437cd7c6350cd8b8aaa9f723d880e2f363196cab48"
+    "file": "out/packages/StarDataParadiseNetFramework.2.0.0.nupkg",
+    "sha256": "0b2945ff421be94c5130e7ddeb8963e67e9cc12673f4834f238af81c5df097ee"
   },
   {
-    "repo": "StarDataParadiseServer",
-    "file": "out/sdp-m7/stage33/release/stardataparadise-jdbc-0.2.0.jar",
-    "sha256": "c40f92b8d725eefff235980f25b264fbfca056b13fa313aa5a00d2fa14c69298"
+    "repo": "StarDataParadise.SDK.Java",
+    "file": "out/maven/com/stardataparadise/stardataparadise-jdbc/0.3.0/stardataparadise-jdbc-0.3.0.jar",
+    "sha256": "df1d92c7e9ef03da3c0ca5218016d61bfda922ccc71c7e7298e0a4fb7edc7526"
   },
   {
     "repo": "StarDataParadise.SDK.Python",
-    "file": "out/packages/stardataparadise_sdk-0.2.0-py3-none-any.whl",
-    "sha256": "b48ec6e5ed8e52e5fa2b04186f9c7229628dbffe3d6a5693f48c5a154e160940"
+    "file": "out/packages/stardataparadise_sdk-0.3.0-py3-none-any.whl",
+    "sha256": "c912240e2d682f8ff6da778588cc6580bb9c5e5aafb45556ca4f4e17ab77df93"
   },
   {
     "repo": "StarDataParadise.SDK.Node",
-    "file": "out/packages/stardataparadise-sdk-0.1.0.tgz",
-    "sha256": "5831f4e456e397bdaf3c477dad160477bd8ba2e23eeafb80ee203dee2e104ad6"
+    "file": "out/packages/stardataparadise-sdk-0.2.0.tgz",
+    "sha256": "1d9a3ddac9203d8408383ac822ce053a4efc87e0ca4a1bc93414e48089c22da3"
   }
 ]

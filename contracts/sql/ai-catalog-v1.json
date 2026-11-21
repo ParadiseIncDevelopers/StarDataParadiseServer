@@ -1,0 +1,472 @@
+{
+  "version": 1,
+  "public_code_format": "six_digit_integer",
+  "classic_errno_policy": "Stable 16-bit mapping; structured metadata retains public code; existing errors are unchanged.",
+  "errors": [
+    {
+      "code": 502001,
+      "classic_errno": 61001,
+      "name": "unknown_option",
+      "sqlstate": "22023",
+      "message": "Unknown response option.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 502002,
+      "classic_errno": 61002,
+      "name": "duplicate_option",
+      "sqlstate": "22023",
+      "message": "Duplicate response option.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 502003,
+      "classic_errno": 61003,
+      "name": "option_type",
+      "sqlstate": "22023",
+      "message": "Invalid response option type.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 502004,
+      "classic_errno": 61004,
+      "name": "option_range",
+      "sqlstate": "22023",
+      "message": "Response option is out of range.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 502005,
+      "classic_errno": 61005,
+      "name": "option_conflict",
+      "sqlstate": "22023",
+      "message": "Incompatible response options.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 502006,
+      "classic_errno": 61006,
+      "name": "unsupported_option",
+      "sqlstate": "0A000",
+      "message": "Model does not support the requested option.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 503001,
+      "classic_errno": 61011,
+      "name": "conversation_not_found",
+      "sqlstate": "42000",
+      "message": "Conversation is unavailable.",
+      "retry_action": "NONE"
+    },
+    {
+      "code": 503002,
+      "classic_errno": 61012,
+      "name": "no_active_conversation",
+      "sqlstate": "25000",
+      "message": "No active conversation.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 503003,
+      "classic_errno": 61013,
+      "name": "pending_changes",
+      "sqlstate": "25000",
+      "message": "Conversation has pending changes.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 503004,
+      "classic_errno": 61014,
+      "name": "revision_conflict",
+      "sqlstate": "40001",
+      "message": "Conversation revision changed.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 504001,
+      "classic_errno": 61021,
+      "name": "empty_response",
+      "sqlstate": "22000",
+      "message": "Provider returned no final response.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 504002,
+      "classic_errno": 61022,
+      "name": "invalid_json",
+      "sqlstate": "22032",
+      "message": "Response is not valid JSON.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 504003,
+      "classic_errno": 61023,
+      "name": "schema_mismatch",
+      "sqlstate": "22000",
+      "message": "Response does not match its schema.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 504004,
+      "classic_errno": 61024,
+      "name": "truncated_response",
+      "sqlstate": "22000",
+      "message": "Provider response is incomplete.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 504005,
+      "classic_errno": 61025,
+      "name": "response_not_ready",
+      "sqlstate": "55000",
+      "message": "Response is not ready.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 504006,
+      "classic_errno": 61026,
+      "name": "capture_type",
+      "sqlstate": "22000",
+      "message": "Response capture type is incompatible.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 504007,
+      "classic_errno": 61027,
+      "name": "invalid_unicode",
+      "sqlstate": "22021",
+      "message": "Response contains invalid Unicode.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 505001,
+      "classic_errno": 61031,
+      "name": "empty_context",
+      "sqlstate": "22000",
+      "message": "Required context is empty.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 505002,
+      "classic_errno": 61032,
+      "name": "context_budget",
+      "sqlstate": "54000",
+      "message": "Context budget exceeded.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 506001,
+      "classic_errno": 61041,
+      "name": "invalid_dependency",
+      "sqlstate": "55000",
+      "message": "Knowledge dependency is unavailable.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 506002,
+      "classic_errno": 61042,
+      "name": "knowledge_shape",
+      "sqlstate": "22000",
+      "message": "Knowledge result schema changed.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 507001,
+      "classic_errno": 61051,
+      "name": "behavior_not_found",
+      "sqlstate": "42000",
+      "message": "Behavior version is unavailable.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 507002,
+      "classic_errno": 61052,
+      "name": "behavior_conflict",
+      "sqlstate": "22023",
+      "message": "Behavior settings conflict.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 508001,
+      "classic_errno": 61061,
+      "name": "memory_budget",
+      "sqlstate": "54000",
+      "message": "Memory budget exceeded.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 508002,
+      "classic_errno": 61062,
+      "name": "memory_epoch_changed",
+      "sqlstate": "40001",
+      "message": "Memory epoch changed before publication.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 509001,
+      "classic_errno": 61071,
+      "name": "model_unavailable",
+      "sqlstate": "55000",
+      "message": "Model or runtime is unavailable.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 509002,
+      "classic_errno": 61072,
+      "name": "model_capability",
+      "sqlstate": "0A000",
+      "message": "Model capability is unavailable.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 509003,
+      "classic_errno": 61073,
+      "name": "provider_rate_limit",
+      "sqlstate": "HY000",
+      "message": "Provider quota or rate limit reached.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 509004,
+      "classic_errno": 61074,
+      "name": "provider_timeout",
+      "sqlstate": "HYT00",
+      "message": "Provider deadline expired.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 509005,
+      "classic_errno": 61075,
+      "name": "provider_auth",
+      "sqlstate": "28000",
+      "message": "Provider credential was rejected.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 509006,
+      "classic_errno": 61076,
+      "name": "provider_transport",
+      "sqlstate": "HY000",
+      "message": "Provider transport failed.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 509007,
+      "classic_errno": 61077,
+      "name": "provider_protocol",
+      "sqlstate": "HY000",
+      "message": "Provider returned an invalid response.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 509008,
+      "classic_errno": 61078,
+      "name": "unsafe_endpoint",
+      "sqlstate": "22023",
+      "message": "Provider endpoint is not allowed.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 509009,
+      "classic_errno": 61079,
+      "name": "model_integrity",
+      "sqlstate": "22000",
+      "message": "Local model integrity verification failed.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 510001,
+      "classic_errno": 61081,
+      "name": "tool_denied",
+      "sqlstate": "42000",
+      "message": "Tool is outside the authorized allowlist.",
+      "retry_action": "NONE"
+    },
+    {
+      "code": 510002,
+      "classic_errno": 61082,
+      "name": "tool_arguments",
+      "sqlstate": "22023",
+      "message": "Tool arguments violate their contract.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 510003,
+      "classic_errno": 61083,
+      "name": "approval_required",
+      "sqlstate": "42000",
+      "message": "Action requires approval.",
+      "retry_action": "WAIT_FOR_APPROVAL"
+    },
+    {
+      "code": 510004,
+      "classic_errno": 61084,
+      "name": "approval_stale",
+      "sqlstate": "40001",
+      "message": "Action approval is no longer valid.",
+      "retry_action": "WAIT_FOR_APPROVAL"
+    },
+    {
+      "code": 510005,
+      "classic_errno": 61085,
+      "name": "tool_transaction_failed",
+      "sqlstate": "45000",
+      "message": "Tool transaction rolled back.",
+      "retry_action": "NONE"
+    },
+    {
+      "code": 511001,
+      "classic_errno": 61091,
+      "name": "request_key_conflict",
+      "sqlstate": "23000",
+      "message": "Request key identifies a different request.",
+      "retry_action": "FIX_REQUEST"
+    },
+    {
+      "code": 511002,
+      "classic_errno": 61092,
+      "name": "commit_unknown",
+      "sqlstate": "HY000",
+      "message": "Commit outcome must be queried.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 511003,
+      "classic_errno": 61093,
+      "name": "wait_timeout",
+      "sqlstate": "HYT00",
+      "message": "Client wait deadline expired; run may still be active.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 511004,
+      "classic_errno": 61094,
+      "name": "run_cancelled",
+      "sqlstate": "57014",
+      "message": "Run was cancelled.",
+      "retry_action": "QUERY_RUN"
+    },
+    {
+      "code": 512001,
+      "classic_errno": 61101,
+      "name": "decision_denied",
+      "sqlstate": "42000",
+      "message": "Decision rejected the action.",
+      "retry_action": "NONE"
+    },
+    {
+      "code": 512002,
+      "classic_errno": 61102,
+      "name": "decision_changed",
+      "sqlstate": "40001",
+      "message": "Decision dependency changed.",
+      "retry_action": "FIX_REQUEST"
+    }
+  ],
+  "options": {
+    "encoding": {
+      "type": "string",
+      "default": "UTF-8",
+      "enum": [
+        "UTF-8"
+      ]
+    },
+    "schema": {
+      "type": "string",
+      "max_length": 256
+    },
+    "schema_version": {
+      "type": "integer",
+      "min": 1,
+      "max": 2147483647
+    },
+    "pretty": {
+      "type": "boolean",
+      "default": false
+    },
+    "max_output_bytes": {
+      "type": "integer",
+      "min": 1,
+      "max": 16777216,
+      "default": 1048576
+    },
+    "max_output_tokens": {
+      "type": "integer",
+      "min": 1,
+      "max": 131072,
+      "default": 1500
+    },
+    "stream": {
+      "type": "boolean",
+      "default": false
+    },
+    "provider_timeout_ms": {
+      "type": "integer",
+      "min": 1,
+      "max": 600000,
+      "default": 20000
+    },
+    "run_timeout_ms": {
+      "type": "integer",
+      "min": 1,
+      "max": 3600000,
+      "default": 60000
+    },
+    "max_attempts": {
+      "type": "integer",
+      "min": 1,
+      "max": 5,
+      "default": 1
+    },
+    "retry_backoff_ms": {
+      "type": "integer",
+      "min": 0,
+      "max": 600000,
+      "default": 1000
+    },
+    "temperature": {
+      "type": "number",
+      "min": 0,
+      "max": 2,
+      "requires": "temperature"
+    },
+    "top_p": {
+      "type": "number",
+      "min": 0,
+      "max": 1,
+      "requires": "top_p"
+    },
+    "seed": {
+      "type": "integer",
+      "min": 0,
+      "max": 2147483647,
+      "requires": "seed"
+    },
+    "stop": {
+      "type": "string_array",
+      "max_items": 4,
+      "max_length": 256,
+      "requires": "stop"
+    }
+  },
+  "providers": {
+    "openai": {
+      "endpoint": "https://api.openai.com/v1/responses",
+      "credential": "environment_or_windows_credential",
+      "wire": "responses"
+    },
+    "anthropic": {
+      "endpoint": "https://api.anthropic.com/v1/messages",
+      "api_version": "2026-10-21",
+      "credential": "environment_or_windows_credential",
+      "wire": "messages"
+    },
+    "local_gguf": {
+      "endpoint": "worker_managed_loopback",
+      "credential": "none",
+      "wire": "llama.cpp_chat_completions",
+      "artifact": "GGUF"
+    }
+  }
+}

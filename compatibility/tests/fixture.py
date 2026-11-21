@@ -25,6 +25,17 @@ HOST = "127.0.0.1"
 HIDDEN = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 
+class RestartableFixtureInstance(tuple):
+    """The existing three-item connection tuple plus an owned profile restart."""
+    def __new__(cls, values, restart):
+        value=super().__new__(cls,values)
+        value._restart=restart
+        return value
+
+    def restart(self, *, server_options):
+        self._restart(tuple(server_options))
+
+
 def require(condition, message):
     if not condition:
         raise RuntimeError(message)
@@ -44,7 +55,7 @@ def local_port():
 
 def mysql_client(binary, connection):
     return [str(binary), "--no-defaults", "--protocol=TCP", *connection, "--skip-password",
-            "--connect-timeout=2", "--batch", "--raw", "--skip-column-names"]
+            "--connect-timeout=2", "--batch", "--raw", "--skip-column-names", "--unbuffered"]
 
 
 def wait_ready(process, classic, root, env, timeout=90):
@@ -67,7 +78,8 @@ def wait_ready(process, classic, root, env, timeout=90):
                         and Path(rows[0][0]).resolve() == root / "data"
                         and rows[0][1].endswith("-StarDataParadise")
                         and rows[1][0] == "Ssl_cipher" and rows[1][1],
-                        "unexpected test Server datadir, product version or TLS status")
+                        "unexpected test Server datadir, product version or TLS status: "
+                        f"stdout={status.stdout!r}, stderr={status.stderr!r}")
                 return
         time.sleep(0.2)
     raise RuntimeError("test Server did not become ready")
@@ -129,7 +141,8 @@ class Fixture:
         return env
 
     @contextmanager
-    def disposable(self, root, *, plugin_dir=None, tls_dir=None, server_options=()):
+    def disposable(self, root, *, plugin_dir=None, tls_dir=None, server_options=(),
+                   bootstrap=None, bootstrap_options=(), allow_restart=False):
         require(root.parent.parent == OUT / "compatibility-tests", "unexpected test Server directory")
         root.mkdir()
         env = self.environment(root)
@@ -138,7 +151,9 @@ class Fixture:
         if os.name == "nt":
             common.extend(["--console", "--no-monitor"])
         initialized = run([*common, "--initialize-insecure"], env, 120)
-        require(initialized.returncode == 0, initialized.stdout + initialized.stderr)
+        require(initialized.returncode == 0,
+                f"test Server initialization exit={initialized.returncode}: "
+                f"stdout={initialized.stdout!r}, stderr={initialized.stderr!r}")
 
         port = local_port()
         ca = (tls_dir if tls_dir is not None else data) / "ca.pem"
@@ -156,10 +171,59 @@ class Fixture:
         if tls_dir is not None:
             command.extend([f"--ssl-ca={ca}", f"--ssl-cert={tls_dir / 'server.pem'}",
                             f"--ssl-key={tls_dir / 'server.key'}"])
+        stable_command = list(command)
+        initial_command = [*command, *bootstrap_options] if bootstrap is not None else [*command, *server_options]
         command.extend(server_options)
         log = root / "mysqld.log"
         try:
             with log.open("wb") as output:
+                if bootstrap is not None or allow_restart:
+                    # Both processes belong to this disposable fixture. A
+                    # callback error prevents the final startup and retains
+                    # its original exception even if cleanup also fails.
+                    process = subprocess.Popen(initial_command, env=env, stdin=subprocess.DEVNULL,
+                                               stdout=output, stderr=subprocess.STDOUT, creationflags=HIDDEN)
+                    ready = False
+                    active = True
+                    def restart(options):
+                        nonlocal process, ready
+                        require(active and ready and process.poll() is None,
+                                'restart requires this live fixture-owned Server')
+                        # Profiles may change feature gates, not the fixture's
+                        # executable, TLS, PID, datadir, socket or port. Extend
+                        # this small allowlist explicitly for future tests.
+                        for option in options:
+                            require(isinstance(option,str) and '=' in option and
+                                    option.split('=',1)[0] in ('--sdp-ai-sql','--sdp-ai-actions','--max-connections') and
+                                    '\0' not in option and '\n' not in option and '\r' not in option,
+                                    'restart option is outside the fixed fixture profile: '+repr(option))
+                        ready = False
+                        stop(process, classic, env, True)
+                        require(not (root / 'mysqld.pid').exists(),
+                                'clean profile shutdown retained its PID file')
+                        process = subprocess.Popen([*stable_command,*options], env=env, stdin=subprocess.DEVNULL,
+                                                   stdout=output, stderr=subprocess.STDOUT, creationflags=HIDDEN)
+                        wait_ready(process, classic, root, env)
+                        ready = True
+                    instance = RestartableFixtureInstance((env, classic, cli), restart)
+                    try:
+                        wait_ready(process, classic, root, env)
+                        ready = True
+                        if bootstrap is not None:
+                            bootstrap(instance)
+                            restart(server_options)
+                        yield instance
+                    except BaseException:
+                        try:
+                            stop(process, classic, env, ready)
+                        except Exception as cleanup:
+                            print('Fixture cleanup also failed; preserving original error: ' + repr(cleanup), file=sys.stderr)
+                        raise
+                    else:
+                        stop(process, classic, env, ready)
+                    finally:
+                        active = False
+                    return
                 process = subprocess.Popen(command, env=env, stdin=subprocess.DEVNULL,
                                            stdout=output, stderr=subprocess.STDOUT, creationflags=HIDDEN)
                 ready = False
@@ -167,7 +231,13 @@ class Fixture:
                     wait_ready(process, classic, root, env)
                     ready = True
                     yield env, classic, cli
-                finally:
+                except BaseException:
+                    try:
+                        stop(process, classic, env, ready)
+                    except Exception as cleanup:
+                        print('Fixture cleanup also failed; preserving original error: ' + repr(cleanup), file=sys.stderr)
+                    raise
+                else:
                     stop(process, classic, env, ready)
         except Exception:
             if log.is_file():

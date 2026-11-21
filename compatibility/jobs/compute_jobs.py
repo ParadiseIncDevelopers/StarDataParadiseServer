@@ -17,6 +17,8 @@ MASK64 = (1 << 64) - 1
 EXECUTION_COLUMNS = {
     "attempt": "INT UNSIGNED NOT NULL DEFAULT 0",
     "events": "JSON NOT NULL DEFAULT (JSON_ARRAY())",
+    "job_kind": "VARCHAR(16) CHARACTER SET ascii COLLATE ascii_bin NOT NULL DEFAULT 'compute'",
+    "payload": "JSON NULL",
 }
 QUEUED_EVENT = "JSON_ARRAY(JSON_OBJECT('state', 'queued', 'at', UNIX_TIMESTAMP()))"
 
@@ -31,21 +33,26 @@ def upgrade_execution_columns(session):
     try:
         existing = {row[0] for row in session.run_sql("""SELECT COLUMN_NAME
             FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = 'sdp_jobs' AND TABLE_NAME = 'compute_jobs'
-              AND COLUMN_NAME IN ('attempt', 'events')""").fetch_all()}
+              AND COLUMN_NAME IN ('attempt', 'events', 'job_kind', 'payload')""").fetch_all()}
         additions = [f"ADD COLUMN {name} {definition}"
                      for name, definition in EXECUTION_COLUMNS.items() if name not in existing]
+        owner_width = session.run_sql("""SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA='sdp_jobs' AND TABLE_NAME='compute_jobs' AND COLUMN_NAME='owner'""").fetch_one()
+        if owner_width is not None and owner_width[0] < 576:
+            additions.append("MODIFY COLUMN owner VARCHAR(576) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL")
         if additions:
             session.run_sql(f"ALTER TABLE {QUEUE} " + ", ".join(additions))
     finally:
         session.run_sql("SELECT RELEASE_LOCK(?)", [SCHEMA_LOCK])
 
 
-def install(session):
+def install_queue(session):
+    """Install only the internal durable queue used by AI runs/imports."""
     session.run_sql("CREATE SCHEMA IF NOT EXISTS sdp_jobs")
     session.run_sql(f"""CREATE TABLE IF NOT EXISTS {QUEUE} (
         sequence BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
         job_id CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL UNIQUE,
-        owner VARCHAR(288) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+        owner VARCHAR(576) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
         request_token CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
         iterations INT UNSIGNED NOT NULL,
         timeout_ms INT UNSIGNED NOT NULL,
@@ -57,6 +64,10 @@ def install(session):
         UNIQUE KEY (owner, request_token), KEY (state, sequence)
     ) ENGINE=InnoDB""")
     upgrade_execution_columns(session)
+
+
+def install(session):
+    install_queue(session)
     session.run_sql(f"""CREATE TABLE IF NOT EXISTS {SCHEDULES} (
         schedule_id CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
         owner VARCHAR(288) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -74,6 +85,8 @@ def install(session):
         KEY (schedule_id), FOREIGN KEY (schedule_id) REFERENCES {SCHEDULES}(schedule_id),
         FOREIGN KEY (job_id) REFERENCES {QUEUE}(job_id)
     ) ENGINE=InnoDB""")
+
+
 
 
 def submit(session, token, count, timeout_ms, *, allow_replay=True):
@@ -193,11 +206,11 @@ def work_once(session):
     try:
         session.run_sql(f"""UPDATE {QUEUE} SET state = 'interrupted', error_code = 'worker_interrupted',
             events = {append_event("'interrupted'")}
-            WHERE state = 'running'""")
+            WHERE state = 'running' AND job_kind = 'compute'""")
         publish_due_schedules(session)
         while True:
             job = session.run_sql(f"""SELECT job_id, iterations, timeout_ms FROM {QUEUE}
-                WHERE state = 'queued' ORDER BY sequence LIMIT 1""").fetch_one()
+                WHERE state = 'queued' AND job_kind = 'compute' ORDER BY sequence LIMIT 1""").fetch_one()
             if job is None:
                 return None
             job_id, count, timeout_ms = [job[index] for index in range(3)]
@@ -243,7 +256,8 @@ def hexadecimal(value):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
-    subparsers.add_parser("install")
+    installer = subparsers.add_parser("install")
+    installer.add_argument("--queue-only", action="store_true", help="Install the internal AI queue without compute schedules.")
     subparsers.add_parser("work-once")
     subparsers.add_parser("serve")
     for command in ("submit", "schedule"):
@@ -269,7 +283,7 @@ def main(argv=None):
             raise ValueError("use TLS and an autocommit connection")
         result = {"action": args.command}
         if args.command == "install":
-            install(session)
+            (install_queue if args.queue_only else install)(session)
         elif args.command in ("submit", "schedule"):
             if not 1 <= args.count <= 1_000_000_000 or not 1 <= args.timeout_ms <= 60_000:
                 raise ValueError("iteration count or timeout is out of range")

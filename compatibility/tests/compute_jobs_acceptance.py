@@ -63,7 +63,7 @@ def check_execution_history(server, job_id, attempts, states):
 def upgrade_queue(server):
     job(server, "install")
     # Restore the pre-execution-history queue shape only on the disposable fixture.
-    query(server, "ALTER TABLE sdp_jobs.compute_jobs DROP COLUMN attempt, DROP COLUMN events")
+    query(server, "ALTER TABLE sdp_jobs.compute_jobs DROP COLUMN attempt, DROP COLUMN events, DROP COLUMN job_kind, DROP COLUMN payload, MODIFY COLUMN owner VARCHAR(288) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL")
     finished, running = secrets.token_hex(16), secrets.token_hex(16)
     query(server, f"""INSERT INTO sdp_jobs.compute_jobs
         (job_id, owner, request_token, iterations, timeout_ms, state, checksum)
@@ -78,6 +78,21 @@ def upgrade_queue(server):
     require(job(server, "work-once")["job_id"] is None, "old running job must not be resumed")
     check_execution_history(server, running, 0, ["interrupted"])
     print("PASS existing queue upgrade preserves job records and does not infer earlier attempts or events")
+
+
+
+
+def kind_isolation(server):
+    records = [(secrets.token_hex(16), kind, state) for kind in ('ai', 'ai_import') for state in ('queued', 'running')]
+    for job_id, kind, state in records:
+        query(server, f"""INSERT INTO sdp_jobs.compute_jobs
+            (job_id, owner, request_token, iterations, timeout_ms, job_kind, state, payload)
+            VALUES ('{job_id}', CURRENT_USER(), '{secrets.token_hex(16)}', 0, 20000, '{kind}', '{state}', JSON_OBJECT())""")
+    require(job(server, 'work-once')['job_id'] is None, 'compute worker claimed a different job family')
+    for job_id, _, state in records:
+        require(query(server, f"SELECT state FROM sdp_jobs.compute_jobs WHERE job_id='{job_id}'") == state,
+                'compute recovery changed a different job family')
+    print('PASS shared queue isolates compute from queued/running AI inference and model-import jobs')
 
 
 def interval_schedule(server):
@@ -123,7 +138,12 @@ def interval_schedule(server):
 def verify(fixture):
     with fixture.scratch("jobs") as root:
         with fixture.disposable(root / "server") as server:
+            job(server, "install", "--queue-only")
+            require(query(server,"SELECT GROUP_CONCAT(TABLE_NAME ORDER BY TABLE_NAME) FROM information_schema.TABLES WHERE TABLE_SCHEMA='sdp_jobs'")=='compute_jobs',
+                    'AI queue-only installation created user-facing scheduler tables')
+            print('PASS internal AI queue-only installation does not create schedules or occurrences')
             upgrade_queue(server)
+            kind_isolation(server)
             token = secrets.token_hex(16)
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
                 calls = [pool.submit(job, server, "submit", token, 1000) for _ in range(2)]

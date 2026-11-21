@@ -1,14 +1,21 @@
 # StarDataParadise Server
 
-StarDataParadise Workbench, CLI ve uygulama SDK’larının bağlandığı veritabanı sunucusu. Bu depo, Windows x64 wire v1 motorunu ve MySQL 26.10.0 tabanlı Classic önizlemesinin kaynak yamasını, uyumluluk servislerini ve kabul testlerini içerir.
+StarDataParadise Workbench, CLI ve uygulama SDK’larının bağlandığı veritabanı sunucusu. Bu depo, Windows x64 wire v1 motorunu ve MySQL 26.10.0 tabanlı Classic motorunun kaynak yamasını, uyumluluk servislerini ve kabul testlerini içerir.
+
+Güncel ürün sürümü **0.5.0**, kanal **stable** olur. Classic taban sürümü
+26.10.0 olarak korunur. AI/Knowledge, kullanıcıya ait OpenAI/Claude anahtarı
+veya içe aktarılmış yerel GGUF modeliyle çalışır; SDK'lar ayrı native SQL
+bağlantısı sunar. [Sürüm bilgisi](release.json) · [AI kurulumu](compatibility/ai/README.md)
+· [Native SQL aktarımı](contracts/sql/native-sql-v1.md).
+HIST/Git ve yeni SQL JOB özellikleri kullanıcı kararıyla sonraki etaba ertelendi.
 
 | Sunucu yolu | İstemci uç noktası | Kılavuz |
 | --- | --- | --- |
 | Windows wire v1 motoru (`StarDataParadiseServer.exe`) | Varsayılan `127.0.0.1:7443`, TLS | [Yerel çalıştırma](RUN.md) ve [Windows kurulumu](packaging/SETUP.md) |
-| MySQL 26.10.0 tabanlı kaynak önizlemesi (`mysqld.exe`) | Yapılandırılan MySQL Classic TCP portu | [Kaynak yaması](compatibility/upstream/README.md) ve [geçiş durumu](docs/coordination/MYSQL_MIGRATION.md) |
+| MySQL 26.10.0 tabanlı Classic motoru (`mysqld.exe`) | Yapılandırılan MySQL Classic TCP portu | [Kaynak yaması](compatibility/upstream/README.md) ve [geçiş durumu](docs/coordination/MYSQL_MIGRATION.md) |
 | MySQL tabanı için wire v1 uyumluluk servisi | Yerel TLS dinleyicisi. Örnek komutta `7401` | [Servis, yetenekler ve doğrulama](compatibility/wire_v1/README.md) |
 
-Classic önizlemeyi geliştirirken `3197` örnek portunda ortak loopback dinleyicisi yapılandırabilirsiniz. Bu kipte Classic Workbench ve StarDataParadiseDrive 2.0.2 aynı örneğe bağlanabilir. .NET bağlantısı `TLS Mode=Disabled` ile şifresizdir ve loopback ile sınırlıdır. SDK özelliği seçerken [uyumluluk matrisine](docs/coordination/COMPATIBILITY_MATRIX.md) ve bağlı sunucunun capability yanıtına bakın. [MySQL uyumluluk kapsamı](compatibility/README.md)
+Classic motoru için `3197` örnek portunda ortak loopback dinleyicisi yapılandırabilirsiniz. Bu kipte Classic Workbench ve StarDataParadiseDrive 2.1.0 aynı örneğe bağlanabilir. .NET bağlantısı `TLS Mode=Disabled` ile şifresizdir ve loopback ile sınırlıdır. SDK özelliği seçerken [uyumluluk matrisine](docs/coordination/COMPATIBILITY_MATRIX.md) ve bağlı sunucunun capability yanıtına bakın. [MySQL uyumluluk kapsamı](compatibility/README.md)
 
 ## Windows wire v1 ile ilk bağlantı
 

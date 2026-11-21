@@ -64,3 +64,7 @@
 
 # Stage evidence records contain SHA-256 references to the original bytes.
 docs/coordination/STAGES/*.json -text diff whitespace=cr-at-eol
+
+# The combined native patch is byte-hashed by its adjacent manifest. Patch
+# context can contain significant blank lines; preserve the exported LF bytes.
+compatibility/upstream/server-26.10.0.patch -text whitespace=-blank-at-eol

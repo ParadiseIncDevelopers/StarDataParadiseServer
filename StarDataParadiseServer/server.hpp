@@ -12,7 +12,7 @@
 
 namespace sdp::server
 {
-inline constexpr auto product_version = "0.4.0";
+inline constexpr auto product_version = "0.5.0";
 struct Config
 {
     std::filesystem::path source;
