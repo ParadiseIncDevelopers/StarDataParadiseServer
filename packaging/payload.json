@@ -1,7 +1,7 @@
 {
   "id": "server",
   "name": "StarDataParadise Server",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "scope": "perMachine",
   "directory": "Server",
   "features": [

@@ -1,10 +1,10 @@
 {
   "product": "StarDataParadise Server",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "channel": "stable",
   "prerelease": false,
   "classic_base": "26.10.0",
-  "workbench_version": "0.3.0",
+  "workbench_version": "0.3.1",
   "features": ["ai", "knowledge", "sql", "plsql"],
   "deferred": ["sql_hist", "sql_jobs"],
   "sdks": {

@@ -61,6 +61,48 @@ Worker hesabında `SELECT STARDATAPARADISE_ACTOR();` çalıştırılarak gerçek
 
 ## Worker yapılandırması ve başlatma
 
+Yerel Workbench kurulumu bir yöneticinin hazırladığı `ai-worker-local.json`
+kaydını kullanabilir. Bu kayıt tek server UUID, port ve authenticated SQL owner'a
+bağlıdır. **AI modelleri → OpenAI bağla / Claude bağla** maskeli anahtar penceresi
+açar; anahtarı Windows kasasına kaydeder, resmi provider için trusted worker
+bağını ekler ve anahtarsız model SQL'ini incelemeye açar. Model kimliğini kullanıcı
+kendi sağlayıcı hesabına göre girer. Kayıt işlemi tek başına ücretli inference
+başlatmaz. Konuşma oluşturulup AI SQL çalıştırıldığında worker işi alır.
+
+**GGUF dosyası seç** bilgisayardaki dosyayı izinli import dizinine arka planda
+kopyalar ve SHA256 hesaplar; kaynak dosyayı değiştirmez. SQL önizlemesindeki
+IMPORT çalıştırıldıktan sonra worker bütünlük ve gerçek llama.cpp yükleme
+kontrollerini tamamlar. Model ancak başarılı publication sonrası active olur.
+Yerel runtime bu sürümde GGUF v2/v3 destekler; genel checkpoint/ONNX importu
+iddia edilmez. Bellek ve bağlam sınırları seçilen modele uygun olmalıdır.
+
+Yerel supervisor `compatibility.ai.service.serve` ile çalışır. Trusted config
+işler arasında yeniden okunur; yeni credential bağları için yeniden başlatma
+gerekmez. SQL koparsa yalnız worker'ın ayrı oturumu yeniden açılır; belirsiz
+provider çağrısı veya yarım RPC otomatik tekrar edilmez. Heartbeat anahtar,
+transcript veya cevap içermez. `local_service.py` Windows kasasındaki ayrı SQL
+credential'ı kullanır, VERIFY_IDENTITY/UUID/worker actor doğrular ve dosya kilidi
+ile aynı deployment'ın ikinci worker'ını engeller. **Worker’ı başlat** yerel
+`StarDataParadiseAiWorker.exe` başlatıcısını kullanır. Bu WinExe worker'ı konsol
+penceresi açmadan çalıştırır; PowerShell execution policy değiştirilmez.
+`connection.json` içinde `mysqlsh_executable`, SQL bağlantı seçenekleri,
+`credential_target`, `server_uuid` ve `worker_actor` bulunur; parola bulunmaz.
+Worker runtime'ı deployment'ın `runtime/` dizinine yerleştirilir.
+
+Kullanıcı onayıyla `Register-WorkerStartup.ps1 -DeploymentDirectory <kurulum>`
+yalnız mevcut Windows kullanıcısının Startup klasörüne EXE kısayolu ekler.
+Başka hedefe ait aynı adlı bir kısayol korunur ve kurulum durur. Başlatıcı
+aynı kullanıcının Windows kasasını kullanır; servis hesabına anahtar kopyalanmaz.
+Oturum açıldığında SQL sunucusu henüz hazır değilse supervisor yeniden bağlanmayı
+dener. Kayıt otomatik verilmez; kullanıcı onayı kurulum önkoşuludur.
+
+Yerel araç/onay worker'ının temel altı yordamın yanında
+`publish_tool_requests`, `publish_tool_failure`, `tool_call_status` yordamlarında
+EXECUTE yetkisi gerekir. İş tablolarında doğrudan DML/SELECT veya global/schema
+wildcard grant verilmez. Kullanıcı model/Knowledge/yordam hakları kendi sealed
+principal'ı altında native executor tarafından doğrulanır. Yerel kayıt bulunmayan
+uzak kurulumda aşağıdaki yönetici akışı geçerlidir.
+
 Workbench'teki maskeli **Kimlik bilgisi kaydet** işlemi yalnız mevcut Windows kullanıcısının Credential Manager kaydını oluşturur. **Worker bağını hazırla**, authenticated SQL owner için anahtarsız yapılandırma üretir. Ayrı makinedeki veya farklı Windows identity ile çalışan worker bu kasaya kendiliğinden erişemez; güvenilir worker yöneticisi ilgili kimliğe/config'e bağı kurmalıdır. UI'de kasa kaydı başarılı olduğunda provider erişimi doğrulanmış sayılmaz.
 
 Örnek `C:\ProgramData\StarDataParadise\ai-worker.json`:
