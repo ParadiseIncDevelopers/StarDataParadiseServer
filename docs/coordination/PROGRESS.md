@@ -55,3 +55,7 @@
 | 50 Final teslim kontrolü | PASSED | [M10 yerel aday ve kanıtlar](M10_REPORT.md) |
 
 [M1 temel altyapı raporu](M1_REPORT.md) · [M2 istemci ve depolama raporu](M2_REPORT.md) · [M3 SQL ve güvenlik raporu](M3_REPORT.md) · [M9 kurulum raporu](M9_REPORT.md) · [Sıradaki etap](NEXT_TASK.md)
+
+22 Kasım 2026: [Workbench 0.3.1 güncel EXE ve masaüstü kısayolu](WORKBENCH_EXE_CLEANUP_2026_11_22.md) doğrulandı. 78 eski/tekrarlanan EXE ve üç eski Workbench ZIP'i temizlendi; 2.644 payload sağlaması, bağımlılık denetimi ve izole canlı SQL/AI arayüz kabulü geçti.
+
+22 Kasım 2026: [Kayıtlı port tercihi](PORT_SELECTION_2026_11_22.md) korunacak şekilde Workbench `test` profili son kullanılan 41754 portuna kaydedildi. Tam uygulama yeniden açılışı ve gerçek bağlantı sınaması geçti; başlatıcı portu kalıcı argümanlardan okur.
