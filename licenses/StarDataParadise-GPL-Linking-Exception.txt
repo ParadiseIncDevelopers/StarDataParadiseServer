@@ -1,0 +1,23 @@
+Additional linking permission for StarDataParadise contributions
+
+To the extent that Paradise Bilisim Tic. Ltd. Sti. controls the copyright
+in StarDataParadise modifications and original contributions within the
+GPL-covered scopes identified in LICENSE and LICENSING.md, those
+contributions are licensed under the GNU General Public License,
+version 2 only.
+
+For those contributions, Paradise Bilisim Tic. Ltd. Sti. also grants
+permission to link them, including as part of modified versions of the
+program, with the separately licensed software covered by the additional
+linking permission of the corresponding upstream MySQL release identified
+in LICENSING.md.
+
+The resulting linked work may be distributed subject to GPLv2 for the
+GPL-covered portions and the applicable license terms for the separately
+licensed components.
+
+This additional permission applies only to copyright controlled by
+Paradise Bilisim Tic. Ltd. Sti. It does not grant rights in third-party
+code, change third-party license terms, or extend any third party's
+linking permission. The original upstream license notices and additional
+permissions remain in effect for the code to which they apply.

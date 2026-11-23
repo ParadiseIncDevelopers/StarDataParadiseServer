@@ -1,0 +1,38 @@
+StarDataParadise Server — license scope
+
+Copyright (c) 2026 Paradise Bilisim Tic. Ltd. Sti. (ParadiseIncDevelopers).
+
+The independently authored StarDataParadise Server code and documentation
+in this repository are licensed under the MIT License in licenses/MIT.txt,
+except for the separately licensed material identified below or by a
+file-specific notice. This includes the original wire contract definitions
+and the original contract content distributed in project contract archives.
+
+MySQL-derived and MySQL-native integration scope:
+  compatibility/upstream/
+  compatibility/ai/native/
+  compatibility/ml/cpu_udf.cpp
+
+The MySQL-derived material in these paths retains GNU GPL version 2,
+applicable upstream additional permissions and third-party notices.
+Original StarDataParadise contributions in this designated integration
+scope are licensed under GPL version 2 (licenses/GPL-2.0-only.txt).
+The exact pinned MySQL 26.10.0 license and notices are copied unchanged to
+compatibility/upstream/LICENSE.mysql-server.txt.
+Any separately identified third-party material retains its own terms.
+These GPL-covered components and their covered derivative works are not
+relicensed under MIT by this file.
+
+Other dependencies retain their own licenses and notices. Existing
+copyright notices and rights already granted are not removed.
+The MIT grant does not provide access to separately offered Enterprise,
+Cloud, credentials or support services; it does not restrict rights to
+code that is actually provided under MIT. No trademark or endorsement
+permission is granted by this scope notice.
+
+See LICENSING.md for the component map and distribution guidance.
+
+Additional linking permission for copyright-controlled StarDataParadise
+contributions in the identified GPL scopes is granted in
+licenses/StarDataParadise-GPL-Linking-Exception.txt. It does not apply to
+unrelated proprietary code or change third-party rights.

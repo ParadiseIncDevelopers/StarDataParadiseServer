@@ -64,3 +64,12 @@ ctest --preset windows-x64
 | [Node.js SDK](https://github.com/ParadiseIncDevelopers/StarDataParadise.SDK.Node) | Node.js 22+ asenkron ESM istemcisi |
 
 [Wire v1 sözleşmesi](contracts/v1/PROTOCOL.md) · [SQL RPC](contracts/sql/SQL_RPC_V1.md) · [İşlemler ve WAL](TRANSACTIONS_AND_WAL.md) · [Bilinen sınırlamalar](docs/coordination/KNOWN_LIMITATIONS.md)
+
+## Lisans
+
+Özgün Server ve wire sözleşmesi kodları [MIT](licenses/MIT.txt) lisanslıdır.
+MySQL kaynak yamaları ve native entegrasyonları GPLv2 ile upstream ek izinlerini
+ve üçüncü taraf bildirimlerini korur; MIT kapsamına dahil değildir.
+
+Dosya ve bileşen ayrımı: [LICENSE](LICENSE) · [Lisans kapsamı](LICENSING.md).
+MySQL tabanlı ikili dağıtımların kaynak sağlama yükümlülükleri devam eder.
